@@ -10,6 +10,11 @@
   "author": "Alex",
   "license": "",
   "dependencies": {
-    "jest": "^29.0.1"
+    "@types/jest": "^29.0.0",
+    "jest": "^29.0.1",
+    "ts-jest": "^28.0.8"
+  },
+  "devDependencies": {
+    "typescript": "^4.8.2"
   }
 }
