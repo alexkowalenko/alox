@@ -1,0 +1,15 @@
+{
+  "name": "alox",
+  "version": "1.0.0",
+  "description": "Lox implementation",
+  "main": "index.js",
+  "scripts": {
+    "interp": "ts-node interp.ts",
+    "test": "jest"
+  },
+  "author": "Alex",
+  "license": "",
+  "dependencies": {
+    "jest": "^29.0.1"
+  }
+}
