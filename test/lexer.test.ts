@@ -23,7 +23,7 @@ function do_tests(tests: TestCases[]) {
                     //console.log(`test: ${test[2]}  gen: ${token.value}`)
                     expect(test[2]).toBe(token.value)
                     break
-                case TokenType.NUMBER:
+                case TokenType.NUMBER || TokenType.IDENT:
                     expect(test[2]).toBe(token.value)
                     break
             }
@@ -87,6 +87,20 @@ describe('Lexer', () => {
             ['12.', TokenType.NUMBER, '12.'],
 
             ['1.0.', TokenType.NUMBER, '1.0'], // final point not included
+        ]
+        do_tests(tests)
+    })
+
+    it('identifiers', () => {
+        const tests: TestCases[] = [
+            ['a', TokenType.IDENT, 'a'],
+            ['a1', TokenType.IDENT, 'a1'],
+            ['liberté', TokenType.IDENT, 'liberté'],
+            ['Interpréteur', TokenType.IDENT, 'Interpréteur'],
+            ['αβγ', TokenType.IDENT, 'αβγ'],
+            //['👾', TokenType.IDENT, '👾'],
+            ['a_', TokenType.IDENT, 'a_'],
+            ['_', TokenType.IDENT, '_'],
         ]
         do_tests(tests)
     })

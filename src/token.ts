@@ -28,7 +28,7 @@ export enum TokenType {
     LESS = '<',
     LESS_EQUAL = '<=',
 
-    INDENT = '<ident>',
+    IDENT = '<ident>',
     STRING = '<string>',
     NUMBER = '<num>',
 

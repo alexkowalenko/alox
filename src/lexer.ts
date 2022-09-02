@@ -30,12 +30,20 @@ const single_chars: Map<string, TokenType> = new Map([
 const char_zero = "0".charCodeAt(0)
 const char_nine = "9".charCodeAt(0)
 
+const alpha = /[\p{L}\p{Emoji}_]/u
+const alphanumeric = /[\p{L}\p{N}\p{Emoji}]/u
+
 export class Lexer {
 
     constructor(private buffer: string) { }
 
-    is_numeric(c: string): boolean {
-        return char_zero <= c.charCodeAt(0) && c.charCodeAt(0) <= char_nine
+    get_identifier(c: string): Token {
+        var buffer = c;
+        const start = this.get_location();
+        while (this.peek_char().match(alphanumeric)) {
+            buffer += this.get_char()
+        }
+        return new Token(TokenType.IDENT, start, buffer);
     }
 
     get_string(): Token {
@@ -50,6 +58,10 @@ export class Lexer {
             buffer += c
         }
         throw new LexError('Unterminated string', this.get_location())
+    }
+
+    is_numeric(c: string): boolean {
+        return char_zero <= c.charCodeAt(0) && c.charCodeAt(0) <= char_nine
     }
 
     get_number(c: string): Token {
@@ -115,6 +127,9 @@ export class Lexer {
         if (this.is_numeric(char)) {
             return this.get_number(char)
         }
+        if (char.match(alpha)) {
+            return this.get_identifier(char)
+        }
 
         throw new LexError(`Unknown character ${char}`, this.get_location())
     }
@@ -128,7 +143,7 @@ export class Lexer {
             if (this.index >= this.buffer.length) {
                 return ""
             }
-            var char = this.buffer[this.index];
+            var char = this.buffer.charAt(this.index)
             if (" \t\r".includes(char)) {
                 this.incr_count()
                 continue
