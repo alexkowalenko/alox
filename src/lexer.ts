@@ -8,7 +8,7 @@ import { Token, TokenType, Location } from './token'
 
 export class LexError implements Error {
 
-    constructor(public message: string) { }
+    constructor(public message: string, public loc: Location) { }
     public name: string = "LexError";
     stack?: string | undefined;
 }
@@ -41,8 +41,50 @@ export class Lexer {
         if (single_chars.has(char)) {
             return this.mk_token(single_chars.get(char) as TokenType)
         }
+        const next = this.peek_char();
+        switch (char) {
+            case '!': {
+                if (next === '=')
+                    return this.mk_token(TokenType.BANG_EQUAL)
+                else
+                    return this.mk_token(TokenType.BANG)
+            }
+            case '=': {
+                if (next === '=')
+                    return this.mk_token(TokenType.EQUAL_EQUAL)
+                else
+                    return this.mk_token(TokenType.EQUAL)
+            }
+            case '>': {
+                if (next === '=')
+                    return this.mk_token(TokenType.GREATER_EQUAL)
+                else
+                    return this.mk_token(TokenType.GREATER)
+            }
+            case '<': {
+                if (next === '=')
+                    return this.mk_token(TokenType.LESS_EQUAL)
+                else
+                    return this.mk_token(TokenType.LESS)
+            }
+        }
 
-        throw new LexError(`Unknown character ${char}`)
+        // strings
+        if (char === '"') {
+            var buffer: Buffer = Buffer.alloc(20);
+            const start = this.get_location();
+            while (this.index < this.buffer.length) {
+                var c = this.buffer[this.index];
+                this.incr_count();
+                if (c === '"') {
+                    return new Token(TokenType.STRING, this.get_location(), buffer.toString())
+                }
+                buffer.write(c)
+            }
+            throw new LexError('Unterminated string', this.get_location())
+        }
+
+        throw new LexError(`Unknown character ${char}`, this.get_location())
     }
 
     mk_token(token: TokenType) {
@@ -55,9 +97,8 @@ export class Lexer {
                 return ""
             }
             var char = this.buffer[this.index];
-            if (" \t".includes(char)) {
-                this.index++
-                this.char_no++;
+            if (" \t\r".includes(char)) {
+                this.incr_count()
                 continue
             }
             if ('\n' === char) {
@@ -76,6 +117,11 @@ export class Lexer {
             return ""
         }
         return this.buffer[this.index];
+    }
+
+    incr_count() {
+        this.index++
+        this.char_no++
     }
 
     private get_location(): Location {
