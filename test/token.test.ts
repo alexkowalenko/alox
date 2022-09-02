@@ -4,10 +4,10 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Token } from '../src/token'
+import { TokenType } from '../src/token'
 
 describe('Token test', () => {
     it('Tokens', () => {
-        expect("" + Token.AND).toBe("and");
+        expect("" + TokenType.AND).toBe("and");
     });
 });

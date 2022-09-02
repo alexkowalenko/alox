@@ -5,7 +5,7 @@
 //
 
 
-export enum Token {
+export enum TokenType {
     L_PAREN = '(',
     R_PAREN = ')',
     L_BRACE = '{',
@@ -50,7 +50,13 @@ export enum Token {
     EOF = '<eof>'
 }
 
-class Location {
+
+export class Location {
     constructor(public line: number = 1, public pos: number = 1) { }
 }
+
+export class Token {
+    constructor(public tok: TokenType, public loc: Location, public value?: string) { }
+}
+
 
