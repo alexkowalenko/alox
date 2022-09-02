@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Token, TokenType, Location } from "./token";
+import { Token, TokenType, Location } from './token'
 
 export class LexError implements Error {
 
@@ -13,30 +13,77 @@ export class LexError implements Error {
     stack?: string | undefined;
 }
 
+const single_chars: Map<string, TokenType> = new Map([
+    ['.', TokenType.DOT],
+    ['(', TokenType.L_PAREN],
+    [')', TokenType.R_PAREN],
+    ['{', TokenType.L_BRACE],
+    ['}', TokenType.R_BRACE],
+    [',', TokenType.COMMA],
+    ['-', TokenType.MINUS],
+    ['+', TokenType.PLUS],
+    ['/', TokenType.SLASH],
+    ['*', TokenType.ASTÉRIX],
+    [':', TokenType.COLON],
+])
+
 export class Lexer {
 
     constructor(private buffer: string) { }
 
     get_token(): Token {
-
+        const char = this.get_char()
         // If end return EOF
-        if (this.index >= this.buffer.length) {
-            return new Token(TokenType.EOF, this.get_location())
+        if (char === "") {
+            return this.mk_token(TokenType.EOF)
         }
 
-        const char = this.buffer[this.index];
-        switch (char) {
-            case '.': return new Token(TokenType.DOT, this.get_location())
+        if (single_chars.has(char)) {
+            return this.mk_token(single_chars.get(char) as TokenType)
         }
 
         throw new LexError(`Unknown character ${char}`)
     }
 
+    mk_token(token: TokenType) {
+        return new Token(token, this.get_location())
+    }
+
+    get_char() {
+        do {
+            if (this.index >= this.buffer.length) {
+                return ""
+            }
+            var char = this.buffer[this.index];
+            if (" \t".includes(char)) {
+                this.index++
+                this.char_no++;
+                continue
+            }
+            if ('\n' === char) {
+                this.line_no++;
+                this.char_no = 1;
+                continue;
+            }
+            this.index++;
+            this.char_no++;
+            return char
+        } while (true)
+    }
+
+    peek_char() {
+        if (this.index >= this.buffer.length) {
+            return ""
+        }
+        return this.buffer[this.index];
+    }
+
     private get_location(): Location {
-        return new Location(this.index, this.line_no)
+        return new Location(this.char_no, this.line_no)
     }
 
     private index: number = 0;
+    private char_no: number = 1;
     private line_no: number = 1;
 
-} 
+}

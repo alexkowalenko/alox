@@ -11,12 +11,13 @@ export enum TokenType {
     L_BRACE = '{',
     R_BRACE = '}',
     COMMA = ',',
-    DOT = ',',
+    DOT = '.',
     MINUS = '-',
     PLUS = '+',
     SEMICOLON = ';',
     SLASH = '/',
-    ASTERIX = '*',
+    ASTÉRIX = '*',
+    COLON = ':',
 
     BANG = '!',
     BANG_EQUAL = '!=',
@@ -58,5 +59,3 @@ export class Location {
 export class Token {
     constructor(public tok: TokenType, public loc: Location, public value?: string) { }
 }
-
-
