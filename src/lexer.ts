@@ -27,9 +27,48 @@ const single_chars: Map<string, TokenType> = new Map([
     [':', TokenType.COLON],
 ])
 
+const char_zero = "0".charCodeAt(0)
+const char_nine = "9".charCodeAt(0)
+
 export class Lexer {
 
     constructor(private buffer: string) { }
+
+    is_numeric(c: string): boolean {
+        return char_zero <= c.charCodeAt(0) && c.charCodeAt(0) <= char_nine
+    }
+
+    get_string(): Token {
+        var buffer = ""
+        const start = this.get_location();
+        while (this.index < this.buffer.length) {
+            var c = this.buffer[this.index];
+            this.incr_count();
+            if (c === '"') {
+                return new Token(TokenType.STRING, this.get_location(), buffer)
+            }
+            buffer += c
+        }
+        throw new LexError('Unterminated string', this.get_location())
+    }
+
+    get_number(c: string): Token {
+        var buffer = c;
+        const start = this.get_location();
+        var peek = this.peek_char();
+        var seen_dot = false;
+        while (this.is_numeric(peek) || peek === '.') {
+            if (peek === '.') {
+                if (seen_dot) {
+                    break
+                }
+                seen_dot = true
+            }
+            buffer += this.get_char()
+            peek = this.peek_char();
+        }
+        return new Token(TokenType.NUMBER, start, buffer)
+    }
 
     get_token(): Token {
         const char = this.get_char()
@@ -71,17 +110,10 @@ export class Lexer {
 
         // strings
         if (char === '"') {
-            var buffer: Buffer = Buffer.alloc(20);
-            const start = this.get_location();
-            while (this.index < this.buffer.length) {
-                var c = this.buffer[this.index];
-                this.incr_count();
-                if (c === '"') {
-                    return new Token(TokenType.STRING, this.get_location(), buffer.toString())
-                }
-                buffer.write(c)
-            }
-            throw new LexError('Unterminated string', this.get_location())
+            return this.get_string()
+        }
+        if (this.is_numeric(char)) {
+            return this.get_number(char)
         }
 
         throw new LexError(`Unknown character ${char}`, this.get_location())

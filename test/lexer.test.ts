@@ -14,11 +14,18 @@ function do_tests(tests: TestCases[]) {
         //console.log(`token test: ${test[0]}  ${test[1]}`)
         try {
             var lexer = new Lexer(test[0]);
-            const tok = lexer.get_token().tok;
+            const token = lexer.get_token();
+            const tok = token.tok;
             //console.log(`token tok: ${tok}  ${test[1]}`)
             expect(tok).toBe(test[1])
-            if (test[1] === TokenType.STRING) {
-                expect(test[0].slice(1, -1)).toBe(test[2])
+            switch (test[1]) {
+                case TokenType.STRING:
+                    //console.log(`test: ${test[2]}  gen: ${token.value}`)
+                    expect(test[2]).toBe(token.value)
+                    break
+                case TokenType.NUMBER:
+                    expect(test[2]).toBe(token.value)
+                    break
             }
         }
         catch (e) {
@@ -56,6 +63,7 @@ describe('Lexer', () => {
         ]
         do_tests(tests)
     })
+
     it('strings', () => {
         const tests: TestCases[] = [
             ['"abc"', TokenType.STRING, "abc"],
@@ -67,6 +75,18 @@ describe('Lexer', () => {
             ['"👾"', TokenType.STRING, "👾"],
             ['"こんにちは"', TokenType.STRING, "こんにちは"],
             ['"👾🍎🇵🇹🍊🍌😀🏖🏄🏻‍♂️🍉🍷"', TokenType.STRING, "👾🍎🇵🇹🍊🍌😀🏖🏄🏻‍♂️🍉🍷"],
+        ]
+        do_tests(tests)
+    })
+
+    it('numbers', () => {
+        const tests: TestCases[] = [
+            ['12', TokenType.NUMBER, '12'],
+            ['0', TokenType.NUMBER, '0'],
+            ['1.0', TokenType.NUMBER, '1.0'],
+            ['12.', TokenType.NUMBER, '12.'],
+
+            ['1.0.', TokenType.NUMBER, '1.0'], // final point not included
         ]
         do_tests(tests)
     })
