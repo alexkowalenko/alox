@@ -12,7 +12,7 @@ import { LoxError } from './src/error';
 
 import { Lexer } from './src/lexer'
 import { Parser } from './src/parser'
-import { Printer, WritableString } from './src/printer';
+import { Printer } from './src/printer';
 
 (function run() {
     console.log("ALOX 👾 interpreter")
@@ -40,10 +40,8 @@ import { Printer, WritableString } from './src/printer';
 
         try {
             const expr = parser.parse()
-            const buffer = new WritableString();
-            const printer: Printer = new Printer(buffer);
-            printer.print(expr);
-            console.log(buffer.toString())
+            const printer: Printer = new Printer();
+            console.log(printer.print(expr))
         }
         catch (e) {
             if (e instanceof LoxError) {

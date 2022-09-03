@@ -8,39 +8,23 @@ import { AstVisitor, LoxBool, LoxExpr, LoxLiteral, LoxNil, LoxNumber } from "./a
 
 import { Writable } from 'stream'
 
-export class Printer extends AstVisitor {
+export class Printer extends AstVisitor<string> {
 
-    constructor(readonly stream: Writable) { super() }
+    constructor() { super() }
 
-    public print(expr: LoxExpr) {
-        expr.accept(this)
+    public print(expr: LoxExpr): string {
+        return expr.accept(this)
     }
 
-    visitNumber(expr: LoxNumber): void {
-        this.stream.write("" + expr.value)
+    visitNumber(expr: LoxNumber): string {
+        return "" + expr.value
     }
 
-    visitBool(expr: LoxBool): void {
-        this.stream.write(expr.toString())
+    visitBool(expr: LoxBool): string {
+        return expr.toString()
     }
 
-    visitNil(expr: LoxNil): void {
-        this.stream.write(expr.toString())
-    }
-}
-
-export class WritableString extends Writable {
-
-    constructor() {
-        super()
-    }
-    private buffer: string = ""
-
-    _write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null | undefined) => void): void {
-        this.buffer += "" + chunk;
-    }
-
-    public toString(): string {
-        return this.buffer;
+    visitNil(expr: LoxNil): string {
+        return expr.toString()
     }
 }

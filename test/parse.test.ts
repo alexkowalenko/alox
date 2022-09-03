@@ -7,7 +7,7 @@
 import { Lexer } from '../src/lexer'
 import { LoxError } from '../src/error';
 import { Parser } from '../src/parser';
-import { Printer, WritableString } from '../src/printer';
+import { Printer } from '../src/printer';
 
 type TestCases = [string, string, string?]
 
@@ -19,11 +19,8 @@ function do_tests(tests: TestCases[]) {
             const parser = new Parser(lexer);
 
             const expr = parser.parse()
-            const buffer = new WritableString();
-            const printer: Printer = new Printer(buffer);
-            printer.print(expr);
-
-            expect(buffer.toString()).toBe(test[1])
+            const printer: Printer = new Printer();
+            expect(printer.print(expr)).toBe(test[1])
         }
         catch (e) {
             if (e instanceof LoxError) {

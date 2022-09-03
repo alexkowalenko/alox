@@ -5,7 +5,7 @@
 //
 
 abstract class LoxBase {
-    abstract accept(visitor: AstVisitor): void
+    abstract accept<T>(visitor: AstVisitor<T>): T
 }
 
 export type LoxExpr = LoxLiteral;
@@ -15,8 +15,8 @@ export class LoxNumber extends LoxBase {
 
     constructor(readonly value: number) { super(); }
 
-    accept(visitor: AstVisitor): void {
-        visitor.visitNumber(this)
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitNumber(this)
     }
 
     toString(): string {
@@ -27,8 +27,8 @@ export class LoxNumber extends LoxBase {
 export class LoxBool extends LoxBase {
     constructor(readonly value: boolean) { super(); }
 
-    accept(visitor: AstVisitor): void {
-        visitor.visitBool(this)
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitBool(this)
     }
 
     toString(): string {
@@ -37,8 +37,8 @@ export class LoxBool extends LoxBase {
 }
 
 export class LoxNil extends LoxBase {
-    accept(visitor: AstVisitor): void {
-        visitor.visitNil(this)
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitNil(this)
     }
 
     toString(): string {
@@ -46,16 +46,24 @@ export class LoxNil extends LoxBase {
     }
 }
 
-export abstract class AstVisitor {
-    visitExpr(expr: LoxExpr): void {
-        expr.accept(this)
+export abstract class AstVisitor<T> {
+    visitExpr(expr: LoxExpr): T {
+        return expr.accept<T>(this)
     }
 
-    visitLiteral(expr: LoxLiteral): void {
-        expr.accept(this);
+    visitLiteral(expr: LoxLiteral): T {
+        return expr.accept<T>(this)
     }
 
-    visitNumber(expr: LoxNumber): void { }
-    visitBool(expr: LoxBool): void { }
-    visitNil(expr: LoxNil): void { }
+    visitNumber(expr: LoxNumber): T {
+        return undefined as T;
+    }
+
+    visitBool(expr: LoxBool): T {
+        return undefined as T;
+    }
+
+    visitNil(expr: LoxNil): T {
+        return undefined as T;
+    }
 }
