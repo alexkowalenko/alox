@@ -4,7 +4,8 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Lexer, LexError } from '../src/lexer'
+import { Lexer } from '../src/lexer'
+import { LexError } from '../src/error';
 import { TokenType } from '../src/token'
 
 type TestCases = [string, TokenType, string?]
@@ -13,7 +14,7 @@ function do_tests(tests: TestCases[]) {
     for (const test of tests) {
         //console.log(`token test: ${test[0]}  ${test[1]}`)
         try {
-            var lexer = new Lexer(test[0]);
+            const lexer = new Lexer(test[0]);
             const token = lexer.get_token();
             const tok = token.tok;
             //console.log(`token tok: ${tok}  ${test[1]}`)

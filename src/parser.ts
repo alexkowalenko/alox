@@ -7,13 +7,7 @@
 import { LoxExpr, LoxNumber } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType, Location } from "./token";
-
-export class ParseError implements Error {
-
-    constructor(public readonly message: string, public readonly loc: Location) { }
-    public name: string = "LexError";
-    stack?: string | undefined;
-}
+import { ParseError } from "./error";
 
 export class Parser {
     constructor(private readonly lexer: Lexer) { }
@@ -34,7 +28,7 @@ export class Parser {
     private expect(t: TokenType): Token {
         const tok = this.lexer.get_token();
         if (tok.tok != t) {
-            throw new ParseError(`unexpected ${tok.tok}`, tok.loc)
+            throw new ParseError(`unexpected ${tok}`, tok.loc)
         }
         return tok
     }

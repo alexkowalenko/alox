@@ -4,11 +4,12 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Lexer, LexError } from '../src/lexer'
-import { Parser, ParseError } from '../src/parser';
+import { Lexer } from '../src/lexer'
+import { LoxError } from '../src/error';
+import { Parser } from '../src/parser';
 import { Printer, WritableString } from '../src/printer';
 
-type TestCases = [string, string]
+type TestCases = [string, string, string?]
 
 function do_tests(tests: TestCases[]) {
     for (const test of tests) {
@@ -18,18 +19,16 @@ function do_tests(tests: TestCases[]) {
             const parser = new Parser(lexer);
 
             const expr = parser.parse()
-            var buffer = new WritableString();
-            var printer: Printer = new Printer(buffer);
+            const buffer = new WritableString();
+            const printer: Printer = new Printer(buffer);
             printer.print(expr);
 
             expect(buffer.toString()).toBe(test[1])
         }
         catch (e) {
-            if (e instanceof LexError) {
-                console.log(`Lex error: ${e.message}`)
-            }
-            if (e instanceof ParseError) {
-                console.log(`Parse error: ${e.message}`)
+            if (e instanceof LoxError) {
+                expect(e.message).toBe(test[2])
+                continue
             }
             throw e
         }
@@ -41,7 +40,9 @@ describe('Parser', () => {
         const tests: TestCases[] = [
             ["1", "1"],
             ["1.1", "1.1"],
-            // ["x", "x"],
+
+            // Error
+            ["x", "x", "unexpected ident<x>"],
         ]
         do_tests(tests)
     })

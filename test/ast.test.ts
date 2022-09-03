@@ -9,12 +9,11 @@ import { Printer, WritableString } from '../src/printer';
 
 describe('Token test', () => {
     it('Tokens', () => {
-        var expr: LoxExpr = new LoxNumber(2);
+        const expr: LoxExpr = new LoxNumber(2);
 
-        var buffer = new WritableString();
-        var printer: Printer = new Printer(buffer);
+        const buffer = new WritableString();
+        const printer: Printer = new Printer(buffer);
         printer.print(expr);
-        //console.log(`print: ${buffer.toString()}`)
         expect(buffer.toString()).toBe("2")
     });
 });

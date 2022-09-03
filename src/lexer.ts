@@ -4,15 +4,9 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Token, TokenType, Location } from './token'
+import { Token, TokenType, Location } from './token';
 import { LineReader } from './lineReader';
-
-export class LexError implements Error {
-
-    constructor(public readonly message: string, public readonly loc: Location) { }
-    public name: string = "LexError";
-    stack?: string | undefined;
-}
+import { LexError } from './error';
 
 const single_chars: Map<string, TokenType> = new Map([
     ['.', TokenType.DOT],

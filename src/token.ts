@@ -53,8 +53,25 @@ export enum TokenType {
 
 export class Location {
     constructor(public readonly line: number = 1, public readonly pos: number = 1) { }
+
+    toString(): string {
+        return `[${this.line},${this.pos}]`
+    }
 }
 
 export class Token {
     constructor(public readonly tok: TokenType, public readonly loc: Location, public readonly value?: string) { }
+
+    public toString(): string {
+        switch (this.tok) {
+            case TokenType.IDENT:
+                return `ident<${this.value}>`
+            case TokenType.NUMBER:
+                return `number<${this.value}>`
+            case TokenType.STRING:
+                return `"${this.value}"`
+            default:
+                return this.tok
+        }
+    }
 }
