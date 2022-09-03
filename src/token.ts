@@ -4,7 +4,6 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-
 export enum TokenType {
     L_PAREN = '(',
     R_PAREN = ')',
