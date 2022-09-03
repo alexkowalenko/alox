@@ -5,10 +5,64 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Token } from './src/token'
+import readline from 'node:readline'
+import fs from 'node:fs'
 
-function run() {
-    console.log("ALOX interpreter")
-}
+import { LoxError } from './src/error';
 
-run()
+import { Lexer } from './src/lexer'
+import { Parser } from './src/parser'
+import { Printer, WritableString } from './src/printer';
+
+(function run() {
+    console.log("ALOX 👾 interpreter")
+
+    // Read history file
+
+    const data = fs.readFileSync('.alox').toString()
+    const histories = data.split('\n')
+    // console.log(`Read histories: ${histories.length}`)
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        prompt: '-> ',
+        historySize: 1000,
+        removeHistoryDuplicates: true,
+        history: histories,
+    });
+
+    rl.prompt();
+
+    rl.on('line', (line: string) => {
+        const lexer = new Lexer(line);
+        const parser = new Parser(lexer);
+
+        try {
+            const expr = parser.parse()
+            const buffer = new WritableString();
+            const printer: Printer = new Printer(buffer);
+            printer.print(expr);
+            console.log(buffer.toString())
+        }
+        catch (e) {
+            if (e instanceof LoxError) {
+                console.log(e.toString())
+            } else {
+                throw e
+            }
+        }
+        rl.prompt()
+    })
+
+    rl.on('history', (line: string) => {
+        histories.push(line)
+    })
+
+    rl.on('close', () => {
+        fs.writeFileSync('.alox', histories.join('\n').trimEnd())
+        console.log('Bye!');
+        process.exit(0);
+    });
+
+})();
