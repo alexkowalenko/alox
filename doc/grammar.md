@@ -14,8 +14,9 @@ DIGIT       -> '0' ... '9' ;
 
 This is the grammar which is implemented:
 
-```
-expression     -> literal | grouping ;
+```BNF
+expression     -> literal | unary | grouping ;
+unary          -> ("-" | "!") expression;
 grouping       -> "(" expression ")" ;
 literal        -> NUMBER | "true" | "false" | "nil" ;
 ```

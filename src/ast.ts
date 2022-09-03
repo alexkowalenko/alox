@@ -4,12 +4,26 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
+import { TokenType } from "./token"
+
 abstract class LoxBase {
     abstract accept<T>(visitor: AstVisitor<T>): T
 }
 
-export type LoxExpr = LoxLiteral | LoxGroup;
+export type LoxExpr = LoxLiteral | LoxUnary | LoxGroup;
 export type LoxLiteral = LoxNumber | LoxBool | LoxNil;
+
+export class LoxUnary extends LoxBase {
+    constructor(readonly prefix: TokenType, readonly expr: LoxExpr) { super(); }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitUnary(this)
+    }
+
+    toString(): string {
+        return this.prefix + this.expr.toString();
+    }
+}
 
 export class LoxGroup extends LoxBase {
     constructor(readonly expr: LoxExpr) { super(); }
@@ -60,6 +74,10 @@ export class LoxNil extends LoxBase {
 export abstract class AstVisitor<T> {
     visitExpr(expr: LoxExpr): T {
         return expr.accept<T>(this)
+    }
+
+    visitUnary(e: LoxUnary): T {
+        return e.accept<T>(this)
     }
 
     visitGroup(e: LoxGroup): T {

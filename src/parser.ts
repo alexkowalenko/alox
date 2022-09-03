@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxBool, LoxExpr, LoxGroup, LoxNil, LoxNumber } from "./ast";
+import { LoxBool, LoxExpr, LoxGroup, LoxNil, LoxNumber, LoxUnary } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType, Location, Precedence } from "./token";
 import { ParseError } from "./error";
@@ -17,6 +17,8 @@ const prefix_map: Map<TokenType, PrefixParselet> = new Map([
     [TokenType.FALSE, (p: Parser) => { return p.parseBool() }],
     [TokenType.NIL, (p: Parser) => { return p.parseNil() }],
     [TokenType.L_PAREN, (p: Parser) => { return p.parseGroup() }],
+    [TokenType.MINUS, (p: Parser) => { return p.parseUnary() }],
+    [TokenType.BANG, (p: Parser) => { return p.parseUnary() }],
 ])
 
 export class Parser {
@@ -34,15 +36,21 @@ export class Parser {
      */
     private parseExpr(precedence: Precedence): LoxExpr {
         const tok = this.lexer.peek_token();
-        console.log(`got token: ${tok}`)
+        // console.log(`got token: ${tok}`)
         if (!prefix_map.has(tok.tok)) {
             throw new ParseError(`unexpected ${tok}`, tok.loc)
         }
         return (prefix_map.get(tok.tok) as PrefixParselet)(this)
     }
 
+    parseUnary(): LoxUnary {
+        const tok = this.lexer.get_token().tok;
+        const expr = this.parseExpr(Precedence.LOWEST)
+        return new LoxUnary(tok, expr)
+    }
+
     parseGroup(): LoxGroup {
-        console.log(`parseGroup`)
+        // console.log(`parseGroup`)
         this.lexer.get_token() // '('
         const expr = this.parseExpr(Precedence.LOWEST)
         const group = new LoxGroup(expr)

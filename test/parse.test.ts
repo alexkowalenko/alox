@@ -69,4 +69,17 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('unary', () => {
+        const tests: TestCases[] = [
+            ["-1", "-1"],
+            ["! true", "!true"],
+            ["!!false", "!!false"],
+            ["!(!false)", "!( !false )"],
+
+            // Error
+            ["+1", "", "unexpected +"],
+        ]
+        do_tests(tests)
+    })
 })

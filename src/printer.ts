@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBool, LoxExpr, LoxGroup, LoxLiteral, LoxNil, LoxNumber } from "./ast";
+import { AstVisitor, LoxBool, LoxExpr, LoxGroup, LoxLiteral, LoxNil, LoxNumber, LoxUnary } from "./ast";
 
 import { Writable } from 'stream'
 
@@ -14,6 +14,10 @@ export class Printer extends AstVisitor<string> {
 
     public print(expr: LoxExpr): string {
         return expr.accept(this)
+    }
+
+    visitUnary(e: LoxUnary): string {
+        return e.toString()
     }
 
     visitGroup(e: LoxGroup): string {
