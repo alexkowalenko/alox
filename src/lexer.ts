@@ -5,10 +5,11 @@
 //
 
 import { Token, TokenType, Location } from './token'
+import { LineReader } from './lineReader';
 
 export class LexError implements Error {
 
-    constructor(public message: string, public loc: Location) { }
+    constructor(public readonly message: string, public readonly loc: Location) { }
     public name: string = "LexError";
     stack?: string | undefined;
 }
@@ -35,64 +36,70 @@ const alphanumeric = /[\p{L}\p{N}\p{Emoji}]/u
 
 export class Lexer {
 
-    constructor(private buffer: string) { }
+    constructor(buffer: string) {
+        this.line = new LineReader(buffer)
+    }
 
-    get_identifier(c: string): Token {
+    private readonly line: LineReader
+
+    private get_identifier(c: string): Token {
         var buffer = c;
-        const start = this.get_location();
-        while (this.peek_char().match(alphanumeric)) {
-            buffer += this.get_char()
+        const start = this.line.get_location();
+        while (this.line.peek_char().match(alphanumeric)) {
+            buffer += this.line.get_char()
         }
         return new Token(TokenType.IDENT, start, buffer);
     }
 
-    get_string(): Token {
+    private get_string(): Token {
         var buffer = ""
-        const start = this.get_location();
-        while (this.index < this.buffer.length) {
-            var c = this.buffer[this.index];
-            this.incr_count();
+        const start = this.line.get_location();
+        while (this.line.peek_char() !== "") {
+            var c = this.line.get_char();
             if (c === '"') {
-                return new Token(TokenType.STRING, this.get_location(), buffer)
+                return new Token(TokenType.STRING, this.line.get_location(), buffer)
             }
             buffer += c
         }
-        throw new LexError('Unterminated string', this.get_location())
+        throw new LexError('Unterminated string', this.line.get_location())
     }
 
-    is_numeric(c: string): boolean {
+    private is_numeric(c: string): boolean {
         return char_zero <= c.charCodeAt(0) && c.charCodeAt(0) <= char_nine
     }
 
-    get_number(c: string): Token {
+    private get_number(c: string): Token {
         var buffer = c;
-        const start = this.get_location();
-        var peek = this.peek_char();
+        const start = this.line.get_location();
+        var peek = this.line.peek_char();
         var seen_dot = false;
-        while (this.is_numeric(peek) || peek === '.') {
+        while (this.is_numeric(peek as string) || peek === '.') {
             if (peek === '.') {
                 if (seen_dot) {
                     break
                 }
                 seen_dot = true
             }
-            buffer += this.get_char()
-            peek = this.peek_char();
+            buffer += this.line.get_char()
+            peek = this.line.peek_char();
         }
         return new Token(TokenType.NUMBER, start, buffer)
     }
 
-    get_token(): Token {
-        const char = this.get_char()
+    public get_token(): Token {
+        const char = this.line.get_char_filter()
+
         // If end return EOF
         if (char === "") {
             return this.mk_token(TokenType.EOF)
         }
 
+
+
         if (single_chars.has(char)) {
             return this.mk_token(single_chars.get(char) as TokenType)
         }
-        const next = this.peek_char();
+        const next = this.line.peek_char();
         switch (char) {
             case '!': {
                 if (next === '=')
@@ -131,52 +138,13 @@ export class Lexer {
             return this.get_identifier(char)
         }
 
-        throw new LexError(`Unknown character ${char}`, this.get_location())
+        throw new LexError(`Unknown character ${char}`, this.line.get_location())
     }
 
-    mk_token(token: TokenType) {
-        return new Token(token, this.get_location())
+    private mk_token(token: TokenType) {
+        return new Token(token, this.line.get_location())
     }
 
-    get_char() {
-        do {
-            if (this.index >= this.buffer.length) {
-                return ""
-            }
-            var char = this.buffer.charAt(this.index)
-            if (" \t\r".includes(char)) {
-                this.incr_count()
-                continue
-            }
-            if ('\n' === char) {
-                this.line_no++;
-                this.char_no = 1;
-                continue;
-            }
-            this.index++;
-            this.char_no++;
-            return char
-        } while (true)
-    }
 
-    peek_char() {
-        if (this.index >= this.buffer.length) {
-            return ""
-        }
-        return this.buffer[this.index];
-    }
-
-    incr_count() {
-        this.index++
-        this.char_no++
-    }
-
-    private get_location(): Location {
-        return new Location(this.char_no, this.line_no)
-    }
-
-    private index: number = 0;
-    private char_no: number = 1;
-    private line_no: number = 1;
 
 }

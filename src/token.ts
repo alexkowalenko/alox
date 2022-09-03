@@ -53,9 +53,9 @@ export enum TokenType {
 
 
 export class Location {
-    constructor(public line: number = 1, public pos: number = 1) { }
+    constructor(public readonly line: number = 1, public readonly pos: number = 1) { }
 }
 
 export class Token {
-    constructor(public tok: TokenType, public loc: Location, public value?: string) { }
+    constructor(public readonly tok: TokenType, public readonly loc: Location, public readonly value?: string) { }
 }

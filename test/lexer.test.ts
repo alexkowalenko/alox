@@ -98,7 +98,8 @@ describe('Lexer', () => {
             ['liberté', TokenType.IDENT, 'liberté'],
             ['Interpréteur', TokenType.IDENT, 'Interpréteur'],
             ['αβγ', TokenType.IDENT, 'αβγ'],
-            //['👾', TokenType.IDENT, '👾'],
+            ['👾', TokenType.IDENT, '👾'],
+            ['🍎1', TokenType.IDENT, '🍎1'],
             ['a_', TokenType.IDENT, 'a_'],
             ['_', TokenType.IDENT, '_'],
         ]
