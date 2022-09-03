@@ -54,6 +54,7 @@ export class Lexer {
     }
 
     private readonly line: LineReader
+    private spare_token: Token | undefined;
 
     private get_identifier(c: string): Token {
         var buffer = c;
@@ -103,6 +104,13 @@ export class Lexer {
     }
 
     public get_token(): Token {
+
+        if (this.spare_token !== undefined) {
+            var ret = this.spare_token;
+            this.spare_token = undefined;
+            return ret;
+        }
+
         const char = this.line.get_char_filter()
 
         // If end return EOF
@@ -157,5 +165,12 @@ export class Lexer {
 
     private mk_token(token: TokenType) {
         return new Token(token, this.line.get_location())
+    }
+
+    public peek_token() {
+        if (this.spare_token === undefined) {
+            this.spare_token = this.get_token();
+        }
+        return this.spare_token;
     }
 }

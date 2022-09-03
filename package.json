@@ -1,7 +1,7 @@
 {
   "name": "alox",
   "version": "1.0.0",
-  "description": "Lox implementation",
+  "description": "a Lox implementation",
   "main": "index.js",
   "scripts": {
     "interp": "ts-node interp.ts",
@@ -9,12 +9,11 @@
   },
   "author": "Alex",
   "license": "",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.8.2",
     "@types/jest": "^28.0",
     "jest": "^28.0",
     "ts-jest": "^28.0.8"
-  },
-  "devDependencies": {
-    "typescript": "^4.8.2"
   }
 }

@@ -75,3 +75,15 @@ export class Token {
         }
     }
 }
+
+export enum Precedence {
+    LOWEST = 0,
+    OR,
+    AND,
+    COMPARATIVE,
+    CONCAT,
+    SUM,
+    PRODUCT,
+    UNARY,
+    EXPONENT
+}
