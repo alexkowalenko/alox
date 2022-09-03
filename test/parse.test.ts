@@ -46,4 +46,19 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('bools', () => {
+        const tests: TestCases[] = [
+            ["true", "true"],
+            ["false", "false"],
+        ]
+        do_tests(tests)
+    })
+
+    it('bools', () => {
+        const tests: TestCases[] = [
+            ["nil", "nil"],
+        ]
+        do_tests(tests)
+    })
 })

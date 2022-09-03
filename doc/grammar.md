@@ -15,7 +15,8 @@ DIGIT       -> '0' ... '9' ;
 This is the grammar which is implemented:
 
 ```
-expression     -> NUMBER
+expression      -> literal
+literal         -> NUMBER | "true" | "false" | "nil" ;
 ```
 
 This is the grammar which we are aiming at:
@@ -35,9 +36,10 @@ operator       -> "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/
 
 ## Operator Precedence
 
-1. 'and' | 'or'
-2. "==" | "!="
-3. "<" | "<=" | ">" | ">="
-4. "-" | "!" uniary
+1. 'or'
+2. 'and'
+3. "==" | "!=" | "<" | "<=" | ">" | ">="
+4. "+" | "-"
 5. "*" | "/"
-6. "+" | "-"
+6. "-" | "!" unary
+7. exponent
