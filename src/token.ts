@@ -45,12 +45,12 @@ export enum TokenType {
     RETURN = 'return',
     SUPER = 'super',
     THIS = 'this',
+    TRUE = 'true',
     VAR = 'var',
     WHILE = 'while',
 
     EOF = '<eof>'
 }
-
 
 export class Location {
     constructor(public readonly line: number = 1, public readonly pos: number = 1) { }

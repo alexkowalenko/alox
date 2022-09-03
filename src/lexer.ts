@@ -28,6 +28,25 @@ const single_chars: Map<string, TokenType> = new Map([
     [':', TokenType.COLON],
 ])
 
+const reserved_words: Map<string, TokenType> = new Map([
+    ['and', TokenType.AND],
+    ['class', TokenType.CLASS],
+    ['else', TokenType.ELSE],
+    ['false', TokenType.FALSE],
+    ['fun', TokenType.FUN],
+    ['for', TokenType.FOR],
+    ['if', TokenType.IF],
+    ['nil', TokenType.NIL],
+    ['or', TokenType.OR],
+    ['print', TokenType.PRINT],
+    ['return', TokenType.RETURN],
+    ['super', TokenType.SUPER],
+    ['this', TokenType.THIS],
+    ['true', TokenType.TRUE],
+    ['var', TokenType.VAR],
+    ['while', TokenType.WHILE],
+])
+
 const char_zero = "0".charCodeAt(0)
 const char_nine = "9".charCodeAt(0)
 
@@ -47,6 +66,9 @@ export class Lexer {
         const start = this.line.get_location();
         while (this.line.peek_char().match(alphanumeric)) {
             buffer += this.line.get_char()
+        }
+        if (reserved_words.has(buffer)) {
+            return new Token(reserved_words.get(buffer) as TokenType, start)
         }
         return new Token(TokenType.IDENT, start, buffer);
     }
@@ -93,8 +115,6 @@ export class Lexer {
         if (char === "") {
             return this.mk_token(TokenType.EOF)
         }
-
-
 
         if (single_chars.has(char)) {
             return this.mk_token(single_chars.get(char) as TokenType)
@@ -144,7 +164,4 @@ export class Lexer {
     private mk_token(token: TokenType) {
         return new Token(token, this.line.get_location())
     }
-
-
-
 }
