@@ -8,9 +8,20 @@ abstract class LoxBase {
     abstract accept<T>(visitor: AstVisitor<T>): T
 }
 
-export type LoxExpr = LoxLiteral;
+export type LoxExpr = LoxLiteral | LoxGroup;
 export type LoxLiteral = LoxNumber | LoxBool | LoxNil;
 
+export class LoxGroup extends LoxBase {
+    constructor(readonly expr: LoxExpr) { super(); }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitGroup(this)
+    }
+
+    toString(): string {
+        return "( " + this.expr.toString() + " )"
+    }
+}
 export class LoxNumber extends LoxBase {
 
     constructor(readonly value: number) { super(); }
@@ -49,6 +60,10 @@ export class LoxNil extends LoxBase {
 export abstract class AstVisitor<T> {
     visitExpr(expr: LoxExpr): T {
         return expr.accept<T>(this)
+    }
+
+    visitGroup(e: LoxGroup): T {
+        return e.expr.accept<T>(this)
     }
 
     visitLiteral(expr: LoxLiteral): T {

@@ -15,8 +15,9 @@ DIGIT       -> '0' ... '9' ;
 This is the grammar which is implemented:
 
 ```
-expression      -> literal
-literal         -> NUMBER | "true" | "false" | "nil" ;
+expression     -> literal | grouping ;
+grouping       -> "(" expression ")" ;
+literal        -> NUMBER | "true" | "false" | "nil" ;
 ```
 
 This is the grammar which we are aiming at:

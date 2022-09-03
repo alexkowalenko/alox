@@ -57,6 +57,11 @@ import { Printer } from './src/printer';
         histories.push(line)
     })
 
+    rl.on('SIGINT', (line: string) => {
+        console.log('Interupt!');
+        process.exit(0);
+    })
+
     rl.on('close', () => {
         fs.writeFileSync('.alox', histories.join('\n').trimEnd())
         console.log('Bye!');

@@ -58,4 +58,15 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('brackets', () => {
+        const tests: TestCases[] = [
+            ["(nil)", "( nil )"],
+            ["((nil))", "( ( nil ) )"],
+
+            // Error
+            ["(())", "", "unexpected )"],
+        ]
+        do_tests(tests)
+    })
 })
