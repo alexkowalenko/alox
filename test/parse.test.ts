@@ -55,7 +55,7 @@ describe('Parser', () => {
         do_tests(tests)
     })
 
-    it('bools', () => {
+    it('nil', () => {
         const tests: TestCases[] = [
             ["nil", "nil"],
         ]

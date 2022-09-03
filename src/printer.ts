@@ -8,27 +8,12 @@ import { AstVisitor, LoxBool, LoxExpr, LoxLiteral, LoxNil, LoxNumber } from "./a
 
 import { Writable } from 'stream'
 
-export class Printer implements AstVisitor {
+export class Printer extends AstVisitor {
 
-    constructor(readonly stream: Writable) { }
-
+    constructor(readonly stream: Writable) { super() }
 
     public print(expr: LoxExpr) {
-        this.visitExpr(expr)
-    }
-
-    visitExpr(expr: LoxExpr): void {
-        this.visitLiteral(expr as LoxLiteral)
-    }
-
-    visitLiteral(expr: LoxLiteral): void {
-        if (expr instanceof LoxNumber) {
-            this.visitNumber(expr as LoxNumber)
-        } else if (expr instanceof LoxBool) {
-            this.visitBool(expr as LoxBool)
-        } else {
-            this.visitNil(expr as LoxNil)
-        }
+        expr.accept(this)
     }
 
     visitNumber(expr: LoxNumber): void {
