@@ -10,7 +10,7 @@ abstract class LoxBase {
     abstract accept<T>(visitor: AstVisitor<T>): T
 }
 
-export type LoxExpr = LoxLiteral | LoxUnary | LoxGroup;
+export type LoxExpr = LoxLiteral | LoxUnary | LoxBinary | LoxGroup;
 export type LoxLiteral = LoxNumber | LoxBool | LoxNil;
 
 export class LoxUnary extends LoxBase {
@@ -22,6 +22,18 @@ export class LoxUnary extends LoxBase {
 
     toString(): string {
         return this.prefix + this.expr.toString();
+    }
+}
+
+export class LoxBinary extends LoxBase {
+    constructor(readonly operator: TokenType, readonly left: LoxExpr, readonly right: LoxExpr) { super(); }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitBinary(this)
+    }
+
+    toString(): string {
+        return `(${this.left.toString()} ${this.operator} ${this.right.toString()})`
     }
 }
 
@@ -77,6 +89,10 @@ export abstract class AstVisitor<T> {
     }
 
     visitUnary(e: LoxUnary): T {
+        return e.accept<T>(this)
+    }
+
+    visitBinary(e: LoxBinary): T {
         return e.accept<T>(this)
     }
 

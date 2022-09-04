@@ -32,6 +32,10 @@ export class LineReader {
     public get_char_filter(): string {
         do {
             const char = this.get_char();
+            // console.log(`get_char filter: "${char}"`)
+            if (char === "") { // empty character must be returned first
+                return char;
+            }
             if (" \t\r".includes(char)) {
                 continue
             }

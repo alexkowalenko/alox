@@ -15,25 +15,12 @@ DIGIT       -> '0' ... '9' ;
 This is the grammar which is implemented:
 
 ```BNF
-expression     -> literal | unary | grouping ;
+expression     -> literal | unary | binary | grouping ;
 unary          -> ("-" | "!") expression;
-grouping       -> "(" expression ")" ;
-literal        -> NUMBER | "true" | "false" | "nil" ;
-```
-
-This is the grammar which we are aiming at:
-
-```BNF
-expression     -> literal
-               | unary
-               | binary
-               | grouping ;
-
-literal        -> NUMBER | STRING | "true" | "false" | "nil" ;
-grouping       -> "(" expression ")" ;
-unary          -> ( "-" | "!" ) expression ;
 binary         -> expression operator expression ;
-operator       -> "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/" ;
+grouping       -> "(" expression ")" ;
+operator       -> "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/" | "or" | "and" ;
+literal        -> NUMBER | "true" | "false" | "nil" ;
 ```
 
 ## Operator Precedence

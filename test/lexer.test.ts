@@ -128,6 +128,24 @@ describe('Lexer', () => {
         ]
         do_tests(tests)
     })
+})
 
+describe("Lexer 2", () => {
+    it('read and stop', () => {
+        const lexer = new Lexer("1");
+        expect(lexer.get_token().value).toBe("1")
+        expect(lexer.get_token().tok).toBe(TokenType.EOF)
+    })
 
+    it('read and stop 2', () => {
+        const lexer = new Lexer("x");
+        expect(lexer.get_token().value).toBe("x")
+        expect(lexer.peek_token().tok).toBe(TokenType.EOF)
+    })
+
+    it('read and stop 3', () => {
+        const lexer = new Lexer("<=+");
+        expect(lexer.get_token().tok).toBe(TokenType.LESS_EQUAL)
+        expect(lexer.peek_token().tok).toBe(TokenType.PLUS)
+    })
 })

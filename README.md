@@ -4,10 +4,14 @@ ALOX - A Lox implementation in Typescript. Following the book _Crafting Interpre
 
 ## Progress
 
-[x] Lexer - Chapter 4: Scanning.
+- [x] Lexer - Chapter 4: Scanning.
 
-[x] AST - Chapter 5: Representing Code.
+- [x] AST - Chapter 5: Representing Code.
 
-[x] REPL.
+- [x] A REPL.
 
-[ ] Parser - Expressions - Chapter 6: Parsing Expressions. Implemented using Prat Operator precedence parser.
+- [x] Parser - Expressions - Chapter 6: Parsing Expressions. Implemented using Prat Operator precedence parser (Section 17.6).
+
+- [ ] Interpreter - Chapter 7: Evaluating Expressions.
+
+- [ ] Test Structure for running programs.

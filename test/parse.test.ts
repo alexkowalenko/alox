@@ -66,6 +66,7 @@ describe('Parser', () => {
 
             // Error
             ["(())", "", "unexpected )"],
+            ["(", "", "unexpected <eof>"],
         ]
         do_tests(tests)
     })
@@ -79,6 +80,31 @@ describe('Parser', () => {
 
             // Error
             ["+1", "", "unexpected +"],
+            ["!", "", "unexpected <eof>"],
+        ]
+        do_tests(tests)
+    })
+
+    it('binary', () => {
+        const tests: TestCases[] = [
+            ["1+2", "(1 + 2)"],
+            ["2 * 3 + 4", "((2 * 3) + 4)"],
+            ["2 + 3 * 4", "(2 + (3 * 4))"],
+            ["2 + 3 * 4 / 5", "(2 + ((3 * 4) / 5))"],
+
+            ["1 and 2", "(1 and 2)"],
+            ["1 and 2 or 3", "((1 and 2) or 3)"],
+            ["1 or 2 and 3", "(1 or (2 and 3))"],
+            ["1 and ! 3", "(1 and !3)"],
+
+            ["1 < 2", "(1 < 2)"],
+            ["1 < 2 <= 3", "((1 < 2) <= 3)"],
+            ["1 > 2 >= 3", "((1 > 2) >= 3)"],
+            ["1 == 2 != 3", "((1 == 2) != 3)"],
+
+            // Error
+            ["2 +", "", "unexpected <eof>"],
+            ["* 3", "", "unexpected *"],
         ]
         do_tests(tests)
     })

@@ -124,28 +124,40 @@ export class Lexer {
         const next = this.line.peek_char();
         switch (char) {
             case '!': {
-                if (next === '=')
+                if (next === '=') {
+                    this.line.get_char()
                     return this.mk_token(TokenType.BANG_EQUAL)
-                else
+                }
+                else {
                     return this.mk_token(TokenType.BANG)
+                }
             }
             case '=': {
-                if (next === '=')
+                if (next === '=') {
+                    this.line.get_char()
                     return this.mk_token(TokenType.EQUAL_EQUAL)
-                else
+                }
+                else {
                     return this.mk_token(TokenType.EQUAL)
+                }
             }
             case '>': {
-                if (next === '=')
+                if (next === '=') {
+                    this.line.get_char()
                     return this.mk_token(TokenType.GREATER_EQUAL)
-                else
+                }
+                else {
                     return this.mk_token(TokenType.GREATER)
+                }
             }
             case '<': {
-                if (next === '=')
+                if (next === '=') {
+                    this.line.get_char()
                     return this.mk_token(TokenType.LESS_EQUAL)
-                else
+                }
+                else {
                     return this.mk_token(TokenType.LESS)
+                }
             }
         }
 

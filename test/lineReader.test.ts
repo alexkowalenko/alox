@@ -56,7 +56,6 @@ describe('LineReader', () => {
         expect(line.get_location().pos).toBe(7);
     });
 
-
     it('filter', () => {
         var line = new LineReader("12 👾 456");
         expect(line.get_char_filter()).toBe("1");
@@ -66,6 +65,12 @@ describe('LineReader', () => {
         expect(line.get_char_filter()).toBe("5");
         expect(line.get_char_filter()).toBe("6");
         expect(line.get_location().pos).toBe(9);
+    });
+
+    it('end', () => {
+        var line = new LineReader("1");
+        expect(line.get_char_filter()).toBe("1");
+        expect(line.peek_char()).toBe("");
     });
 
 });
