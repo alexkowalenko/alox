@@ -59,12 +59,12 @@ export class Parser {
         // console.log('expr')
 
         // check infix operator
-        var tok = this.lexer.peek_token();
+        let tok = this.lexer.peek_token();
         // console.log(`got token: ${tok}`)
         if (!prefix_map.has(tok.tok)) {
             throw new ParseError(`unexpected ${tok}`, tok.loc)
         }
-        var left = (prefix_map.get(tok.tok) as PrefixParselet)(this)
+        let left = (prefix_map.get(tok.tok) as PrefixParselet)(this)
 
         // check infix
         tok = this.lexer.peek_token();
@@ -109,7 +109,7 @@ export class Parser {
 
     bool(): LoxBool {
         const tok = this.lexer.get_token();
-        var bool = false;
+        let bool = false;
         if (tok.tok === TokenType.TRUE) {
             bool = true;
         }

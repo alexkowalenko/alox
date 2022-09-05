@@ -57,7 +57,7 @@ export class Lexer {
     private spare_token: Token | undefined;
 
     private get_identifier(c: string): Token {
-        var buffer = c;
+        let buffer = c;
         const start = this.line.get_location();
         while (this.line.peek_char().match(alphanumeric)) {
             buffer += this.line.get_char()
@@ -69,10 +69,10 @@ export class Lexer {
     }
 
     private get_string(): Token {
-        var buffer = ""
+        let buffer = ""
         const start = this.line.get_location();
         while (this.line.peek_char() !== "") {
-            var c = this.line.get_char();
+            const c = this.line.get_char();
             if (c === '"') {
                 return new Token(TokenType.STRING, this.line.get_location(), buffer)
             }
@@ -86,10 +86,10 @@ export class Lexer {
     }
 
     private get_number(c: string): Token {
-        var buffer = c;
+        let buffer = c;
         const start = this.line.get_location();
-        var peek = this.line.peek_char();
-        var seen_dot = false;
+        let peek = this.line.peek_char();
+        let seen_dot = false;
         while (this.is_numeric(peek as string) || peek === '.') {
             if (peek === '.') {
                 if (seen_dot) {
@@ -106,7 +106,7 @@ export class Lexer {
     public get_token(): Token {
 
         if (this.spare_token !== undefined) {
-            var ret = this.spare_token;
+            const ret = this.spare_token;
             this.spare_token = undefined;
             return ret;
         }

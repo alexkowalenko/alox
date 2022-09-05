@@ -1,6 +1,6 @@
 # ALOX
 
-ALOX - A Lox implementation in Typescript. Following the book _Crafting Interpreters_ by Robert Nystrom.
+ALOX - A Lox implementation in Typescript. Following the book [_Crafting Interpreters_](http://www.craftinginterpreters.com/) by Robert Nystrom.
 
 ## Progress
 
@@ -14,4 +14,4 @@ ALOX - A Lox implementation in Typescript. Following the book _Crafting Interpre
 
 - [ ] Interpreter - Chapter 7: Evaluating Expressions.
 
-- [ ] Test Structure for running programs.
+- [ ] Test Structure for running test programs.

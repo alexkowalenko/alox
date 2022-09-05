@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-export enum TokenType {
+export const enum TokenType {
     L_PAREN = '(',
     R_PAREN = ')',
     L_BRACE = '{',
@@ -76,7 +76,7 @@ export class Token {
     }
 }
 
-export enum Precedence {
+export const enum Precedence {
     LOWEST = 0,
     OR,
     AND,

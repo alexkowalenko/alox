@@ -8,7 +8,7 @@ import { LineReader } from '../src/lineReader'
 
 describe('LineReader', () => {
     it('basic', () => {
-        var line = new LineReader("123456");
+        let line = new LineReader("123456");
         expect(line.get_char()).toBe("1");
         expect(line.get_char()).toBe("2");
         expect(line.get_char()).toBe("3");
@@ -19,14 +19,14 @@ describe('LineReader', () => {
     });
 
     it('basic 2', () => {
-        var line = new LineReader("123456");
+        let line = new LineReader("123456");
         expect(line.get_char()).toBe("1");
         expect(line.get_char()).toBe("2");
         expect(line.peek_char()).toBe("3");
     });
 
     it('basic3', () => {
-        var line = new LineReader("123456");
+        let line = new LineReader("123456");
         expect(line.get_char()).toBe("1");
         expect(line.get_char()).toBe("2");
         expect(line.get_char()).toBe("3");
@@ -37,7 +37,7 @@ describe('LineReader', () => {
     });
 
     it('location', () => {
-        var line = new LineReader("123456");
+        let line = new LineReader("123456");
         expect(line.get_location().pos).toBe(1);
         expect(line.get_char()).toBe("1");
         expect(line.get_char()).toBe("2");
@@ -46,7 +46,7 @@ describe('LineReader', () => {
     });
 
     it('unicode', () => {
-        var line = new LineReader("12👾456");
+        let line = new LineReader("12👾456");
         expect(line.get_char()).toBe("1");
         expect(line.get_char()).toBe("2");
         expect(line.get_char()).toBe("👾");
@@ -68,7 +68,7 @@ describe('LineReader', () => {
     });
 
     it('end', () => {
-        var line = new LineReader("1");
+        let line = new LineReader("1");
         expect(line.get_char_filter()).toBe("1");
         expect(line.peek_char()).toBe("");
     });

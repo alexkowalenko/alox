@@ -83,17 +83,24 @@ export class LoxNil extends LoxBase {
     }
 }
 
+/**
+ * Visitor class for traversing the AST
+ * 
+ * Never call return e.accept<T>(this) in a method  which is class not in a union,
+ * as this leads to a infinite call back and forth between the visitor and the AST.
+ */
 export abstract class AstVisitor<T> {
     visitExpr(expr: LoxExpr): T {
         return expr.accept<T>(this)
     }
 
     visitUnary(e: LoxUnary): T {
-        return e.accept<T>(this)
+        return e.expr.accept<T>(this)
     }
 
     visitBinary(e: LoxBinary): T {
-        return e.accept<T>(this)
+        return e.left.accept<T>(this)
+        return e.right.accept<T>(this)
     }
 
     visitGroup(e: LoxGroup): T {
