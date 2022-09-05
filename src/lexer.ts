@@ -78,7 +78,7 @@ export class Lexer {
             }
             buffer += c
         }
-        throw new LexError('Unterminated string', this.line.get_location())
+        throw new LexError('unterminated string', this.line.get_location())
     }
 
     private is_numeric(c: string): boolean {

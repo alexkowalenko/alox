@@ -20,7 +20,7 @@ unary          -> ("-" | "!") expression;
 binary         -> expression operator expression ;
 grouping       -> "(" expression ")" ;
 operator       -> "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/" | "or" | "and" ;
-literal        -> NUMBER | "true" | "false" | "nil" ;
+literal        -> NUMBER | STRING | "true" | "false" | "nil" ;
 ```
 
 ## Operator Precedence

@@ -44,6 +44,19 @@ describe('Parser', () => {
         do_tests(tests)
     })
 
+    it('strings', () => {
+        const tests: TestCases[] = [
+            ['"1"', '"1"'],
+            ['"Astérix"', '"Astérix"'],
+            ['"👾🍎🇵🇹🍊🍌😀🏖🏄🏻‍♂️🍉🍷"', '"👾🍎🇵🇹🍊🍌😀🏖🏄🏻‍♂️🍉🍷"'],
+            ['""', '""'],
+
+            // Error
+            ['"x', '', "unterminated string"],
+        ]
+        do_tests(tests)
+    })
+
     it('bools', () => {
         const tests: TestCases[] = [
             ["true", "true"],

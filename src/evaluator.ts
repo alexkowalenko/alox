@@ -6,26 +6,26 @@
 
 import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil } from "./ast";
 
-export type LOXValue = number | string | boolean | null
+export type LoxValue = number | string | boolean | null
 
-export class Evaluator extends AstVisitor<LOXValue> {
+export class Evaluator extends AstVisitor<LoxValue> {
     constructor() {
         super()
     }
 
-    eval(expr: LoxExpr): LOXValue {
+    eval(expr: LoxExpr): LoxValue {
         return expr.accept(this)
     }
 
-    visitNumber(expr: LoxNumber): LOXValue {
+    visitNumber(expr: LoxNumber): LoxValue {
         return expr.value;
     }
 
-    visitBool(expr: LoxBool): LOXValue {
+    visitBool(expr: LoxBool): LoxValue {
         return expr.value;
     }
 
-    visitNil(expr: LoxNil): LOXValue {
+    visitNil(expr: LoxNil): LoxValue {
         return null;
     }
 }

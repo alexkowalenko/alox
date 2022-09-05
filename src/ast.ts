@@ -11,7 +11,7 @@ abstract class LoxBase {
 }
 
 export type LoxExpr = LoxLiteral | LoxUnary | LoxBinary | LoxGroup;
-export type LoxLiteral = LoxNumber | LoxBool | LoxNil;
+export type LoxLiteral = LoxNumber | LoxString | LoxBool | LoxNil;
 
 export class LoxUnary extends LoxBase {
     constructor(readonly prefix: TokenType, readonly expr: LoxExpr) { super(); }
@@ -60,6 +60,20 @@ export class LoxNumber extends LoxBase {
         return "" + this.value
     }
 }
+
+export class LoxString extends LoxBase {
+
+    constructor(readonly value: string) { super(); }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitString(this)
+    }
+
+    toString(): string {
+        return this.value
+    }
+}
+
 
 export class LoxBool extends LoxBase {
     constructor(readonly value: boolean) { super(); }
@@ -112,6 +126,10 @@ export abstract class AstVisitor<T> {
     }
 
     visitNumber(expr: LoxNumber): T {
+        return undefined as T;
+    }
+
+    visitString(expr: LoxString): T {
         return undefined as T;
     }
 

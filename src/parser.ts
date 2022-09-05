@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxBinary, LoxBool, LoxExpr, LoxGroup, LoxNil, LoxNumber, LoxUnary } from "./ast";
+import { LoxBinary, LoxBool, LoxExpr, LoxGroup, LoxNil, LoxNumber, LoxString, LoxUnary } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType, Location, Precedence, get_precedence } from "./token";
 import { ParseError } from "./error";
@@ -13,6 +13,7 @@ type PrefixParselet = (p: Parser) => LoxExpr;
 
 const prefix_map: Map<TokenType, PrefixParselet> = new Map([
     [TokenType.NUMBER, (p: Parser) => { return p.number() }],
+    [TokenType.STRING, (p: Parser) => { return p.string() }],
     [TokenType.TRUE, (p: Parser) => { return p.bool() }],
     [TokenType.FALSE, (p: Parser) => { return p.bool() }],
     [TokenType.NIL, (p: Parser) => { return p.nil() }],
@@ -105,6 +106,11 @@ export class Parser {
     number(): LoxNumber {
         const tok = this.expect(TokenType.NUMBER)
         return new LoxNumber(Number(tok?.value))
+    }
+
+    string(): LoxString {
+        const tok = this.expect(TokenType.STRING)
+        return new LoxString(tok?.value as string)
     }
 
     bool(): LoxBool {

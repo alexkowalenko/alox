@@ -7,10 +7,9 @@
 import { Lexer } from '../src/lexer'
 import { LoxError } from '../src/error';
 import { Parser } from '../src/parser';
-import { Printer } from '../src/printer';
-import { Evaluator, LOXValue } from '../src/evaluator';
+import { Evaluator, LoxValue } from '../src/evaluator';
 
-type TestCases = [string, LOXValue, string?]
+type TestCases = [string, LoxValue, string?]
 
 function do_tests(tests: TestCases[]) {
     for (const test of tests) {
