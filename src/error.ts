@@ -25,3 +25,9 @@ export class ParseError extends LoxError {
         super(message, loc, "Parse error")
     }
 }
+
+export class RuntimeError extends LoxError {
+    constructor(public readonly message: string, public readonly loc: Location) {
+        super(message, loc, "Run time exception")
+    }
+}

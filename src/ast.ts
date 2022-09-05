@@ -4,9 +4,11 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { TokenType } from "./token"
+import { Location, TokenType } from "./token"
 
 abstract class LoxBase {
+    constructor(public readonly location: Location) { };
+
     abstract accept<T>(visitor: AstVisitor<T>): T
 }
 
@@ -14,7 +16,9 @@ export type LoxExpr = LoxLiteral | LoxUnary | LoxBinary | LoxGroup;
 export type LoxLiteral = LoxNumber | LoxString | LoxBool | LoxNil;
 
 export class LoxUnary extends LoxBase {
-    constructor(readonly prefix: TokenType, readonly expr: LoxExpr) { super(); }
+    constructor(location: Location, readonly prefix: TokenType, readonly expr: LoxExpr) {
+        super(location);
+    }
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitUnary(this)
@@ -26,7 +30,9 @@ export class LoxUnary extends LoxBase {
 }
 
 export class LoxBinary extends LoxBase {
-    constructor(readonly operator: TokenType, readonly left: LoxExpr, readonly right: LoxExpr) { super(); }
+    constructor(location: Location, readonly operator: TokenType, readonly left: LoxExpr, readonly right: LoxExpr) {
+        super(location);
+    }
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitBinary(this)
@@ -38,7 +44,9 @@ export class LoxBinary extends LoxBase {
 }
 
 export class LoxGroup extends LoxBase {
-    constructor(readonly expr: LoxExpr) { super(); }
+    constructor(location: Location, readonly expr: LoxExpr) {
+        super(location);
+    }
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitGroup(this)
@@ -50,7 +58,9 @@ export class LoxGroup extends LoxBase {
 }
 export class LoxNumber extends LoxBase {
 
-    constructor(readonly value: number) { super(); }
+    constructor(location: Location, readonly value: number) {
+        super(location);
+    }
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitNumber(this)
@@ -63,7 +73,9 @@ export class LoxNumber extends LoxBase {
 
 export class LoxString extends LoxBase {
 
-    constructor(readonly value: string) { super(); }
+    constructor(location: Location, readonly value: string) {
+        super(location);
+    }
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitString(this)
@@ -76,7 +88,9 @@ export class LoxString extends LoxBase {
 
 
 export class LoxBool extends LoxBase {
-    constructor(readonly value: boolean) { super(); }
+    constructor(location: Location, readonly value: boolean) {
+        super(location);
+    }
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitBool(this)
@@ -88,6 +102,10 @@ export class LoxBool extends LoxBase {
 }
 
 export class LoxNil extends LoxBase {
+    constructor(location: Location) {
+        super(location)
+    }
+
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitNil(this)
     }

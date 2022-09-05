@@ -59,4 +59,25 @@ describe('Evaluator', () => {
         ]
         do_tests(tests)
     })
+
+    it('unary', () => {
+        const tests: TestCases[] = [
+            ["!true", false],
+            ["!false", true],
+            ["!!true", true],
+            ["!!!true", false],
+            ["!(false)", true],
+
+            ["-1", -1],
+            ["--1", 1],
+            ["---1", -1],
+            ["----1", 1],
+            ["-(1)", -1],
+
+            // Error
+            ["!1", null, "value must be a boolean"],
+            [`-"hello"`, null, "value must be a number"],
+        ]
+        do_tests(tests)
+    })
 })

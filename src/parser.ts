@@ -82,35 +82,37 @@ export class Parser {
 
     unary(): LoxUnary {
         // console.log('unary')
-        const tok = this.lexer.get_token().tok;
+        const token = this.lexer.get_token();
+        const tok = token.tok;
         const expr = this.expr(Precedence.LOWEST)
-        return new LoxUnary(tok, expr)
+        return new LoxUnary(token.loc, tok, expr)
     }
 
     binary(left: LoxExpr): LoxBinary {
-        const operator = this.lexer.get_token().tok;
+        const token = this.lexer.get_token();
+        const operator = token.tok;
         const precedence = get_precedence(operator);
         const right = this.expr(precedence);
-        return new LoxBinary(operator, left, right)
+        return new LoxBinary(token.loc, operator, left, right)
     }
 
     group(): LoxGroup {
         // console.log(`parseGroup`)
-        this.lexer.get_token() // '('
+        const token = this.lexer.get_token() // '('
         const expr = this.expr(Precedence.LOWEST)
-        const group = new LoxGroup(expr)
+        const group = new LoxGroup(token.loc, expr)
         this.expect(TokenType.R_PAREN) // ')'
         return group
     }
 
     number(): LoxNumber {
         const tok = this.expect(TokenType.NUMBER)
-        return new LoxNumber(Number(tok?.value))
+        return new LoxNumber(tok.loc, Number(tok?.value))
     }
 
     string(): LoxString {
         const tok = this.expect(TokenType.STRING)
-        return new LoxString(tok?.value as string)
+        return new LoxString(tok.loc, tok?.value as string)
     }
 
     bool(): LoxBool {
@@ -119,12 +121,12 @@ export class Parser {
         if (tok.tok === TokenType.TRUE) {
             bool = true;
         }
-        return new LoxBool(bool)
+        return new LoxBool(tok.loc, bool)
     }
 
     nil(): LoxNil {
         const tok = this.expect(TokenType.NIL)
-        return new LoxNil()
+        return new LoxNil(tok.loc)
     }
 
     private expect(t: TokenType): Token {
