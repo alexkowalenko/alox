@@ -12,6 +12,7 @@ import { LoxError } from './src/error';
 
 import { Lexer } from './src/lexer'
 import { Parser } from './src/parser'
+import { Evaluator } from './src/evaluator'
 import { Printer } from './src/printer';
 
 (function run() {
@@ -37,11 +38,14 @@ import { Printer } from './src/printer';
     rl.on('line', (line: string) => {
         const lexer = new Lexer(line);
         const parser = new Parser(lexer);
+        const evaluator = new Evaluator()
 
         try {
             const expr = parser.parse()
             const printer: Printer = new Printer();
             console.log(printer.print(expr))
+            const val = evaluator.eval(expr)
+            console.log(`: ${val}`)
         }
         catch (e) {
             if (e instanceof LoxError) {
