@@ -76,37 +76,3 @@ export class Token {
     }
 }
 
-export const enum Precedence {
-    LOWEST = 0,
-    OR,
-    AND,
-    COMPARATIVE,
-    CONCAT,
-    SUM,
-    PRODUCT,
-    UNARY,
-    EXPONENT
-}
-
-const precedence_map: Map<TokenType, Precedence> = new Map<TokenType, Precedence>([
-    [TokenType.OR, Precedence.OR],
-    [TokenType.AND, Precedence.AND],
-    [TokenType.EQUAL_EQUAL, Precedence.COMPARATIVE],
-    [TokenType.BANG_EQUAL, Precedence.COMPARATIVE],
-    [TokenType.LESS, Precedence.COMPARATIVE],
-    [TokenType.LESS_EQUAL, Precedence.COMPARATIVE],
-    [TokenType.GREATER, Precedence.COMPARATIVE],
-    [TokenType.GREATER_EQUAL, Precedence.COMPARATIVE],
-    [TokenType.PLUS, Precedence.CONCAT],
-    [TokenType.MINUS, Precedence.SUM],
-    [TokenType.SLASH, Precedence.PRODUCT],
-    [TokenType.ASTÉRIX, Precedence.PRODUCT],
-    [TokenType.BANG, Precedence.UNARY],
-])
-
-export function get_precedence(t: TokenType): Precedence {
-    if (precedence_map.has(t)) {
-        return precedence_map.get(t) as Precedence
-    }
-    return Precedence.LOWEST
-}

@@ -33,7 +33,7 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitString(expr: LoxString): string {
-        return '"' + expr.value + '"'
+        return expr.toString()
     }
 
     visitBool(expr: LoxBool): string {
@@ -41,6 +41,6 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitNil(expr: LoxNil): string {
-        return expr.toString()
+        return "nil"
     }
 }

@@ -8,7 +8,16 @@ import { Location } from './token'
 
 export class LineReader {
 
-    constructor(private readonly buffer: string) { }
+    constructor(private buffer: string = "") {
+        this.set_buffer(buffer)
+    }
+
+    public set_buffer(buffer: string) {
+        this.buffer = buffer;
+        this.index = 0;
+        this.char_no = 1;
+        this.line_no = 1;
+    }
 
     private index: number = 0;
     private char_no: number = 1;

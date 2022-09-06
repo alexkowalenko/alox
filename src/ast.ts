@@ -82,7 +82,7 @@ export class LoxString extends LoxBase {
     }
 
     toString(): string {
-        return this.value
+        return '"' + this.value + '"'
     }
 }
 

@@ -12,13 +12,12 @@ import { Printer } from '../src/printer';
 type TestCases = [string, string, string?]
 
 function do_tests(tests: TestCases[]) {
+    const lexer = new Lexer();
+    const parser = new Parser(lexer);
     for (const test of tests) {
         //console.log(`token test: ${test[0]}  ${test[1]}`)
         try {
-            const lexer = new Lexer(test[0]);
-            const parser = new Parser(lexer);
-
-            const expr = parser.parse()
+            const expr = parser.parse(test[0])
             const printer: Printer = new Printer();
             expect(printer.print(expr)).toBe(test[1])
         }

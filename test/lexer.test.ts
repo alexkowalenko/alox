@@ -11,10 +11,11 @@ import { TokenType } from '../src/token'
 type TestCases = [string, TokenType, string?]
 
 function do_tests(tests: TestCases[]) {
+    const lexer = new Lexer();
     for (const test of tests) {
         //console.log(`token test: ${test[0]}  ${test[1]}`)
         try {
-            const lexer = new Lexer(test[0]);
+            lexer.set_line(test[0])
             const token = lexer.get_token();
             const tok = token.tok;
             //console.log(`token tok: ${tok}  ${test[1]}`)
@@ -132,19 +133,22 @@ describe('Lexer', () => {
 
 describe("Lexer 2", () => {
     it('read and stop', () => {
-        const lexer = new Lexer("1");
+        const lexer = new Lexer();
+        lexer.set_line("1")
         expect(lexer.get_token().value).toBe("1")
         expect(lexer.get_token().tok).toBe(TokenType.EOF)
     })
 
     it('read and stop 2', () => {
-        const lexer = new Lexer("x");
+        const lexer = new Lexer()
+        lexer.set_line("x")
         expect(lexer.get_token().value).toBe("x")
         expect(lexer.peek_token().tok).toBe(TokenType.EOF)
     })
 
     it('read and stop 3', () => {
-        const lexer = new Lexer("<=+");
+        const lexer = new Lexer();
+        lexer.set_line("<=+")
         expect(lexer.get_token().tok).toBe(TokenType.LESS_EQUAL)
         expect(lexer.peek_token().tok).toBe(TokenType.PLUS)
     })

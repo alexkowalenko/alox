@@ -49,12 +49,17 @@ const alphanumeric = /[\p{L}\p{N}\p{Emoji}]/u
 
 export class Lexer {
 
-    constructor(buffer: string) {
-        this.line = new LineReader(buffer)
+    constructor() {
+        this.line = new LineReader();
     }
 
-    private readonly line: LineReader
+    private line: LineReader;
     private spare_token: Token | undefined;
+
+    public set_line(line: string) {
+        this.line = new LineReader(line)
+        this.spare_token = undefined;
+    }
 
     private get_identifier(c: string): Token {
         let buffer = c;
