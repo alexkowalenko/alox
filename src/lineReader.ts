@@ -40,7 +40,7 @@ export class LineReader {
 
     public get_char_filter(): string {
         do {
-            const char = this.get_char();
+            let char = this.get_char();
             // console.log(`get_char filter: "${char}"`)
             if (char === "") { // empty character must be returned first
                 return char;
@@ -52,6 +52,13 @@ export class LineReader {
                 this.line_no++;
                 this.char_no = 1;
                 continue;
+            }
+            if (char === '/' && this.peek_char() == '/') {
+                // comments
+                do {
+                    char = this.get_char();
+                } while (char !== '\n')
+                continue
             }
             return char
         } while (true)

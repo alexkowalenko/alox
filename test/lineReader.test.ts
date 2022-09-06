@@ -73,4 +73,11 @@ describe('LineReader', () => {
         expect(line.peek_char()).toBe("");
     });
 
+    it('comments', () => {
+        let line = new LineReader("// hello \n1"); //
+        expect(line.get_char_filter()).toBe("1");
+        expect(line.peek_char()).toBe("");
+    });
+
+
 });

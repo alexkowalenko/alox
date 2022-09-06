@@ -134,4 +134,11 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('comments', () => {
+        const tests: TestCases[] = [
+            ["print 2;// hello\nprint 1;", "print 2;print 1;"],
+        ]
+        do_tests(tests)
+    })
 })

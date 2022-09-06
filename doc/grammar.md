@@ -10,6 +10,8 @@ ALPHA       -> <Unicode Letter Char> | <Emoji Character> | '_' ;
 DIGIT       -> '0' ... '9' ;
 ```
 
+Comments are introduced with `//` and continue to the end of the line.
+
 ## Grammar
 
 This is the grammar which is implemented:
