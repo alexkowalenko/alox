@@ -9,8 +9,13 @@ import { Lexer } from "./lexer";
 import { Parser } from "./parser";
 import { Printer } from "./printer";
 
+export class Options {
+    constructor() { };
+    public silent = false;
+}
+
 export class Interpreter {
-    constructor() {
+    constructor(private readonly options: Options) {
         this.lexer = new Lexer();
         this.parser = new Parser(this.lexer);
         this.evaluator = new Evaluator()
@@ -22,7 +27,9 @@ export class Interpreter {
     do(line: string): LoxValue {
         const expr = this.parser.parse(line)
         const printer: Printer = new Printer(true);
-        console.log(printer.print(expr))
+        if (!this.options.silent) {
+            console.log(printer.print(expr))
+        }
         const val = this.evaluator.eval(expr)
         return val;
     }

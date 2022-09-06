@@ -1,3 +1,8 @@
+Some of the `.lox` text files in the `xtest` directory are from [_Crafting Interpreters_](https://github.com/munificent/craftinginterpreters) by Robert Nystrom.
+These files are are covered by the MIT License in his repository.
+
+The of the files in this repository are covered by the following license.
+
 MIT License
 
 Copyright (c) 2022 Alex Kowalenko
