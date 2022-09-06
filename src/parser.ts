@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxBinary, LoxBool, LoxExpr, LoxGroup, LoxNil, LoxNumber, LoxString, LoxUnary } from "./ast";
+import { LoxBinary, LoxBool, LoxExpr, LoxGroup, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType } from "./token";
 import { ParseError } from "./error";
@@ -82,9 +82,40 @@ export function get_precedence(t: TokenType): Precedence {
 export class Parser {
     constructor(private readonly lexer: Lexer) { }
 
-    public parse(line: string): LoxExpr {
+    public parse(line: string): LoxProgram {
         this.lexer.set_line(line)
-        return this.expr(Precedence.LOWEST)
+        return this.program()
+    }
+
+    private program(): LoxProgram {
+        let prog = new LoxProgram();
+        do {
+            let statement = this.statement();
+            if (statement === null) {
+                break
+            }
+            this.expect(TokenType.SEMICOLON)
+            prog.statements.push(statement);
+        } while (true)
+        return prog
+    }
+
+    private statement(): LoxStatement | null {
+        let tok = this.lexer.peek_token();
+        switch (tok.tok) {
+            case TokenType.PRINT:
+                return this.print();
+            case TokenType.EOF:
+                return null;
+            default:
+                return this.expr()
+        }
+    }
+
+    private print(): LoxPrint {
+        let tok = this.lexer.get_token();
+        let expr = this.expr();
+        return new LoxPrint(tok.loc, expr);
     }
 
     /**
@@ -93,7 +124,7 @@ export class Parser {
      * @param precedence Prat level
      * @returns 
      */
-    private expr(precedence: Precedence): LoxExpr {
+    private expr(precedence: Precedence = Precedence.LOWEST): LoxExpr {
         // console.log('expr')
 
         // check prefix operator

@@ -14,6 +14,6 @@ ALOX - A Lox implementation in Typescript. Following the book [_Crafting Interpr
 
 - [x] Interpreter - Chapter 7: Evaluating Expressions.
 
-- [ ] Assignment, Program structure - Chapter 8: State and Statements
+- [x] Assignment, Program structure - Chapter 8: State and Statements
 
 - [ ] Test Structure for running test programs.

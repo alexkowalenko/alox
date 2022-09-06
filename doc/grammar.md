@@ -2,8 +2,8 @@
 
 ## Lexical Items
 
-```BNF
-NUMBER      -> DIGIT+ ('.' DIGIT*) ;
+```EBNF
+NUMBER      -> DIGIT+ ('.' DIGIT*)? ;
 STRING      -> '"' <any character except "> '"' ;
 IDENTIFIER  -> ALPHA (ALPHA | <Unicode Digit Char>)* ;
 ALPHA       -> <Unicode Letter Char> | <Emoji Character> | '_' ;
@@ -14,7 +14,15 @@ DIGIT       -> '0' ... '9' ;
 
 This is the grammar which is implemented:
 
-```BNF
+```EBNF
+program        → statement* EOF ;
+
+statement      → exprStmt
+               | printStmt ;
+
+exprStmt       → expression ";" ;
+printStmt      → "print" expression ";" ;
+
 expression     -> literal | unary | binary | grouping ;
 unary          -> ("-" | "!") expression;
 binary         -> expression operator expression ;

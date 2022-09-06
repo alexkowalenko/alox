@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint } from "./ast";
 import { RuntimeError } from "./error";
 import { Location, TokenType } from "./token";
 
@@ -39,6 +39,24 @@ export class Evaluator extends AstVisitor<LoxValue> {
             throw new RuntimeError("value must be a boolean", where)
         }
         return v as boolean
+    }
+
+    visitProgram(prog: LoxProgram): LoxValue {
+        let val = null
+        for (const stat of prog.statements) {
+            val = stat.accept(this)
+        }
+        return val
+    }
+
+    visitPrint(p: LoxPrint): LoxValue {
+        let val = p.expr.accept(this)
+        if (val === null) {
+            console.log("nil")
+        } else {
+            console.log(val)
+        }
+        return val
     }
 
     visitUnary(e: LoxUnary): LoxValue {

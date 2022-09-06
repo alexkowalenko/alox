@@ -12,6 +12,43 @@ abstract class LoxBase {
     abstract accept<T>(visitor: AstVisitor<T>): T
 }
 
+export class LoxProgram extends LoxBase {
+    constructor() {
+        super(new Location(0, 0));
+        this.statements = new Array<LoxStatement>
+    }
+
+    public statements: Array<LoxStatement>;
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitProgram(this)
+    }
+
+    toString(): string {
+        let result = "";
+        for (let stat of this.statements) {
+            result += stat.toString() + ';';
+        }
+        return result;
+    }
+}
+
+export type LoxStatement = LoxExpr | LoxPrint;
+
+export class LoxPrint extends LoxBase {
+    constructor(location: Location, readonly expr: LoxExpr) {
+        super(location);
+    }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitPrint(this)
+    }
+
+    toString(): string {
+        return "print " + this.expr.toString();
+    }
+}
+
 export type LoxExpr = LoxLiteral | LoxUnary | LoxBinary | LoxGroup;
 export type LoxLiteral = LoxNumber | LoxString | LoxBool | LoxNil;
 
@@ -122,6 +159,13 @@ export class LoxNil extends LoxBase {
  * as this leads to a infinite call back and forth between the visitor and the AST.
  */
 export abstract class AstVisitor<T> {
+
+    abstract visitProgram(prog: LoxProgram): T // Decide what to do here in derived classes
+
+    visitPrint(expr: LoxPrint): T {
+        return expr.expr.accept<T>(this)
+    }
+
     visitExpr(expr: LoxExpr): T {
         return expr.accept<T>(this)
     }
@@ -131,7 +175,7 @@ export abstract class AstVisitor<T> {
     }
 
     visitBinary(e: LoxBinary): T {
-        return e.left.accept<T>(this)
+        e.left.accept<T>(this)
         return e.right.accept<T>(this)
     }
 

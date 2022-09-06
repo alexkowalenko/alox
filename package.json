@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "interp": "ts-node interp.ts",
-    "test": "jest"
+    "test": "jest --config jest-config.json"
   },
   "author": "Alex",
   "license": "",

@@ -21,7 +21,7 @@ export class Interpreter {
 
     do(line: string): LoxValue {
         const expr = this.parser.parse(line)
-        const printer: Printer = new Printer();
+        const printer: Printer = new Printer(true);
         console.log(printer.print(expr))
         const val = this.evaluator.eval(expr)
         return val;

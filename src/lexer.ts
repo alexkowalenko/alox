@@ -20,6 +20,7 @@ const single_chars: Map<string, TokenType> = new Map([
     ['/', TokenType.SLASH],
     ['*', TokenType.ASTÉRIX],
     [':', TokenType.COLON],
+    [';', TokenType.SEMICOLON],
 ])
 
 const reserved_words: Map<string, TokenType> = new Map([

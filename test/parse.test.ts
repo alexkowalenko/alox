@@ -19,6 +19,7 @@ function do_tests(tests: TestCases[]) {
         try {
             const expr = parser.parse(test[0])
             const printer: Printer = new Printer();
+            //console.log(printer.print(expr))
             expect(printer.print(expr)).toBe(test[1])
         }
         catch (e) {
@@ -34,21 +35,21 @@ function do_tests(tests: TestCases[]) {
 describe('Parser', () => {
     it('numbers', () => {
         const tests: TestCases[] = [
-            ["1", "1"],
-            ["1.1", "1.1"],
+            ["1;", "1;"],
+            ["1.1;", "1.1;"],
 
             // Error
-            ["x", "x", "unexpected ident<x>"],
+            ["x;", "x;", "unexpected ident<x>"],
         ]
         do_tests(tests)
     })
 
     it('strings', () => {
         const tests: TestCases[] = [
-            ['"1"', '"1"'],
-            ['"Astérix"', '"Astérix"'],
-            ['"👾🍎🇵🇹🍊🍌😀🏖🏄🏻‍♂️🍉🍷"', '"👾🍎🇵🇹🍊🍌😀🏖🏄🏻‍♂️🍉🍷"'],
-            ['""', '""'],
+            ['"1";', '"1";'],
+            ['"Astérix";', '"Astérix";'],
+            ['"👾🍎🇵🇹🍊🍌😀🏖🏄🏻‍♂️🍉🍷";', '"👾🍎🇵🇹🍊🍌😀🏖🏄🏻‍♂️🍉🍷";'],
+            ['"";', '"";'],
 
             // Error
             ['"x', '', "unterminated string"],
@@ -58,23 +59,23 @@ describe('Parser', () => {
 
     it('bools', () => {
         const tests: TestCases[] = [
-            ["true", "true"],
-            ["false", "false"],
+            ["true;", "true;"],
+            ["false;", "false;"],
         ]
         do_tests(tests)
     })
 
     it('nil', () => {
         const tests: TestCases[] = [
-            ["nil", "nil"],
+            ["nil;", "nil;"],
         ]
         do_tests(tests)
     })
 
     it('brackets', () => {
         const tests: TestCases[] = [
-            ["(nil)", "( nil )"],
-            ["((nil))", "( ( nil ) )"],
+            ["(nil);", "( nil );"],
+            ["((nil));", "( ( nil ) );"],
 
             // Error
             ["(())", "", "unexpected )"],
@@ -85,10 +86,10 @@ describe('Parser', () => {
 
     it('unary', () => {
         const tests: TestCases[] = [
-            ["-1", "-1"],
-            ["! true", "!true"],
-            ["!!false", "!!false"],
-            ["!(!false)", "!( !false )"],
+            ["-1;", "-1;"],
+            ["! true;", "!true;"],
+            ["!!false;", "!!false;"],
+            ["!(!false);", "!( !false );"],
 
             // Error
             ["+1", "", "unexpected +"],
@@ -99,24 +100,37 @@ describe('Parser', () => {
 
     it('binary', () => {
         const tests: TestCases[] = [
-            ["1+2", "(1 + 2)"],
-            ["2 * 3 + 4", "((2 * 3) + 4)"],
-            ["2 + 3 * 4", "(2 + (3 * 4))"],
-            ["2 + 3 * 4 / 5", "(2 + ((3 * 4) / 5))"],
+            ["1+2;", "(1 + 2);"],
+            ["2 * 3 + 4;", "((2 * 3) + 4);"],
+            ["2 + 3 * 4;", "(2 + (3 * 4));"],
+            ["2 + 3 * 4 / 5;", "(2 + ((3 * 4) / 5));"],
 
-            ["1 and 2", "(1 and 2)"],
-            ["1 and 2 or 3", "((1 and 2) or 3)"],
-            ["1 or 2 and 3", "(1 or (2 and 3))"],
-            ["1 and ! 3", "(1 and !3)"],
+            ["1 and 2;", "(1 and 2);"],
+            ["1 and 2 or 3;", "((1 and 2) or 3);"],
+            ["1 or 2 and 3;", "(1 or (2 and 3));"],
+            ["1 and ! 3;", "(1 and !3);"],
 
-            ["1 < 2", "(1 < 2)"],
-            ["1 < 2 <= 3", "((1 < 2) <= 3)"],
-            ["1 > 2 >= 3", "((1 > 2) >= 3)"],
-            ["1 == 2 != 3", "((1 == 2) != 3)"],
+            ["1 < 2;", "(1 < 2);"],
+            ["1 < 2 <= 3;", "((1 < 2) <= 3);"],
+            ["1 > 2 >= 3;", "((1 > 2) >= 3);"],
+            ["1 == 2 != 3;", "((1 == 2) != 3);"],
 
             // Error
             ["2 +", "", "unexpected <eof>"],
             ["* 3", "", "unexpected *"],
+        ]
+        do_tests(tests)
+    })
+
+    it('prog', () => {
+        const tests: TestCases[] = [
+            ["print 2;", "print 2;"],
+            ["print 2;print 1;", "print 2;print 1;"],
+            ["print 2;1;", "print 2;1;"],
+
+            // Error
+            [";", "", "unexpected ;"],
+            ["print ;", "", "unexpected ;"],
         ]
         do_tests(tests)
     })
