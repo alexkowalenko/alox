@@ -12,6 +12,8 @@ ALOX - A Lox implementation in Typescript. Following the book [_Crafting Interpr
 
 - [x] Parser - Expressions - Chapter 6: Parsing Expressions. Implemented using Prat Operator precedence parser (Section 17.6).
 
-- [ ] Interpreter - Chapter 7: Evaluating Expressions.
+- [x] Interpreter - Chapter 7: Evaluating Expressions.
+
+- [ ] Assignment, Program structure - Chapter 8: State and Statements
 
 - [ ] Test Structure for running test programs.

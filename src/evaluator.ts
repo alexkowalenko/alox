@@ -56,9 +56,10 @@ export class Evaluator extends AstVisitor<LoxValue> {
         const left = e.left.accept(this)
         const right = e.right.accept(this)
         switch (e.operator) {
+            // The Four Operators of the Arithmetic.
             case TokenType.PLUS:
                 if (typeof left === "number")
-                    return this.check_number(left, e.left.location) + this.check_number(right, e.right.location)
+                    return left + this.check_number(right, e.right.location)
                 else if (typeof left === "string")
                     return this.check_string(left, e.left.location) + this.check_string(right, e.right.location)
                 else {
@@ -67,6 +68,33 @@ export class Evaluator extends AstVisitor<LoxValue> {
 
             case TokenType.MINUS:
                 return this.check_number(left, e.left.location) - this.check_number(right, e.right.location)
+
+            case TokenType.ASTÉRIX:
+                return this.check_number(left, e.left.location) * this.check_number(right, e.right.location)
+
+            case TokenType.SLASH:
+                return this.check_number(left, e.left.location) / this.check_number(right, e.right.location)
+
+            // Relational
+            case TokenType.LESS:
+                return this.check_number(left, e.left.location) < this.check_number(right, e.right.location)
+            case TokenType.LESS_EQUAL:
+                return this.check_number(left, e.left.location) <= this.check_number(right, e.right.location)
+            case TokenType.GREATER:
+                return this.check_number(left, e.left.location) > this.check_number(right, e.right.location)
+            case TokenType.GREATER_EQUAL:
+                return this.check_number(left, e.left.location) >= this.check_number(right, e.right.location)
+            case TokenType.EQUAL_EQUAL:
+                return left === right // strict non-javascript equals
+            case TokenType.BANG_EQUAL:
+                return left !== right
+
+            // Logical
+            case TokenType.AND:
+                return this.check_boolean(left, e.left.location) && this.check_boolean(right, e.right.location)
+            case TokenType.OR:
+                return this.check_boolean(left, e.left.location) || this.check_boolean(right, e.right.location)
+
         }
         throw new Error(`unhandled binary operator ${e.operator}`)
     }
