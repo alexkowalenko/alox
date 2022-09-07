@@ -136,7 +136,11 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     visitIdentifier(e: LoxIdentifier): LoxValue {
-        throw new Error("Method not implemented.");
+        let val = this.symboltable.get(e.id)
+        if (val == undefined) {
+            throw new RuntimeError(`identifier ${e.id} not found`, e.location);
+        }
+        return val
     }
 
     visitNumber(expr: LoxNumber): LoxValue {

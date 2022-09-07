@@ -65,7 +65,8 @@ export class LoxPrint extends LoxBase {
     }
 }
 
-export type LoxExpr = LoxLiteral | LoxUnary | LoxBinary | LoxGroup;
+export type LoxExpr = LoxPrimary | LoxUnary | LoxBinary | LoxGroup;
+export type LoxPrimary = LoxIdentifier | LoxLiteral;
 export type LoxLiteral = LoxNumber | LoxString | LoxBool | LoxNil;
 
 export class LoxUnary extends LoxBase {

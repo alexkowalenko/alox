@@ -20,7 +20,6 @@ function do_tests(tests: TestCases[]) {
     const evaluator = new Evaluator(symboltable);
 
     for (const test of tests) {
-        // console.log(`token test: ${test[0]}  ${test[1]}`)
         try {
             const expr = parser.parse(test[0])
             const val = evaluator.eval(expr)
@@ -30,6 +29,7 @@ function do_tests(tests: TestCases[]) {
         }
         catch (e) {
             if (e instanceof LoxError) {
+                //console.log(`token test: ${test[0]}  ${test[1]}`)
                 expect(e.message).toBe(test[2])
                 continue
             }
@@ -43,9 +43,6 @@ describe('Evaluator', () => {
         const tests: TestCases[] = [
             ["1;", 1],
             ["1.1;", 1.1],
-
-            // Error
-            ["x", "x", "unexpected ident<x>"],
         ]
         do_tests(tests)
     })
@@ -179,6 +176,22 @@ describe('Evaluator', () => {
 
             // Error
             ["var a = 1; var a = 1;", 1, 'variable a already defined'],
+        ]
+        do_tests(tests)
+    })
+
+    it('identifiers', () => {
+        const tests: TestCases[] = [
+            ["var x = 1;", 1],
+            ["x + 1;", 2],
+            ["var y = 2;", 2],
+            ["x + y * y;", 5],
+            ["var r = 2 + 33;", 35],
+            ['var 🍎 = true;', true],
+            ['(r == 35) and 🍎;', true],
+
+            // Error
+            ["b + 1;", null, 'identifier b not found'],
         ]
         do_tests(tests)
     })

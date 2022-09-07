@@ -159,4 +159,21 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('identifiers', () => {
+        const tests: TestCases[] = [
+            ["x+2;", "(x + 2);"],
+            ["2 * y + 4;", "((2 * y) + 4);"],
+            ["x + y * z;", "(x + (y * z));"],
+
+            ["A and B;", "(A and B);"],
+            ["A and B or C;", "((A and B) or C);"],
+
+            ["🍎 < 🍊;", "(🍎 < 🍊);"],
+
+            // Error
+            ["and +", "", "unexpected and"],
+        ]
+        do_tests(tests)
+    })
 })

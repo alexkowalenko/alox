@@ -12,6 +12,7 @@ import { ParseError } from "./error";
 type PrefixParselet = (p: Parser) => LoxExpr;
 
 const prefix_map: Map<TokenType, PrefixParselet> = new Map([
+    [TokenType.IDENT, (p: Parser) => { return p.identifier() }],
     [TokenType.NUMBER, (p: Parser) => { return p.number() }],
     [TokenType.STRING, (p: Parser) => { return p.string() }],
     [TokenType.TRUE, (p: Parser) => { return p.bool() }],

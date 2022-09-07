@@ -28,11 +28,12 @@ statement      → exprStmt
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
 
-expression     -> literal | unary | binary | grouping ;
+expression     -> primary | unary | binary | grouping ;
 unary          -> ("-" | "!") expression;
 binary         -> expression operator expression ;
 grouping       -> "(" expression ")" ;
 operator       -> "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/" | "or" | "and" ;
+primary        -> IDENTIFIER | literal
 literal        -> NUMBER | STRING | "true" | "false" | "nil" ;
 ```
 
