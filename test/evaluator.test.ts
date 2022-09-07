@@ -9,13 +9,15 @@ import { LoxError } from '../src/error';
 import { Parser } from '../src/parser';
 import { Evaluator, LoxValue } from '../src/evaluator';
 import { Printer } from '../src/printer';
+import { SymbolTable } from '../src/symboltable';
 
 type TestCases = [string, LoxValue, string?]
 
 function do_tests(tests: TestCases[]) {
     const lexer = new Lexer();
     const parser = new Parser(lexer);
-    const evaluator = new Evaluator();
+    const symboltable = new SymbolTable<LoxValue>;
+    const evaluator = new Evaluator(symboltable);
 
     for (const test of tests) {
         // console.log(`token test: ${test[0]}  ${test[1]}`)
@@ -166,5 +168,20 @@ describe('Evaluator', () => {
         ]
         do_tests(tests)
     })
+
+    it('var', () => {
+        const tests: TestCases[] = [
+            ["var x = 1;", 1],
+            ["var z = 1; var y = 2.5;", 2.5],
+            ["var r = 2 + 33;", 35],
+            ['var 🍎 = "apple";', "apple"],
+
+            // Error
+            ["var a = 1; var a = 1;", 1, 'variable a already defined'],
+        ]
+        do_tests(tests)
+    })
+
+
 
 })

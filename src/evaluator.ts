@@ -4,14 +4,16 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar } from "./ast";
 import { RuntimeError } from "./error";
+import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
 
 export type LoxValue = number | string | boolean | null
 
 export class Evaluator extends AstVisitor<LoxValue> {
-    constructor() {
+
+    constructor(private readonly symboltable: SymbolTable<LoxValue>) {
         super()
     }
 
@@ -41,12 +43,28 @@ export class Evaluator extends AstVisitor<LoxValue> {
         return v as boolean
     }
 
+    /**
+     * 
+     * @param prog program to execute
+     * @returns 
+     */
     visitProgram(prog: LoxProgram): LoxValue {
         let val = null
         for (const stat of prog.statements) {
             val = stat.accept(this)
         }
         return val
+    }
+
+    visitVar(v: LoxVar): LoxValue {
+        var val = v.expr.accept(this)
+        console.log(``)
+        if (this.symboltable.get(v.ident.id) === undefined) {
+            // put in symbol table
+            this.symboltable.set(v.ident.id, val);
+            return val;
+        }
+        throw new RuntimeError(`variable ${v.ident.toString()} already defined`, v.location)
     }
 
     visitPrint(p: LoxPrint): LoxValue {
@@ -67,7 +85,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
             case TokenType.BANG:
                 return !this.check_boolean(val, e.location)
         }
-        throw new Error(`unhandled unary operator ${e.prefix}`)
+        throw new RuntimeError(`unhandled unary operator ${e.prefix}`, e.location)
     }
 
     visitBinary(e: LoxBinary): LoxValue {
@@ -114,7 +132,11 @@ export class Evaluator extends AstVisitor<LoxValue> {
                 return this.check_boolean(left, e.left.location) || this.check_boolean(right, e.right.location)
 
         }
-        throw new Error(`unhandled binary operator ${e.operator}`)
+        throw new RuntimeError(`unhandled binary operator ${e.operator}`, e.location)
+    }
+
+    visitIdentifier(e: LoxIdentifier): LoxValue {
+        throw new Error("Method not implemented.");
     }
 
     visitNumber(expr: LoxNumber): LoxValue {

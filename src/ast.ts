@@ -14,11 +14,11 @@ abstract class LoxBase {
 
 export class LoxProgram extends LoxBase {
     constructor() {
-        super(new Location(0, 0));
-        this.statements = new Array<LoxStatement>
+        super(new Location());
+        this.statements = new Array<LoxDeclaration>
     }
 
-    public statements: Array<LoxStatement>;
+    public statements: Array<LoxDeclaration>;
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitProgram(this)
@@ -30,6 +30,22 @@ export class LoxProgram extends LoxBase {
             result += stat.toString() + ';';
         }
         return result;
+    }
+}
+
+export type LoxDeclaration = LoxVar | LoxStatement;
+
+export class LoxVar extends LoxBase {
+    constructor(location: Location, readonly ident: LoxIdentifier, readonly expr: LoxExpr) {
+        super(location);
+    }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitVar(this)
+    }
+
+    toString(): string {
+        return "var " + this.ident.toString() + " = " + this.expr.toString();
     }
 }
 
@@ -93,6 +109,22 @@ export class LoxGroup extends LoxBase {
         return "( " + this.expr.toString() + " )"
     }
 }
+
+export class LoxIdentifier extends LoxBase {
+
+    constructor(location: Location, readonly id: string) {
+        super(location);
+    }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitIdentifier(this)
+    }
+
+    toString(): string {
+        return this.id
+    }
+}
+
 export class LoxNumber extends LoxBase {
 
     constructor(location: Location, readonly value: number) {
@@ -162,6 +194,11 @@ export abstract class AstVisitor<T> {
 
     abstract visitProgram(prog: LoxProgram): T // Decide what to do here in derived classes
 
+    visitVar(expr: LoxVar): T {
+        expr.ident.accept<T>(this)
+        return expr.expr.accept<T>(this)
+    }
+
     visitPrint(expr: LoxPrint): T {
         return expr.expr.accept<T>(this)
     }
@@ -183,23 +220,14 @@ export abstract class AstVisitor<T> {
         return e.expr.accept<T>(this)
     }
 
+    abstract visitIdentifier(e: LoxIdentifier): T;
+
     visitLiteral(expr: LoxLiteral): T {
         return expr.accept<T>(this)
     }
 
-    visitNumber(expr: LoxNumber): T {
-        return undefined as T;
-    }
-
-    visitString(expr: LoxString): T {
-        return undefined as T;
-    }
-
-    visitBool(expr: LoxBool): T {
-        return undefined as T;
-    }
-
-    visitNil(expr: LoxNil): T {
-        return undefined as T;
-    }
+    abstract visitNumber(expr: LoxNumber): T;
+    abstract visitString(expr: LoxString): T;
+    abstract visitBool(expr: LoxBool): T;
+    abstract visitNil(expr: LoxNil): T;
 }

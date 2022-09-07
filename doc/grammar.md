@@ -17,7 +17,10 @@ Comments are introduced with `//` and continue to the end of the line.
 This is the grammar which is implemented:
 
 ```EBNF
-program        → statement* EOF ;
+program        → declaration* EOF ;
+
+declaration    -> varDecl
+               | statement ;
 
 statement      → exprStmt
                | printStmt ;

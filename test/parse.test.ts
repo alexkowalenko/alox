@@ -141,4 +141,22 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('var', () => {
+        const tests: TestCases[] = [
+            ["var x = 1;", "var x = 1;"],
+            ["var x = 1; var y = 2.5;", "var x = 1;var y = 2.5;"],
+            ["var r = 1.4; var θ = 2.5;", "var r = 1.4;var θ = 2.5;"],
+
+            // 
+            ["var;", "", "unexpected ;"],
+            ["var x;", "", "unexpected ;"],
+            ["var x 1;", "", "unexpected number<1>"],
+            ["var x = ;", "", "unexpected ;"],
+
+            ["var nil = 1;", "", "unexpected nil"],
+            ["var true = 1;", "", "unexpected true"],
+        ]
+        do_tests(tests)
+    })
 })

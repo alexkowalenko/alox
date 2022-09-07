@@ -8,6 +8,7 @@ import { Evaluator, LoxValue } from "./evaluator";
 import { Lexer } from "./lexer";
 import { Parser } from "./parser";
 import { Printer } from "./printer";
+import { SymbolTable } from "./symboltable";
 
 export class Options {
     constructor() { };
@@ -18,11 +19,13 @@ export class Interpreter {
     constructor(private readonly options: Options) {
         this.lexer = new Lexer();
         this.parser = new Parser(this.lexer);
-        this.evaluator = new Evaluator()
+        this.symboltable = new SymbolTable<LoxValue>;
+        this.evaluator = new Evaluator(this.symboltable)
     };
     private lexer: Lexer;
     private parser: Parser;
     private evaluator: Evaluator;
+    private symboltable: SymbolTable<LoxValue>;
 
     do(line: string): LoxValue {
         const expr = this.parser.parse(line)

@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxBinary, LoxBool, LoxExpr, LoxGroup, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary } from "./ast";
+import { LoxBinary, LoxBool, LoxDeclaration, LoxExpr, LoxGroup, LoxIdentifier, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType } from "./token";
 import { ParseError } from "./error";
@@ -90,14 +90,32 @@ export class Parser {
     private program(): LoxProgram {
         let prog = new LoxProgram();
         do {
-            let statement = this.statement();
-            if (statement === null) {
+            let declaration = this.declaration();
+            if (declaration === null) {
                 break
             }
             this.expect(TokenType.SEMICOLON)
-            prog.statements.push(statement);
+            prog.statements.push(declaration);
         } while (true)
         return prog
+    }
+
+    private declaration(): LoxDeclaration | null {
+        let tok = this.lexer.peek_token();
+        switch (tok.tok) {
+            case TokenType.VAR:
+                return this.var();
+            default:
+                return this.statement();
+        }
+    }
+
+    private var(): LoxVar {
+        var tok = this.expect(TokenType.VAR)
+        let id = this.identifier()
+        this.expect(TokenType.EQUAL)
+        let expr = this.expr();
+        return new LoxVar(tok.loc, id, expr)
     }
 
     private statement(): LoxStatement | null {
@@ -174,6 +192,11 @@ export class Parser {
         const group = new LoxGroup(token.loc, expr)
         this.expect(TokenType.R_PAREN) // ')'
         return group
+    }
+
+    identifier(): LoxIdentifier {
+        var tok = this.expect(TokenType.IDENT);
+        return new LoxIdentifier(tok.loc, tok.value as string)
     }
 
     number(): LoxNumber {
