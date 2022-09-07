@@ -47,6 +47,7 @@ export const enum Precedence {
     LOWEST = 0,
     OR,
     AND,
+    EQUALS,
     COMPARATIVE,
     CONCAT,
     SUM,
@@ -58,18 +59,18 @@ export const enum Precedence {
 const precedence_map = new Map<TokenType, Precedence>([
     [TokenType.OR, Precedence.OR],
     [TokenType.AND, Precedence.AND],
-    [TokenType.EQUAL_EQUAL, Precedence.COMPARATIVE],
-    [TokenType.BANG_EQUAL, Precedence.COMPARATIVE],
+    [TokenType.EQUAL_EQUAL, Precedence.EQUALS],
+    [TokenType.BANG_EQUAL, Precedence.EQUALS],
     [TokenType.LESS, Precedence.COMPARATIVE],
     [TokenType.LESS_EQUAL, Precedence.COMPARATIVE],
     [TokenType.GREATER, Precedence.COMPARATIVE],
     [TokenType.GREATER_EQUAL, Precedence.COMPARATIVE],
     [TokenType.PLUS, Precedence.CONCAT],
-    // [TokenType.MINUS, Precedence.SUM],
+    [TokenType.MINUS, Precedence.SUM],
     [TokenType.SLASH, Precedence.PRODUCT],
     [TokenType.ASTÉRIX, Precedence.PRODUCT],
     [TokenType.BANG, Precedence.UNARY],
-    [TokenType.MINUS, Precedence.UNARY],
+    //[TokenType.MINUS, Precedence.UNARY],
 ])
 
 export function get_precedence(t: TokenType): Precedence {

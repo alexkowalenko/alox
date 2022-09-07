@@ -112,6 +112,7 @@ describe('Evaluator', () => {
             ["1 + 2 * 3;", 7],
             ["1 * 2 + 3;", 5],
             ["33/3;", 11],
+            ["2 - 6 / 3;", 0],
 
             // Error
             ["1 * true;", null, "value must be a number"],
