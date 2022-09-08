@@ -196,6 +196,22 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
+    it('assignment', () => {
+        const tests: TestCases[] = [
+            ["var x = 1;", 1],
+            ["x + 1;", 2],
+            ["x = 27;", 27],
+            ["x + 1;", 28],
+            ["var y = 2;", 2],
+            ["x = x + y;", 29],
+
+            // Error
+            ["b = 1;", null, 'undefined variable b'],
+            ["x + 1 = 1;", null, "can't assign to (x + 1)"],
+        ]
+        do_tests(tests)
+    })
+
 
 
 })

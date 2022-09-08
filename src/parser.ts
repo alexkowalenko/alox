@@ -41,11 +41,13 @@ const infix_map: Map<TokenType, InfixParselet> = new Map([
     [TokenType.GREATER, call_binary],
     [TokenType.GREATER_EQUAL, call_binary],
     [TokenType.AND, call_binary],
-    [TokenType.OR, call_binary]
+    [TokenType.OR, call_binary],
+    [TokenType.EQUAL, call_binary],
 ])
 
 export const enum Precedence {
     LOWEST = 0,
+    ASSIGNMENT,
     OR,
     AND,
     EQUALS,
@@ -54,7 +56,7 @@ export const enum Precedence {
     SUM,
     PRODUCT,
     UNARY,
-    EXPONENT
+    EXPONENT,
 }
 
 const precedence_map = new Map<TokenType, Precedence>([
@@ -72,11 +74,12 @@ const precedence_map = new Map<TokenType, Precedence>([
     [TokenType.ASTÉRIX, Precedence.PRODUCT],
     [TokenType.BANG, Precedence.UNARY],
     //[TokenType.MINUS, Precedence.UNARY],
+    [TokenType.EQUAL, Precedence.ASSIGNMENT]
 ])
 
 export function get_precedence(t: TokenType): Precedence {
     if (precedence_map.has(t)) {
-        return precedence_map.get(t) as Precedence
+        return precedence_map.get(t)!
     }
     return Precedence.LOWEST
 }
@@ -154,7 +157,7 @@ export class Parser {
             throw new ParseError(`unexpected ${tok}`, tok.loc)
         }
         //Parse the left hand expression
-        let left = (prefix_map.get(tok.tok) as PrefixParselet)(this)
+        let left = (prefix_map.get(tok.tok)!)(this)
 
         // check infix
         tok = this.lexer.peek_token();
@@ -165,7 +168,7 @@ export class Parser {
             if (!infix_map.has(tok.tok)) {
                 throw new ParseError(`unexpected ${tok} in expression`, tok.loc)
             }
-            left = (infix_map.get(tok.tok) as InfixParselet)(this, left)
+            left = (infix_map.get(tok.tok)!)(this, left)
             tok = this.lexer.peek_token();
         }
         return left
@@ -198,7 +201,7 @@ export class Parser {
 
     identifier(): LoxIdentifier {
         var tok = this.expect(TokenType.IDENT);
-        return new LoxIdentifier(tok.loc, tok.value as string)
+        return new LoxIdentifier(tok.loc, tok.value!)
     }
 
     number(): LoxNumber {
@@ -208,7 +211,7 @@ export class Parser {
 
     string(): LoxString {
         const tok = this.expect(TokenType.STRING)
-        return new LoxString(tok.loc, tok?.value as string)
+        return new LoxString(tok.loc, tok?.value!)
     }
 
     bool(): LoxBool {

@@ -176,4 +176,17 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('assignment', () => {
+        const tests: TestCases[] = [
+            ["x = 1;", "(x = 1);"],
+            ["x = 1 + 4;", "(x = (1 + 4));"],
+            ["x = 1 == 4;", "(x = (1 == 4));"],
+
+            // Error
+            ["x = ", "", "unexpected <eof>"],
+            ["= 2 + 3", "", "unexpected ="],
+        ]
+        do_tests(tests)
+    })
 })

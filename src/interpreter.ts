@@ -13,6 +13,7 @@ import { SymbolTable } from "./symboltable";
 export class Options {
     constructor() { };
     public silent = false;
+    public parseOnly = false;
 }
 
 export class Interpreter {
@@ -32,6 +33,9 @@ export class Interpreter {
         const printer: Printer = new Printer(true);
         if (!this.options.silent) {
             console.log(printer.print(expr))
+        }
+        if (this.options.parseOnly) {
+            return null;
         }
         const val = this.evaluator.eval(expr)
         return val;

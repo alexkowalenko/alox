@@ -96,12 +96,14 @@ function do_file(file: string, opts: Options) {
 
     program.option('-s, --silent', 'turn off extra output')
     program.option('-f, --file <file>', 'execute <file>')
+    program.option('-p, --parseonly', 'only parse the script')
 
     program.parse(process.argv);
 
     const options = program.opts();
     let opts = new Options();
     opts.silent = options.silent;
+    opts.parseOnly = options.parseonly;
     if (!options.silent) {
         console.log("ALOX 👾 interpreter")
     }

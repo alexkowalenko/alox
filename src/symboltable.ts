@@ -15,7 +15,11 @@ export class SymbolTable<T> {
         this.table.set(name, value);
     }
 
-    get(name: string) {
+    get(name: string): T | undefined {
         return this.table.get(name)
+    }
+
+    has(name: string): boolean {
+        return this.table.has(name)
     }
 }

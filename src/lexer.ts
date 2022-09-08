@@ -69,7 +69,7 @@ export class Lexer {
             buffer += this.line.get_char()
         }
         if (reserved_words.has(buffer)) {
-            return new Token(reserved_words.get(buffer) as TokenType, start)
+            return new Token(reserved_words.get(buffer)!, start)
         }
         return new Token(TokenType.IDENT, start, buffer);
     }
@@ -96,7 +96,7 @@ export class Lexer {
         const start = this.line.get_location();
         let peek = this.line.peek_char();
         let seen_dot = false;
-        while (this.is_numeric(peek as string) || peek === '.') {
+        while (this.is_numeric(peek) || peek === '.') {
             if (peek === '.') {
                 if (seen_dot) {
                     break
@@ -125,7 +125,7 @@ export class Lexer {
         }
 
         if (single_chars.has(char)) {
-            return this.mk_token(single_chars.get(char) as TokenType)
+            return this.mk_token(single_chars.get(char)!)
         }
         const next = this.line.peek_char();
         switch (char) {

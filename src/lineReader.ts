@@ -51,13 +51,13 @@ export class LineReader {
             if ('\n' === char) {
                 this.line_no++;
                 this.char_no = 1;
-                continue;
+                continue
             }
             if (char === '/' && this.peek_char() == '/') {
                 // comments
                 do {
                     char = this.get_char();
-                } while (char !== '\n')
+                } while (char !== '\n' && char != "")
                 continue
             }
             return char

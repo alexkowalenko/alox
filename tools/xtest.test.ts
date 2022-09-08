@@ -43,7 +43,7 @@ for (const name of find_files(base_dir, ".lox")) {
             if (matcher) {
                 let ex = matcher?.groups?.expect
                 // console.log(`expect: ${ex}`)
-                expectedOutput.push(ex as string)
+                expectedOutput.push(ex!)
             }
         }
 

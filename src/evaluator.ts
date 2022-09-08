@@ -26,21 +26,21 @@ export class Evaluator extends AstVisitor<LoxValue> {
         if (typeof v != "number") {
             throw new RuntimeError("value must be a number", where)
         }
-        return v as number
+        return v
     }
 
     private check_string(v: LoxValue, where: Location): string {
         if (typeof v != "string") {
             throw new RuntimeError("value must be a string", where)
         }
-        return v as string
+        return v
     }
 
     private check_boolean(v: LoxValue, where: Location): boolean {
         if (typeof v != "boolean") {
             throw new RuntimeError("value must be a boolean", where)
         }
-        return v as boolean
+        return v
     }
 
     /**
@@ -59,12 +59,27 @@ export class Evaluator extends AstVisitor<LoxValue> {
     visitVar(v: LoxVar): LoxValue {
         var val = v.expr.accept(this)
         console.log(``)
-        if (this.symboltable.get(v.ident.id) === undefined) {
+        if (!this.symboltable.has(v.ident.id)) {
             // put in symbol table
             this.symboltable.set(v.ident.id, val);
             return val;
         }
         throw new RuntimeError(`variable ${v.ident.toString()} already defined`, v.location)
+    }
+
+    assignment(left: LoxExpr, right: LoxExpr): LoxValue {
+
+        // check if left hand expression is a lvalue - assignable
+        if (!(left instanceof LoxIdentifier)) {
+            throw new RuntimeError(`can't assign to ${left.toString()}`, left.location)
+        }
+        let var_name = left.id;
+        let val = right.accept(this);
+        if (this.symboltable.has(var_name)) {
+            this.symboltable.set(var_name, val)
+            return val
+        }
+        throw new RuntimeError(`undefined variable ${left.toString()}`, left.location)
     }
 
     visitPrint(p: LoxPrint): LoxValue {
@@ -89,6 +104,12 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     visitBinary(e: LoxBinary): LoxValue {
+
+        // check if it is assignment before evaluation
+        if (e.operator == TokenType.EQUAL) {
+            return this.assignment(e.left, e.right)
+        }
+
         const left = e.left.accept(this)
         const right = e.right.accept(this)
         switch (e.operator) {
