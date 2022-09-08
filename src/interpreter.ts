@@ -30,7 +30,7 @@ export class Interpreter {
 
     do(line: string): LoxValue {
         const expr = this.parser.parse(line)
-        const printer: Printer = new Printer(true);
+        const printer: Printer = new Printer("\n", 4);
         if (!this.options.silent) {
             console.log(printer.print(expr))
         }

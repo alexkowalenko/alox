@@ -49,7 +49,7 @@ export class LoxVar extends LoxBase {
     }
 }
 
-export type LoxStatement = LoxExpr | LoxPrint;
+export type LoxStatement = LoxExpr | LoxPrint | LoxBlock;
 
 export class LoxPrint extends LoxBase {
     constructor(location: Location, readonly expr: LoxExpr) {
@@ -62,6 +62,27 @@ export class LoxPrint extends LoxBase {
 
     toString(): string {
         return "print " + this.expr.toString();
+    }
+}
+
+export class LoxBlock extends LoxBase {
+    constructor(location: Location) {
+        super(location);
+        this.statements = new Array<LoxDeclaration>
+    }
+
+    public statements: Array<LoxDeclaration>;
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitBlock(this)
+    }
+
+    toString(): string {
+        let result = "{\n";
+        for (const stat of this.statements) {
+            result = "    " + stat.toString() + '\n';
+        }
+        return result + '}\n'
     }
 }
 
@@ -203,6 +224,8 @@ export abstract class AstVisitor<T> {
     visitPrint(expr: LoxPrint): T {
         return expr.expr.accept<T>(this)
     }
+
+    abstract visitBlock(expr: LoxBlock): T;
 
     visitExpr(expr: LoxExpr): T {
         return expr.accept<T>(this)

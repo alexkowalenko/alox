@@ -12,6 +12,6 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
 - [ ] Assignment, Program structure - Chapter 8: State and Statements
   - [x] Program structure, print.
   - [x] Variables, environment, assignment.
-  - [ ] Blocks (§8.5 Scope)
+  - [x] Blocks (§8.5 Scope)
 - [x] Test Structure for running test programs.
 - [ ] Control flow - Chapter 9.

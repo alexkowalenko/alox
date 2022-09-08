@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxBinary, LoxBool, LoxDeclaration, LoxExpr, LoxGroup, LoxIdentifier, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar } from "./ast";
+import { LoxBinary, LoxBlock, LoxBool, LoxDeclaration, LoxExpr, LoxGroup, LoxIdentifier, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType } from "./token";
 import { ParseError } from "./error";
@@ -99,7 +99,6 @@ export class Parser {
             if (declaration === null) {
                 break
             }
-            this.expect(TokenType.SEMICOLON)
             prog.statements.push(declaration);
         } while (true)
         return prog
@@ -120,6 +119,7 @@ export class Parser {
         let id = this.identifier()
         this.expect(TokenType.EQUAL)
         let expr = this.expr();
+        this.expect(TokenType.SEMICOLON);
         return new LoxVar(tok.loc, id, expr)
     }
 
@@ -128,17 +128,39 @@ export class Parser {
         switch (tok.tok) {
             case TokenType.PRINT:
                 return this.print();
+            case TokenType.L_BRACE:
+                return this.block();
             case TokenType.EOF:
                 return null;
-            default:
-                return this.expr()
+            default: {
+                const e = this.expr();
+                this.expect(TokenType.SEMICOLON)
+                return e;
+            }
         }
     }
 
     private print(): LoxPrint {
-        let tok = this.lexer.get_token();
+        let tok = this.lexer.get_token(); // print
         let expr = this.expr();
+        this.expect(TokenType.SEMICOLON)
         return new LoxPrint(tok.loc, expr);
+    }
+
+    private block(): LoxBlock {
+        let tok = this.lexer.get_token(); // {
+        let ast = new LoxBlock(tok.loc)
+        let peek = this.lexer.peek_token();
+        while (peek.tok != TokenType.R_BRACE) {
+            const decl = this.declaration();
+            if (decl === null) {
+                break
+            }
+            ast.statements.push(decl);
+            peek = this.lexer.peek_token();
+        }
+        this.expect(TokenType.R_BRACE)
+        return ast
     }
 
     /**

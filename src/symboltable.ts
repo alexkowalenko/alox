@@ -5,7 +5,7 @@
 //
 
 export class SymbolTable<T> {
-    constructor() {
+    constructor(private enclosing?: SymbolTable<T>) {
         this.table = new Map<string, T>
     }
 
@@ -15,8 +15,24 @@ export class SymbolTable<T> {
         this.table.set(name, value);
     }
 
+    assign(name: string, value: T): void {
+        if (this.table.has(name)) {
+            this.table.set(name, value);
+            return
+        }
+        if (this.enclosing) {
+            this.enclosing.assign(name, value)
+        }
+    }
+
     get(name: string): T | undefined {
-        return this.table.get(name)
+        if (this.table.has(name)) {
+            return this.table.get(name)
+        }
+        if (this.enclosing) {
+            return this.enclosing.get(name)
+        }
+        return undefined
     }
 
     has(name: string): boolean {

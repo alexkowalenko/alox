@@ -23,10 +23,12 @@ declaration    -> varDecl
                | statement ;
 
 statement      → exprStmt
-               | printStmt ;
+               | printStmt 
+               | block;
 
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
+block          -> "{" declaration* "}" ;
 
 expression     -> primary | unary | binary | grouping ;
 unary          -> ("-" | "!") expression;

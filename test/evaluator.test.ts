@@ -212,6 +212,18 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
+    it('block', () => {
+        const tests: TestCases[] = [
+            ["{}", null],
+            ["{var x = 1 + 4;}", 5],
+            ["{ print 1; print 2;}", 2],
+
+            ["var z = 1;{z + 4;}", 5],
+            ["var y = 1;{var y = 2; y + 4;}", 6], // shadow
+        ]
+        do_tests(tests)
+    })
+
 
 
 })

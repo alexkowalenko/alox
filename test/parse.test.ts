@@ -189,4 +189,18 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('block', () => {
+        const tests: TestCases[] = [
+            ["{}", "{}"],
+            ["{x = 1 + 4;}", "{(x = (1 + 4));}", "x"],
+            ["{ print 1; print 2;}", "{print 1;print 2;}"],
+
+            // Error
+            ["{ ;", "", "unexpected ;"],
+            ["{", "", "unexpected <eof>"],
+            ["}", "", "unexpected }"],
+        ]
+        do_tests(tests)
+    })
 })

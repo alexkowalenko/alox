@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
@@ -13,7 +13,7 @@ export type LoxValue = number | string | boolean | null
 
 export class Evaluator extends AstVisitor<LoxValue> {
 
-    constructor(private readonly symboltable: SymbolTable<LoxValue>) {
+    constructor(private symboltable: SymbolTable<LoxValue>) {
         super()
     }
 
@@ -58,7 +58,6 @@ export class Evaluator extends AstVisitor<LoxValue> {
 
     visitVar(v: LoxVar): LoxValue {
         var val = v.expr.accept(this)
-        console.log(``)
         if (!this.symboltable.has(v.ident.id)) {
             // put in symbol table
             this.symboltable.set(v.ident.id, val);
@@ -76,7 +75,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
         let var_name = left.id;
         let val = right.accept(this);
         if (this.symboltable.has(var_name)) {
-            this.symboltable.set(var_name, val)
+            this.symboltable.assign(var_name, val)
             return val
         }
         throw new RuntimeError(`undefined variable ${left.toString()}`, left.location)
@@ -90,6 +89,17 @@ export class Evaluator extends AstVisitor<LoxValue> {
             console.log(val)
         }
         return val
+    }
+
+    visitBlock(expr: LoxBlock): LoxValue {
+        let prev = this.symboltable;
+        this.symboltable = new SymbolTable(prev);
+        let result: LoxValue = null;
+        for (const stat of expr.statements) {
+            result = stat.accept(this)
+        }
+        this.symboltable = prev;
+        return result;
     }
 
     visitUnary(e: LoxUnary): LoxValue {
