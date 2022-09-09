@@ -43,6 +43,7 @@ export const enum TokenType {
     PRINT = 'print',
     RETURN = 'return',
     SUPER = 'super',
+    THEN = 'then',
     THIS = 'this',
     TRUE = 'true',
     VAR = 'var',

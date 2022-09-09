@@ -193,13 +193,28 @@ describe('Parser', () => {
     it('block', () => {
         const tests: TestCases[] = [
             ["{}", "{}"],
-            ["{x = 1 + 4;}", "{(x = (1 + 4));}", "x"],
+            ["{x = 1 + 4;}", "{(x = (1 + 4));}"],
             ["{ print 1; print 2;}", "{print 1;print 2;}"],
 
             // Error
             ["{ ;", "", "unexpected ;"],
             ["{", "", "unexpected <eof>"],
             ["}", "", "unexpected }"],
+        ]
+        do_tests(tests)
+    })
+
+    it('if', () => {
+        const tests: TestCases[] = [
+            ["if (true) then print 1;", "if (true) then print 1;"],
+            ["if (true) then print 1; else print 2;", "if (true) then print 1 else print 2;"],
+            ["if (true) then {} else {print 1;}", "if (true) then {} else {print 1;};"],
+            ["if (true) then if (true) then {} else {}", "if (true) then if (true) then {} else {};"],
+
+            // Error
+            ["if true) then print 1;", "", "unexpected true"],
+            ["if (true) print 1;", "", "unexpected print"],
+
         ]
         do_tests(tests)
     })

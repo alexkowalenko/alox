@@ -4,11 +4,12 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxExpr, LoxGroup, LoxIdentifier, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxString, LoxUnary, LoxVar } from "./ast";
+import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxExpr, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxString, LoxUnary, LoxVar } from "./ast";
 
 import { Writable } from 'stream'
 
 export class Printer extends AstVisitor<string> {
+
 
     constructor(private newline = "", private indent = 0) { super() }
 
@@ -33,6 +34,14 @@ export class Printer extends AstVisitor<string> {
 
     visitVar(expr: LoxVar): string {
         return "var " + expr.ident.accept(this) + " = " + expr.expr.accept(this)
+    }
+
+    visitIf(expr: LoxIf): string {
+        let buf = "if (" + expr.expr.accept(this) + ") then " + this.newline + expr.then.accept(this);
+        if (expr.else) {
+            buf += this.newline + " else " + expr.else.accept(this);
+        }
+        return buf;
     }
 
     visitPrint(expr: LoxPrint): string {

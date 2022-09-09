@@ -49,7 +49,26 @@ export class LoxVar extends LoxBase {
     }
 }
 
-export type LoxStatement = LoxExpr | LoxPrint | LoxBlock;
+export type LoxStatement = LoxExpr | LoxIf | LoxPrint | LoxBlock;
+
+export class LoxIf extends LoxBase {
+    constructor(location: Location, readonly expr: LoxExpr, readonly then: LoxStatement) {
+        super(location);
+    }
+    public else?: LoxStatement;
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitIf(this)
+    }
+
+    toString(): string {
+        let buf = "if (" + this.expr.toString() + ") " + this.then
+        if (this.else) {
+            buf += " else " + this.else;
+        }
+        return buf
+    }
+}
 
 export class LoxPrint extends LoxBase {
     constructor(location: Location, readonly expr: LoxExpr) {
@@ -220,6 +239,8 @@ export abstract class AstVisitor<T> {
         expr.ident.accept<T>(this)
         return expr.expr.accept<T>(this)
     }
+
+    abstract visitIf(expr: LoxIf): T;
 
     visitPrint(expr: LoxPrint): T {
         return expr.expr.accept<T>(this)

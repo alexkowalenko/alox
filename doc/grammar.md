@@ -22,13 +22,15 @@ program        → declaration* EOF ;
 declaration    -> varDecl
                | statement ;
 
-statement      → exprStmt
-               | printStmt 
-               | block;
+statement   → exprStmt
+            | ifStmt 
+            | printStmt 
+            | block;
 
-exprStmt       → expression ";" ;
-printStmt      → "print" expression ";" ;
-block          -> "{" declaration* "}" ;
+exprStmt    → expression ";" ;
+ifStmt      -> 'if' '(' expression ')' 'then' statement ('else' statement)? ;
+printStmt   → "print" expression ";" ;
+block       -> "{" declaration* "}" ;
 
 expression     -> primary | unary | binary | grouping ;
 unary          -> ("-" | "!") expression;

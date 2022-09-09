@@ -224,6 +224,13 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
-
+    it('if', () => {
+        const tests: TestCases[] = [
+            ["if (true == true) then 1;", 1],
+            ["if (true == false) then 1; else 2;", 2],
+            ["if (5 == 5) then if (5 != 5) then 3 ; else 4;", 4],
+        ]
+        do_tests(tests)
+    })
 
 })

@@ -36,6 +36,7 @@ const reserved_words: Map<string, TokenType> = new Map([
     ['print', TokenType.PRINT],
     ['return', TokenType.RETURN],
     ['super', TokenType.SUPER],
+    ['then', TokenType.THEN],
     ['this', TokenType.THIS],
     ['true', TokenType.TRUE],
     ['var', TokenType.VAR],

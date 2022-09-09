@@ -82,7 +82,12 @@ function do_file(file: string, opts: Options) {
     }
     catch (e) {
         if (e instanceof LoxError) {
-            console.log(e.toString())
+            if (opts.silent) {
+                console.error(e.message)
+            } else {
+                console.error(e.toString())
+            }
+            process.exit(-1)
         } else {
             throw e
         }

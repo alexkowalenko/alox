@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
@@ -12,6 +12,7 @@ import { Location, TokenType } from "./token";
 export type LoxValue = number | string | boolean | null
 
 export class Evaluator extends AstVisitor<LoxValue> {
+
 
     constructor(private symboltable: SymbolTable<LoxValue>) {
         super()
@@ -79,6 +80,17 @@ export class Evaluator extends AstVisitor<LoxValue> {
             return val
         }
         throw new RuntimeError(`undefined variable ${left.toString()}`, left.location)
+    }
+
+    visitIf(expr: LoxIf): LoxValue {
+        const val = expr.expr.accept(this);
+        if (this.truthy(val)) {
+            return expr.then.accept(this)
+        }
+        if (expr.else) {
+            return expr.else?.accept(this);
+        }
+        return null
     }
 
     visitPrint(p: LoxPrint): LoxValue {
@@ -188,5 +200,9 @@ export class Evaluator extends AstVisitor<LoxValue> {
 
     visitNil(expr: LoxNil): LoxValue {
         return null;
+    }
+
+    private truthy(v: LoxValue): boolean {
+        return v == true;
     }
 }
