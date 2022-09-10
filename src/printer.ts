@@ -10,7 +10,6 @@ import { Writable } from 'stream'
 
 export class Printer extends AstVisitor<string> {
 
-
     constructor(private newline = "", private indent = 0) { super() }
 
     public print(expr: LoxExpr): string {
@@ -44,8 +43,8 @@ export class Printer extends AstVisitor<string> {
         return buf;
     }
 
-    visitPrint(expr: LoxPrint): string {
-        return expr.toString();
+    visitPrint(e: LoxPrint): string {
+        return "print " + e.expr.accept(this);
     }
 
     visitBlock(expr: LoxBlock): string {
@@ -62,15 +61,15 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitUnary(e: LoxUnary): string {
-        return e.toString()
+        return e.prefix + e.expr.accept(this)
     }
 
     visitBinary(e: LoxBinary): string {
-        return e.toString();
+        return `(${e.left.accept(this)} ${e.operator} ${e.right.accept(this)})`
     }
 
     visitGroup(e: LoxGroup): string {
-        return e.toString()
+        return "( " + e.expr.accept(this) + " )"
     }
 
     visitIdentifier(e: LoxIdentifier): string {

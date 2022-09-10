@@ -43,10 +43,6 @@ export class LoxVar extends LoxBase {
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitVar(this)
     }
-
-    toString(): string {
-        return "var " + this.ident.toString() + " = " + this.expr.toString();
-    }
 }
 
 export type LoxStatement = LoxExpr | LoxIf | LoxPrint | LoxBlock;
@@ -60,14 +56,6 @@ export class LoxIf extends LoxBase {
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitIf(this)
     }
-
-    toString(): string {
-        let buf = "if (" + this.expr.toString() + ") " + this.then
-        if (this.else) {
-            buf += " else " + this.else;
-        }
-        return buf
-    }
 }
 
 export class LoxPrint extends LoxBase {
@@ -77,10 +65,6 @@ export class LoxPrint extends LoxBase {
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitPrint(this)
-    }
-
-    toString(): string {
-        return "print " + this.expr.toString();
     }
 }
 
@@ -94,14 +78,6 @@ export class LoxBlock extends LoxBase {
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitBlock(this)
-    }
-
-    toString(): string {
-        let result = "{\n";
-        for (const stat of this.statements) {
-            result = "    " + stat.toString() + '\n';
-        }
-        return result + '}\n'
     }
 }
 
