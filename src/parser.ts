@@ -146,11 +146,10 @@ export class Parser {
         let tok = this.expect(TokenType.IF)
         this.expect(TokenType.L_PAREN)
         const expr = this.expr();
-        this.expect(TokenType.R_PAREN)
-        const then_loc = this.expect(TokenType.THEN)
+        const paren = this.expect(TokenType.R_PAREN)
         const then = this.statement();
         if (!then) {
-            throw new ParseError("expecting statements after then", then_loc.loc)
+            throw new ParseError("expecting statements after )", paren.loc)
         }
         const ast = new LoxIf(tok.loc, expr, then!);
         tok = this.lexer.peek_token();
@@ -158,7 +157,7 @@ export class Parser {
             this.expect(TokenType.ELSE)
             const else_stat = this.statement();
             if (!else_stat) {
-                throw new ParseError("expecting statements after else", then_loc.loc)
+                throw new ParseError("expecting statements after else", tok.loc)
             }
             ast.else = else_stat;
         }

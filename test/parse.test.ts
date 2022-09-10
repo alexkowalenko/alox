@@ -206,15 +206,13 @@ describe('Parser', () => {
 
     it('if', () => {
         const tests: TestCases[] = [
-            ["if (true) then print 1;", "if (true) then print 1;"],
-            ["if (true) then print 1; else print 2;", "if (true) then print 1 else print 2;"],
-            ["if (true) then {} else {print 1;}", "if (true) then {} else {print 1;};"],
-            ["if (true) then if (true) then {} else {}", "if (true) then if (true) then {} else {};"],
+            ["if (true) print 1;", "if (true) print 1;"],
+            ["if (true) print 1; else print 2;", "if (true) print 1 else print 2;"],
+            ["if (true) {} else {print 1;}", "if (true) {} else {print 1;};"],
+            ["if (true) if (true) {} else {}", "if (true) if (true) {} else {};"],
 
             // Error
-            ["if true) then print 1;", "", "unexpected true"],
-            ["if (true) print 1;", "", "unexpected print"],
-
+            ["if true) print 1;", "", "unexpected true"],
         ]
         do_tests(tests)
     })

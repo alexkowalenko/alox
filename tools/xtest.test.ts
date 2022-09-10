@@ -36,7 +36,7 @@ for (const name of find_files(base_dir, ".lox")) {
         const file = `${base_dir}/${name}`;
         const content = fs.readFileSync(file, { encoding: "utf8" });
 
-        //console.log(`file ${file}`)
+        console.log(`file ${file}`)
         let expectedOutput = new Array<String>();
         let errorOutput = new Array<String>();
 

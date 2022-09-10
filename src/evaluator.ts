@@ -132,6 +132,10 @@ export class Evaluator extends AstVisitor<LoxValue> {
             return this.assignment(e.left, e.right)
         }
 
+        if (e.operator == TokenType.AND || e.operator == TokenType.OR) {
+            return this.do_logical(e)
+        }
+
         const left = e.left.accept(this)
         const right = e.right.accept(this)
         switch (e.operator) {
@@ -167,15 +171,20 @@ export class Evaluator extends AstVisitor<LoxValue> {
                 return left === right // strict non-javascript equals
             case TokenType.BANG_EQUAL:
                 return left !== right
-
-            // Logical
-            case TokenType.AND:
-                return this.check_boolean(left, e.left.location) && this.check_boolean(right, e.right.location)
-            case TokenType.OR:
-                return this.check_boolean(left, e.left.location) || this.check_boolean(right, e.right.location)
-
         }
         throw new RuntimeError(`unhandled binary operator ${e.operator}`, e.location)
+    }
+
+    private do_logical(e: LoxBinary) {
+        const left = e.left.accept(this);
+        if (e.operator == TokenType.OR) {
+            if (this.truthy(left))
+                return left
+        } else {
+            if (!this.truthy(left))
+                return left
+        }
+        return e.right.accept(this);
     }
 
     visitIdentifier(e: LoxIdentifier): LoxValue {
@@ -203,6 +212,12 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     private truthy(v: LoxValue): boolean {
-        return v == true;
+        if (v == null) {
+            return false;
+        }
+        if (typeof v === "boolean") {
+            return v
+        }
+        return true
     }
 }

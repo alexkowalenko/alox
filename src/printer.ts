@@ -37,7 +37,7 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitIf(expr: LoxIf): string {
-        let buf = "if (" + expr.expr.accept(this) + ") then " + this.newline + expr.then.accept(this);
+        let buf = "if (" + expr.expr.accept(this) + ") " + this.newline + expr.then.accept(this);
         if (expr.else) {
             buf += this.newline + " else " + expr.else.accept(this);
         }

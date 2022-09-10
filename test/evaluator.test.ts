@@ -154,8 +154,8 @@ describe('Evaluator', () => {
             ["true or false;", true],
             ["false or false;", false],
 
-            // Error
-            ["1 and true;", null, "value must be a boolean"],
+            ["1 or nil;", 1],
+            ["nil or 2;", 2],
         ]
         do_tests(tests)
     })
@@ -226,9 +226,9 @@ describe('Evaluator', () => {
 
     it('if', () => {
         const tests: TestCases[] = [
-            ["if (true == true) then 1;", 1],
-            ["if (true == false) then 1; else 2;", 2],
-            ["if (5 == 5) then if (5 != 5) then 3 ; else 4;", 4],
+            ["if (true == true) 1;", 1],
+            ["if (true == false) 1; else 2;", 2],
+            ["if (5 == 5) if (5 != 5) 3; else 4;", 4],
         ]
         do_tests(tests)
     })

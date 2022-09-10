@@ -28,7 +28,7 @@ statement   → exprStmt
             | block;
 
 exprStmt    → expression ";" ;
-ifStmt      -> 'if' '(' expression ')' 'then' statement ('else' statement)? ;
+ifStmt      -> 'if' '(' expression ')' statement ('else' statement)? ;
 printStmt   → "print" expression ";" ;
 block       -> "{" declaration* "}" ;
 
