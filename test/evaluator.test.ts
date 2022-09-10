@@ -233,4 +233,12 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
+    it('while', () => {
+        const tests: TestCases[] = [
+            ["var x = 4; while (x > 1) x = x - 1; x;", 1],
+            ["x = 4; while (false) { x = x - 1; } x;", 4],
+        ]
+        do_tests(tests)
+    })
+
 })

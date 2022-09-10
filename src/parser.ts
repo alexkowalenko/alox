@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxBinary, LoxBlock, LoxBool, LoxDeclaration, LoxExpr, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar } from "./ast";
+import { LoxBinary, LoxBlock, LoxBool, LoxDeclaration, LoxExpr, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType } from "./token";
 import { ParseError } from "./error";
@@ -88,6 +88,8 @@ const stat_map = new Map<TokenType, PrefixParselet>([
     [TokenType.PRINT, (p: Parser) => { return p.print() }],
     [TokenType.L_BRACE, (p: Parser) => { return p.block() }],
     [TokenType.IF, (p: Parser) => { return p.if() }],
+    [TokenType.WHILE, (p: Parser) => { return p.while() }],
+
 ])
 
 export class Parser {
@@ -162,6 +164,18 @@ export class Parser {
             ast.else = else_stat;
         }
         return ast;
+    }
+
+    public while(): LoxWhile {
+        let tok = this.expect(TokenType.WHILE)
+        this.expect(TokenType.L_PAREN)
+        const expr = this.expr();
+        const paren = this.expect(TokenType.R_PAREN)
+        const stats = this.statement();
+        if (!stats) {
+            throw new ParseError("expecting statements after )", paren.loc)
+        }
+        return new LoxWhile(tok.loc, expr, stats!);
     }
 
     public print(): LoxPrint {

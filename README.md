@@ -16,6 +16,6 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
 - [x] Test Structure for running test programs.
 - [ ] Control flow - Chapter 9.
   - [x] `if` statements, logical operators partial evaluation
-  - [ ] `while` statement.
+  - [x] `while` statement.
   - [ ] `for` statement.
   - [ ] `break` and `continue`.

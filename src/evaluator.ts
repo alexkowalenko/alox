@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
@@ -91,6 +91,16 @@ export class Evaluator extends AstVisitor<LoxValue> {
             return expr.else?.accept(this);
         }
         return null
+    }
+
+    visitWhile(e: LoxWhile): LoxValue {
+        let v = e.expr.accept(this);
+        let stat: LoxValue = null;
+        while (this.truthy(v)) {
+            stat = e.stats.accept(this)
+            v = e.expr.accept(this);
+        }
+        return stat
     }
 
     visitPrint(p: LoxPrint): LoxValue {

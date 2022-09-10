@@ -10,7 +10,8 @@ import child_process from "child_process"
 
 const base_dir = "./xtest"
 const ts_node = "node_modules/ts-node/dist/bin.js"
-const exec_file = `${ts_node} interp.ts`
+const prog_file = "alox.ts"
+const exec_file = `${ts_node} ${prog_file}`
 
 function find_files(dirPath: string, suffix: string): string[] {
     const dirEntries = fs.readdirSync(dirPath, { withFileTypes: true });
@@ -44,7 +45,7 @@ for (const name of find_files(base_dir, ".lox")) {
             let matcher = line.match(expectPattern)
             if (matcher) {
                 let ex = matcher?.groups?.expect
-                // console.log(`expect: ${ex}`)
+                //console.log(`expect: ${ex}`)
                 expectedOutput.push(ex!)
             }
             matcher = line.match(errorPattern)
@@ -61,7 +62,8 @@ for (const name of find_files(base_dir, ".lox")) {
         const args = cmd.split(' ');
         const result = child_process.spawnSync(args[0], args.slice(1), { encoding: "utf8" })
         const output = result.stdout
-        // console.log(output)
+        //console.log(output)
+        //console.log(result.stderr)
 
         let realOutput = output.split('\n')
         for (let i = 0; i < realOutput.length && i < expectedOutput.length; i++) {

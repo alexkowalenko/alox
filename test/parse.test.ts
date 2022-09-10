@@ -216,4 +216,16 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('while', () => {
+        const tests: TestCases[] = [
+            ["while (true) print 1;", "while (true) print 1;"],
+            ["while (true) { print 1; print 2;}", "while (true) {print 1;print 2;};"],
+            ["while (a == b) {} ", "while ((a == b)) {};"],
+
+            // Error
+            ["while true) print 1;", "", "unexpected true"],
+        ]
+        do_tests(tests)
+    })
 })
