@@ -36,6 +36,26 @@ export class SymbolTable<T> {
     }
 
     has(name: string): boolean {
-        return this.table.has(name)
+        if (this.table.has(name)) {
+            return true;
+        }
+        if (this.enclosing) {
+            return this.enclosing.has(name)
+        }
+        return false;
+    }
+
+    has_local(name: string): boolean {
+        return this.table.has(name);
+    }
+
+    dump() {
+        console.log("Symbols: ----------")
+        for (const s of this.table) {
+            console.log(`  ${s[0]} = ${s[1]}`)
+        }
+        if (this.enclosing) {
+            this.enclosing.dump();
+        }
     }
 }

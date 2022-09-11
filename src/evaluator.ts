@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
@@ -21,7 +21,6 @@ export class Evaluator extends AstVisitor<LoxValue> {
     eval(expr: LoxExpr): LoxValue {
         return expr.accept(this)
     }
-
 
     private check_number(v: LoxValue, where: Location): number {
         if (typeof v != "number") {
@@ -58,8 +57,11 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     visitVar(v: LoxVar): LoxValue {
-        var val = v.expr.accept(this)
-        if (!this.symboltable.has(v.ident.id)) {
+        var val = null;
+        if (v.expr) {
+            val = v.expr.accept(this)
+        }
+        if (!this.symboltable.has_local(v.ident.id)) {
             // put in symbol table
             this.symboltable.set(v.ident.id, val);
             return val;
@@ -74,6 +76,8 @@ export class Evaluator extends AstVisitor<LoxValue> {
             throw new RuntimeError(`can't assign to ${left.toString()}`, left.location)
         }
         let var_name = left.id;
+        //console.log(`assign to ${var_name}.`)
+        //this.symboltable.dump();
         let val = right.accept(this);
         if (this.symboltable.has(var_name)) {
             this.symboltable.assign(var_name, val)
@@ -103,6 +107,40 @@ export class Evaluator extends AstVisitor<LoxValue> {
         return stat
     }
 
+    visitFor(e: LoxFor): LoxValue {
+        // Set up new environment
+        let prev = this.symboltable;
+        this.symboltable = new SymbolTable(prev);
+
+        try {
+            if (e.init) {
+                e.init.accept(this);
+            }
+            var val: LoxValue = true;
+            if (e.cond) {
+                val = e.cond.accept(this);
+            }
+            //console.log(`for cond = ${val}`)
+            var ret: LoxValue = null;
+            while (this.truthy(val)) {
+                if (e.stat) {
+                    ret = e.stat.accept(this);
+                }
+                if (e.iter) {
+                    e.iter.accept(this);
+                }
+                if (e.cond) {
+                    val = e.cond.accept(this);
+                }
+                // console.log(`for cond = ${val} : ${this.truthy(val)}`)
+            }
+        } finally {
+            // Restore environment
+            this.symboltable = prev;
+        }
+        return ret;
+    }
+
     visitPrint(p: LoxPrint): LoxValue {
         let val = p.expr.accept(this)
         if (val === null) {
@@ -117,10 +155,14 @@ export class Evaluator extends AstVisitor<LoxValue> {
         let prev = this.symboltable;
         this.symboltable = new SymbolTable(prev);
         let result: LoxValue = null;
-        for (const stat of expr.statements) {
-            result = stat.accept(this)
+        try {
+            for (const stat of expr.statements) {
+                result = stat.accept(this)
+            }
         }
-        this.symboltable = prev;
+        finally {
+            this.symboltable = prev;
+        }
         return result;
     }
 

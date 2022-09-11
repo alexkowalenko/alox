@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxExpr, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxExpr, LoxFor, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 
 import { Writable } from 'stream'
 
@@ -31,8 +31,12 @@ export class Printer extends AstVisitor<string> {
         return buf
     }
 
-    visitVar(expr: LoxVar): string {
-        return "var " + expr.ident.accept(this) + " = " + expr.expr.accept(this)
+    visitVar(e: LoxVar): string {
+        var buf = "var " + e.ident.accept(this);
+        if (e.expr) {
+            buf += " = " + e.expr.accept(this)
+        }
+        return buf;
     }
 
     visitIf(expr: LoxIf): string {
@@ -45,6 +49,23 @@ export class Printer extends AstVisitor<string> {
 
     visitWhile(expr: LoxWhile): string {
         return "while (" + expr.expr.accept(this) + ") " + this.newline + expr.stats.accept(this);
+    }
+
+    visitFor(e: LoxFor): string {
+        var buf = "for ( ";
+        if (e.init) {
+            buf += e.init.accept(this)
+        }
+        buf += "; ";
+        if (e.cond) {
+            buf += e.cond.accept(this)
+        }
+        buf += "; "
+        if (e.iter) {
+            buf += e.iter.accept(this)
+        }
+        buf += ") " + this.newline + e.stat!.accept(this);
+        return buf;
     }
 
     visitPrint(e: LoxPrint): string {

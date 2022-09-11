@@ -173,6 +173,9 @@ describe('Evaluator', () => {
             ["var z = 1; var y = 2.5;", 2.5],
             ["var r = 2 + 33;", 35],
             ['var 🍎 = "apple";', "apple"],
+            ['var xx = 99; xx < 10;', false],
+
+            ["var a;", null],
 
             // Error
             ["var a = 1; var a = 1;", 1, 'variable a already defined'],
@@ -237,6 +240,19 @@ describe('Evaluator', () => {
         const tests: TestCases[] = [
             ["var x = 4; while (x > 1) x = x - 1; x;", 1],
             ["x = 4; while (false) { x = x - 1; } x;", 4],
+        ]
+        do_tests(tests)
+    })
+
+    it('for', () => {
+        const tests: TestCases[] = [
+            ["var x = 1; for( ; x < 10; x = x + 1) {} x;", 10],
+            ["for(x = 1; x < 10; x = x + 1) {} x;", 10],
+            ["for(x = 1; x < 10; ) {x = x + 1;} x;", 10],
+
+            ["for(var x = 1; x < 10; x = x + 1) {}", null],
+            // check no leakage of variable into outer environment
+            ["for(var x = 1; x < 10; x = x + 1) {}", null],
         ]
         do_tests(tests)
     })

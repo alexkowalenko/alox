@@ -11,6 +11,10 @@ describe('SymbolTable', () => {
         let table = new SymbolTable<string>;
 
         table.set('a', 'hello');
+
+        expect(table.has('a')).toBe(true);
+        expect(table.has('b')).toBe(false);
+
         expect(table.get('a')).toBe('hello')
         expect(table.get('b')).toBe(undefined)
 
@@ -24,6 +28,10 @@ describe('SymbolTable', () => {
 
         let outer = new SymbolTable<string>(table);
         outer.set('b', 'olá');
+
+        expect(outer.has('a')).toBe(true);
+        expect(outer.has('b')).toBe(true);
+        expect(outer.has('c')).toBe(false);
 
         expect(outer.get('a')).toBe('hello')
         expect(outer.get('b')).toBe('olá')

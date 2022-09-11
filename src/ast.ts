@@ -36,16 +36,17 @@ export class LoxProgram extends LoxBase {
 export type LoxDeclaration = LoxVar | LoxStatement;
 
 export class LoxVar extends LoxBase {
-    constructor(location: Location, readonly ident: LoxIdentifier, readonly expr: LoxExpr) {
+    constructor(location: Location, readonly ident: LoxIdentifier) {
         super(location);
     }
+    public expr?: LoxExpr;
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitVar(this)
     }
 }
 
-export type LoxStatement = LoxExpr | LoxIf | LoxWhile | LoxPrint | LoxBlock;
+export type LoxStatement = LoxExpr | LoxIf | LoxWhile | LoxFor | LoxPrint | LoxBlock;
 
 export class LoxIf extends LoxBase {
     constructor(location: Location, readonly expr: LoxExpr, readonly then: LoxStatement) {
@@ -67,6 +68,23 @@ export class LoxWhile extends LoxBase {
         return visitor.visitWhile(this)
     }
 }
+
+export type ForInit = LoxVar | LoxExpr;
+
+export class LoxFor extends LoxBase {
+    constructor(location: Location,) {
+        super(location);
+    }
+    public init?: ForInit;
+    public cond?: LoxExpr;
+    public iter?: LoxExpr;
+    public stat: LoxStatement | undefined;
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitFor(this)
+    }
+}
+
 
 export class LoxPrint extends LoxBase {
     constructor(location: Location, readonly expr: LoxExpr) {
@@ -221,14 +239,11 @@ export abstract class AstVisitor<T> {
 
     abstract visitProgram(prog: LoxProgram): T // Decide what to do here in derived classes
 
-    visitVar(expr: LoxVar): T {
-        expr.ident.accept<T>(this)
-        return expr.expr.accept<T>(this)
-    }
+    abstract visitVar(expr: LoxVar): T;
 
     abstract visitIf(expr: LoxIf): T;
-
     abstract visitWhile(expr: LoxWhile): T;
+    abstract visitFor(expr: LoxFor): T;
 
     visitPrint(expr: LoxPrint): T {
         return expr.expr.accept<T>(this)

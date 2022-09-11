@@ -17,5 +17,5 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
 - [ ] Control flow - Chapter 9.
   - [x] `if` statements, logical operators partial evaluation
   - [x] `while` statement.
-  - [ ] `for` statement.
+  - [x] `for` statement.
   - [ ] `break` and `continue`.

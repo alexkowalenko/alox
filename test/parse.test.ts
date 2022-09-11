@@ -147,15 +147,14 @@ describe('Parser', () => {
             ["var x = 1;", "var x = 1;"],
             ["var x = 1; var y = 2.5;", "var x = 1;var y = 2.5;"],
             ["var r = 1.4; var θ = 2.5;", "var r = 1.4;var θ = 2.5;"],
+            ["var x;", "var x;"],
 
             // 
-            ["var;", "", "unexpected ;"],
-            ["var x;", "", "unexpected ;"],
-            ["var x 1;", "", "unexpected number<1>"],
+            ["var;", "", "unexpected ;, expecting <ident>"],
+            ["var x 1;", "", "unexpected number<1>, expecting ;"],
             ["var x = ;", "", "unexpected ;"],
-
-            ["var nil = 1;", "", "unexpected nil"],
-            ["var true = 1;", "", "unexpected true"],
+            ["var nil = 1;", "", "unexpected nil, expecting <ident>"],
+            ["var true = 1;", "", "unexpected true, expecting <ident>"],
         ]
         do_tests(tests)
     })
@@ -198,7 +197,7 @@ describe('Parser', () => {
 
             // Error
             ["{ ;", "", "unexpected ;"],
-            ["{", "", "unexpected <eof>"],
+            ["{", "", "unexpected <eof>, expecting }"],
             ["}", "", "unexpected }"],
         ]
         do_tests(tests)
@@ -212,7 +211,7 @@ describe('Parser', () => {
             ["if (true) if (true) {} else {}", "if (true) if (true) {} else {};"],
 
             // Error
-            ["if true) print 1;", "", "unexpected true"],
+            ["if true) print 1;", "", "unexpected true, expecting ("],
         ]
         do_tests(tests)
     })
@@ -224,7 +223,22 @@ describe('Parser', () => {
             ["while (a == b) {} ", "while ((a == b)) {};"],
 
             // Error
-            ["while true) print 1;", "", "unexpected true"],
+            ["while true) print 1;", "", "unexpected true, expecting ("],
+        ]
+        do_tests(tests)
+    })
+
+    it('for', () => {
+        const tests: TestCases[] = [
+            ["for (;;) true;", "for ( ; ; ) true;"],
+            ["for (true;;) {}", "for ( true; ; ) {};"],
+            ["for (; true ;) {}", "for ( ; true; ) {};"],
+            ["for (; ;true) {}", "for ( ; ; true) {};"],
+            ["for (true; true ; true) { true;}", "for ( true; true; true) {true;};"],
+
+            // Error
+            ["for true; true ; true) { true;}", "", "unexpected true, expecting ("],
+            ["for (true; true ; true { true;}", "", "unexpected {, expecting )"],
         ]
         do_tests(tests)
     })

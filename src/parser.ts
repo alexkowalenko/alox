@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxBinary, LoxBlock, LoxBool, LoxDeclaration, LoxExpr, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxDeclaration, LoxExpr, LoxFor, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType } from "./token";
 import { ParseError } from "./error";
@@ -89,7 +89,7 @@ const stat_map = new Map<TokenType, PrefixParselet>([
     [TokenType.L_BRACE, (p: Parser) => { return p.block() }],
     [TokenType.IF, (p: Parser) => { return p.if() }],
     [TokenType.WHILE, (p: Parser) => { return p.while() }],
-
+    [TokenType.FOR, (p: Parser) => { return p.for() }],
 ])
 
 export class Parser {
@@ -125,10 +125,14 @@ export class Parser {
     private var(): LoxVar {
         var tok = this.expect(TokenType.VAR)
         let id = this.identifier()
-        this.expect(TokenType.EQUAL)
-        let expr = this.expr();
+        var ast = new LoxVar(tok.loc, id);
+        var t = this.lexer.peek_token();
+        if (t.tok == TokenType.EQUAL) {
+            this.expect(TokenType.EQUAL)
+            ast.expr = this.expr();
+        }
         this.expect(TokenType.SEMICOLON);
-        return new LoxVar(tok.loc, id, expr)
+        return ast;
     }
 
     private statement(): LoxStatement | null {
@@ -176,6 +180,40 @@ export class Parser {
             throw new ParseError("expecting statements after )", paren.loc)
         }
         return new LoxWhile(tok.loc, expr, stats!);
+    }
+
+    public for(): LoxFor {
+        let tok = this.expect(TokenType.FOR)
+        var ast = new LoxFor(tok.loc);
+        this.expect(TokenType.L_PAREN)
+        tok = this.lexer.peek_token();
+        if (tok.tok != TokenType.SEMICOLON) {
+            if (tok.tok == TokenType.VAR) {
+                ast.init = this.var();
+            } else {
+                ast.init = this.expr();
+                this.expect(TokenType.SEMICOLON)
+            }
+        } else {
+            this.expect(TokenType.SEMICOLON)
+        }
+
+        tok = this.lexer.peek_token();
+        if (tok.tok != TokenType.SEMICOLON) {
+            ast.cond = this.expr();
+        }
+        this.expect(TokenType.SEMICOLON)
+
+        tok = this.lexer.peek_token();
+        if (tok.tok != TokenType.R_PAREN) {
+            ast.iter = this.expr();
+        }
+        this.expect(TokenType.R_PAREN)
+        var stat = this.statement();
+        if (stat) {
+            ast.stat = stat
+        }
+        return ast;
     }
 
     public print(): LoxPrint {
@@ -291,7 +329,7 @@ export class Parser {
     private expect(t: TokenType): Token {
         const tok = this.lexer.get_token();
         if (tok.tok != t) {
-            throw new ParseError(`unexpected ${tok}`, tok.loc)
+            throw new ParseError(`unexpected ${tok}, expecting ${t}`, tok.loc)
         }
         return tok
     }

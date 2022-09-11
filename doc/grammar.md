@@ -22,15 +22,19 @@ program        → declaration* EOF ;
 declaration    -> varDecl
                | statement ;
 
+varDecl     -> "var" IDENTIFIER ("=" expression)? ";" ;
+
 statement   → exprStmt
             | ifStmt 
             | whileStmt
+            | forStmt
             | printStmt 
             | block;
 
 exprStmt    → expression ";" ;
 ifStmt      -> 'if' '(' expression ')' statement ('else' statement)? ;
 whileStmt   -> 'while' '(' expression ')' statement ;
+forStmt     -> 'for' '(' (varDecl | statement)? ';' (expression)? ';' (expression)? ')' statement ;
 printStmt   → "print" expression ";" ;
 block       -> "{" declaration* "}" ;
 
