@@ -257,4 +257,16 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
+    it('break', () => {
+        const tests: TestCases[] = [
+            ["while(true) break;", null],
+            ["var x; for(x = 1; x < 10; x = x + 1) {continue; x= 20;} x;", 10],
+            ["for(x = 1; x < 10; x = x + 1) {continue; x = 30;} x;", 10],
+
+            ["x = 1; while(true) { x=x+1; if(x>10) break; } x;", 11],
+            // check no leakage of variable into outer environment
+        ]
+        do_tests(tests)
+    })
+
 })

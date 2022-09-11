@@ -14,8 +14,15 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
   - [x] Variables, environment, assignment.
   - [x] Blocks (§8.5 Scope)
 - [x] Test Structure for running test programs.
-- [ ] Control flow - Chapter 9.
+- [x] Control flow - Chapter 9.
   - [x] `if` statements, logical operators partial evaluation
   - [x] `while` statement.
   - [x] `for` statement.
-  - [ ] `break` and `continue`.
+  - [x] `break` and `continue`.
+- [ ] Functions - Chapter 10.
+  -[ ] Function calls
+  -[ ] Native Functions
+  -[ ] Function declarations
+  -[ ] Return statement
+  -[ ] Lambda expressions
+- [ ] Resolution and Binding - Chapter 11

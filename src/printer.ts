@@ -4,11 +4,12 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxExpr, LoxFor, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxExpr, LoxFor, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 
 import { Writable } from 'stream'
 
 export class Printer extends AstVisitor<string> {
+
 
     constructor(private newline = "", private indent = 0) { super() }
 
@@ -70,6 +71,10 @@ export class Printer extends AstVisitor<string> {
 
     visitPrint(e: LoxPrint): string {
         return "print " + e.expr.accept(this);
+    }
+
+    visitBreak(expr: LoxBreak): string {
+        return expr.what;
     }
 
     visitBlock(expr: LoxBlock): string {

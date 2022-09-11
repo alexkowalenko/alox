@@ -242,4 +242,16 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('break', () => {
+        const tests: TestCases[] = [
+            ['while(true) {break;}', 'while (true) {break;};'],
+            ['for(;;) {continue;}', 'for ( ; ; ) {continue;};'],
+
+            //
+            ['break;', '', 'no enclosing loop statement for break'],
+            ['continue;', '', 'no enclosing loop statement for continue'],
+        ]
+        do_tests(tests)
+    })
 })

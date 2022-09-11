@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
@@ -12,6 +12,7 @@ import { Location, TokenType } from "./token";
 export type LoxValue = number | string | boolean | null
 
 export class Evaluator extends AstVisitor<LoxValue> {
+
 
 
     constructor(private symboltable: SymbolTable<LoxValue>) {
@@ -101,7 +102,18 @@ export class Evaluator extends AstVisitor<LoxValue> {
         let v = e.expr.accept(this);
         let stat: LoxValue = null;
         while (this.truthy(v)) {
-            stat = e.stats.accept(this)
+            try {
+                stat = e.stats.accept(this)
+            }
+            catch (ex) {
+                if (!(ex instanceof LoxBreak)) {
+                    throw ex
+                }
+                if (ex.what == TokenType.BREAK) {
+                    break
+                }
+                // else continue
+            }
             v = e.expr.accept(this);
         }
         return stat
@@ -124,7 +136,17 @@ export class Evaluator extends AstVisitor<LoxValue> {
             var ret: LoxValue = null;
             while (this.truthy(val)) {
                 if (e.stat) {
-                    ret = e.stat.accept(this);
+                    try {
+                        ret = e.stat.accept(this);
+                    } catch (ex) {
+                        if (!(ex instanceof LoxBreak)) {
+                            throw ex
+                        }
+                        if (ex.what == TokenType.BREAK) {
+                            break
+                        }
+                        // else continue
+                    }
                 }
                 if (e.iter) {
                     e.iter.accept(this);
@@ -149,6 +171,10 @@ export class Evaluator extends AstVisitor<LoxValue> {
             console.log(val)
         }
         return val
+    }
+
+    visitBreak(e: LoxBreak): LoxValue {
+        throw e
     }
 
     visitBlock(expr: LoxBlock): LoxValue {

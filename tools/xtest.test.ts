@@ -32,8 +32,8 @@ function find_files(dirPath: string, suffix: string): string[] {
 const expectPattern = /\/\/ expect: (?<expect>.*)/
 const errorPattern = /\/\/ error: (?<expect>.*)/
 
-for (const name of find_files(base_dir, ".lox")) {
-    test(name, () => {
+function run_test(name: string) {
+    test(name, async () => {
         const file = `${base_dir}/${name}`;
         const content = fs.readFileSync(file, { encoding: "utf8" });
 
@@ -60,20 +60,26 @@ for (const name of find_files(base_dir, ".lox")) {
         const cmd = `${exec_file} -s -f ${file}`
         // console.log(cmd)
         const args = cmd.split(' ');
-        const result = child_process.spawnSync(args[0], args.slice(1), { encoding: "utf8" })
-        const output = result.stdout
-        //console.log(output)
-        //console.log(result.stderr)
+        const result = child_process.spawnSync(args[0], args.slice(1))
 
-        let realOutput = output.split('\n')
+        let realOutput = result.stdout.toString().split('\n');
         for (let i = 0; i < realOutput.length && i < expectedOutput.length; i++) {
-            expect(expectedOutput[i]).toBe(realOutput[i])
+            expect(expectedOutput[i]).toBe(realOutput[i]);
         }
+
         if (result.status != 0) {
-            let realError = result.stderr.split('\n');
+            let realError = result.stderr.toString().split('\n');
             for (let i = 0; i < errorOutput.length && i < errorOutput.length; i++) {
                 expect(errorOutput[i]).toBe(realError[i])
             }
         }
-    })
+    });
 }
+
+async function run_tests() {
+    for (const name of find_files(base_dir, ".lox")) {
+        run_test(name)
+    }
+}
+
+run_tests()

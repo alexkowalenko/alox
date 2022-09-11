@@ -25,7 +25,9 @@ const single_chars: Map<string, TokenType> = new Map([
 
 const reserved_words: Map<string, TokenType> = new Map([
     ['and', TokenType.AND],
+    ['break', TokenType.BREAK],
     ['class', TokenType.CLASS],
+    ['continue', TokenType.CONTINUE],
     ['else', TokenType.ELSE],
     ['false', TokenType.FALSE],
     ['fun', TokenType.FUN],
