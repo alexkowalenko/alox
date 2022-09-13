@@ -41,7 +41,9 @@ breakStmt   -> "break" | "continue";
 block       -> "{" declaration* "}" ;
 
 expression     -> primary | unary | binary | grouping ;
-unary          -> ("-" | "!") expression;
+unary          -> ("-" | "!") unary | call;
+call           -> primary ( "(" arguments ")" )* ;
+arguments      -> expression ( "," expression )* ;
 binary         -> expression operator expression ;
 grouping       -> "(" expression ")" ;
 operator       -> "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/" | "or" | "and" | "=" ;

@@ -20,9 +20,9 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
   - [x] `for` statement.
   - [x] `break` and `continue`.
 - [ ] Functions - Chapter 10.
-  -[ ] Function calls
+  -[x] Function calls - parsing
   -[ ] Native Functions
   -[ ] Function declarations
   -[ ] Return statement
   -[ ] Lambda expressions
-- [ ] Resolution and Binding - Chapter 11
+- [ ] Resolution and Binding - Chapter 11.

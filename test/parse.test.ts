@@ -254,4 +254,25 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('call', () => {
+        const tests: TestCases[] = [
+            ['f();', 'f();'],
+            ['f(g());', 'f(g());'],
+            ['f(g()+h());', 'f((g() + h()));'],
+
+            ['f(1);', 'f(1);'],
+            ['f(1,g());', 'f(1, g());'],
+            ['f(1, g(1, h()));', 'f(1, g(1, h()));'],
+
+            ['f(1,x,y,z);', 'f(1, x, y, z);'],
+
+            //
+            ['f( ;', '', 'unexpected ;'],
+            ['f(1, ;', '', 'unexpected ;'],
+            ['f(1 1 );', '', 'unexpected <num> expecting , or ) for call expression'],
+
+        ]
+        do_tests(tests)
+    })
 })

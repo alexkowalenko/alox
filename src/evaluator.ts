@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
@@ -12,8 +12,6 @@ import { Location, TokenType } from "./token";
 export type LoxValue = number | string | boolean | null
 
 export class Evaluator extends AstVisitor<LoxValue> {
-
-
 
     constructor(private symboltable: SymbolTable<LoxValue>) {
         super()
@@ -201,6 +199,10 @@ export class Evaluator extends AstVisitor<LoxValue> {
                 return !this.check_boolean(val, e.location)
         }
         throw new RuntimeError(`unhandled unary operator ${e.prefix}`, e.location)
+    }
+
+    visitCall(e: LoxCall): LoxValue {
+        throw new Error("Method not implemented.");
     }
 
     visitBinary(e: LoxBinary): LoxValue {

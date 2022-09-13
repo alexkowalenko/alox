@@ -125,9 +125,10 @@ export type LoxPrimary = LoxIdentifier | LoxLiteral;
 export type LoxLiteral = LoxNumber | LoxString | LoxBool | LoxNil;
 
 export class LoxUnary extends LoxBase {
-    constructor(location: Location, readonly prefix: TokenType, readonly expr: LoxExpr) {
+    constructor(location: Location, readonly prefix: TokenType | undefined, readonly expr: LoxExpr) {
         super(location);
     }
+    public call?: LoxCall;
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitUnary(this)
@@ -135,6 +136,18 @@ export class LoxUnary extends LoxBase {
 
     toString(): string {
         return this.prefix + this.expr.toString();
+    }
+}
+
+export class LoxCall extends LoxBase {
+    constructor(location: Location,) {
+        super(location);
+        this.arguments = new Array<LoxExpr>();
+    }
+    public arguments: Array<LoxExpr>;
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitCall(this)
     }
 }
 
@@ -270,6 +283,8 @@ export abstract class AstVisitor<T> {
     visitUnary(e: LoxUnary): T {
         return e.expr.accept<T>(this)
     }
+
+    abstract visitCall(e: LoxCall): T;
 
     visitBinary(e: LoxBinary): T {
         e.left.accept<T>(this)

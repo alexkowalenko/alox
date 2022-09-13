@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxDeclaration, LoxExpr, LoxFor, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType } from "./token";
 import { ParseError } from "./error";
@@ -43,6 +43,9 @@ const infix_map: Map<TokenType, InfixParselet> = new Map([
     [TokenType.AND, call_binary],
     [TokenType.OR, call_binary],
     [TokenType.EQUAL, call_binary],
+    [TokenType.L_PAREN, (p: Parser, left: LoxExpr): LoxExpr => {
+        return p.call(left);
+    }]
 ])
 
 export const enum Precedence {
@@ -57,6 +60,7 @@ export const enum Precedence {
     PRODUCT,
     UNARY,
     EXPONENT,
+    CALL,
 }
 
 const precedence_map = new Map<TokenType, Precedence>([
@@ -74,7 +78,8 @@ const precedence_map = new Map<TokenType, Precedence>([
     [TokenType.ASTÉRIX, Precedence.PRODUCT],
     [TokenType.BANG, Precedence.UNARY],
     //[TokenType.MINUS, Precedence.UNARY],
-    [TokenType.EQUAL, Precedence.ASSIGNMENT]
+    [TokenType.EQUAL, Precedence.ASSIGNMENT],
+    [TokenType.L_PAREN, Precedence.CALL]
 ])
 
 export function get_precedence(t: TokenType): Precedence {
@@ -263,7 +268,7 @@ export class Parser {
      * @returns 
      */
     private expr(precedence: Precedence = Precedence.LOWEST): LoxExpr {
-        // console.log('expr')
+        //console.log('expr')
 
         // check prefix operator
         let tok = this.lexer.peek_token();
@@ -279,7 +284,7 @@ export class Parser {
         //console.log(`got infix  token: ${tok}`)
         //console.log(`compare precedence ${precedence} : ${get_precedence(tok.tok)}`)
         while (precedence < get_precedence(tok.tok)) {
-            // console.log(`do infix: ${tok}`)
+            //console.log(`do infix: ${tok}`)
             if (!infix_map.has(tok.tok)) {
                 throw new ParseError(`unexpected ${tok} in expression`, tok.loc)
             }
@@ -290,14 +295,38 @@ export class Parser {
     }
 
     unary(): LoxUnary {
-        // console.log('unary')
+        //console.log('unary')
         const token = this.lexer.get_token();
         const tok = token.tok;
         const expr = this.expr(get_precedence(tok))
-        return new LoxUnary(token.loc, tok, expr)
+        return new LoxUnary(token.loc, tok, expr);
+    }
+
+    call(left: LoxExpr): LoxUnary {
+        //console.log('call')
+        var token = this.expect(TokenType.L_PAREN)
+        var ast = new LoxCall(token.loc);
+        var next = this.lexer.peek_token();
+        while (next.tok != TokenType.R_PAREN) {
+            ast.arguments.push(this.expr());
+            next = this.lexer.peek_token();
+            if (next.tok == TokenType.COMMA) {
+                this.lexer.get_token();
+                continue;
+            }
+            if (next.tok == TokenType.R_PAREN) {
+                break;
+            }
+            throw new ParseError(`unexpected ${next.tok} expecting , or ) for call expression`, token.loc)
+        }
+        this.lexer.get_token();
+        var u = new LoxUnary(left.location, undefined, left);
+        u.call = ast;
+        return u;
     }
 
     binary(left: LoxExpr): LoxBinary {
+        //console.log('binary')
         const token = this.lexer.get_token();
         const operator = token.tok;
         const precedence = get_precedence(operator);
@@ -306,7 +335,7 @@ export class Parser {
     }
 
     group(): LoxGroup {
-        // console.log(`parseGroup`)
+        // console.log(`group`)
         const token = this.lexer.get_token() // '('
         const expr = this.expr(Precedence.LOWEST)
         const group = new LoxGroup(token.loc, expr)
