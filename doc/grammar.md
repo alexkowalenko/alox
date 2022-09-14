@@ -20,9 +20,13 @@ This is the grammar which is implemented:
 program        → declaration* EOF ;
 
 declaration    -> varDecl
-               | statement ;
+                | funDecl
+                | statement ;
 
 varDecl     -> "var" IDENTIFIER ("=" expression)? ";" ;
+funDecl     -> "fun" function ;
+function    -> IDENTIFIER "(" parameters? ")" block ;
+parameters  -> IDENTIFIER ( "," IDENTIFIER )* ;
 
 statement   → exprStmt
             | ifStmt 

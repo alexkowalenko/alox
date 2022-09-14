@@ -4,42 +4,73 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable, LoxFun } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
 
 export type LoxValue = number | string | boolean | null | LoxCallable
 
+class LoxFunction extends LoxCallable {
+
+    constructor(readonly fun: LoxFun) {
+        super();
+    }
+
+    call(interp: Evaluator, args: LoxValue[]): LoxValue {
+        if (this.fun.args.length != args.length) {
+            throw new RuntimeError(`function ${this.fun.name} called with ${args.length} arguments, expecting ${this.fun.args.length}`,
+                this.fun.location)
+        }
+        let prev = interp.symboltable;
+        interp.symboltable = new SymbolTable(interp.symboltable);
+        for (let i = 0; i < args.length; i++) {
+            interp.symboltable.set(this.fun.args[i].id, args[i])
+        }
+        let val: LoxValue = null;
+        try {
+            val = interp.visitBlock(this.fun.body!)
+        }
+        finally {
+            interp.symboltable = prev;
+        }
+        return val;
+    }
+
+    toString(): string {
+        return `<fn ${this.fun.name}>`
+    }
+}
+
+function check_number(v: LoxValue, where: Location): number {
+    if (typeof v != "number") {
+        throw new RuntimeError("value must be a number", where)
+    }
+    return v
+}
+
+function check_string(v: LoxValue, where: Location): string {
+    if (typeof v != "string") {
+        throw new RuntimeError("value must be a string", where)
+    }
+    return v
+}
+
+function check_boolean(v: LoxValue, where: Location): boolean {
+    if (typeof v != "boolean") {
+        throw new RuntimeError("value must be a boolean", where)
+    }
+    return v
+}
+
 export class Evaluator extends AstVisitor<LoxValue> {
 
-    constructor(private symboltable: SymbolTable<LoxValue>) {
+    constructor(public symboltable: SymbolTable<LoxValue>) {
         super()
     }
 
     eval(expr: LoxExpr): LoxValue {
         return expr.accept(this)
-    }
-
-    private check_number(v: LoxValue, where: Location): number {
-        if (typeof v != "number") {
-            throw new RuntimeError("value must be a number", where)
-        }
-        return v
-    }
-
-    private check_string(v: LoxValue, where: Location): string {
-        if (typeof v != "string") {
-            throw new RuntimeError("value must be a string", where)
-        }
-        return v
-    }
-
-    private check_boolean(v: LoxValue, where: Location): boolean {
-        if (typeof v != "boolean") {
-            throw new RuntimeError("value must be a boolean", where)
-        }
-        return v
     }
 
     /**
@@ -66,6 +97,12 @@ export class Evaluator extends AstVisitor<LoxValue> {
             return val;
         }
         throw new RuntimeError(`variable ${v.ident.toString()} already defined`, v.location)
+    }
+
+    visitFun(f: LoxFun): LoxValue {
+        const val = new LoxFunction(f);
+        this.symboltable.set(f.name.id, val);
+        return val;
     }
 
     assignment(left: LoxExpr, right: LoxExpr): LoxValue {
@@ -166,7 +203,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
         if (val === null) {
             console.log("nil")
         } else {
-            console.log(val)
+            console.log(val.toString())
         }
         return val
     }
@@ -194,9 +231,9 @@ export class Evaluator extends AstVisitor<LoxValue> {
         const val = e.expr.accept(this)
         switch (e.prefix) {
             case TokenType.MINUS:
-                return - this.check_number(val, e.location)
+                return - check_number(val, e.location)
             case TokenType.BANG:
-                return !this.check_boolean(val, e.location)
+                return !check_boolean(val, e.location)
         }
         if (val instanceof LoxCallable) {
             if (e.call) {
@@ -204,7 +241,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
                 for (var a of e.call.arguments) {
                     args.push(a.accept(this));
                 }
-                return (val as LoxCallable).call(this.symboltable, args);
+                return (val as LoxCallable).call(this, args);
             }
         } else {
             throw new RuntimeError(`can't call ${e.expr}`, e.expr.location)
@@ -234,31 +271,31 @@ export class Evaluator extends AstVisitor<LoxValue> {
             // The Four Operators of the Arithmetic.
             case TokenType.PLUS:
                 if (typeof left === "number")
-                    return left + this.check_number(right, e.right.location)
+                    return left + check_number(right, e.right.location)
                 else if (typeof left === "string")
-                    return this.check_string(left, e.left.location) + this.check_string(right, e.right.location)
+                    return check_string(left, e.left.location) + check_string(right, e.right.location)
                 else {
                     throw new RuntimeError(`can't apply ${e.operator} to ${left}`, e.left.location)
                 }
 
             case TokenType.MINUS:
-                return this.check_number(left, e.left.location) - this.check_number(right, e.right.location)
+                return check_number(left, e.left.location) - check_number(right, e.right.location)
 
             case TokenType.ASTÉRIX:
-                return this.check_number(left, e.left.location) * this.check_number(right, e.right.location)
+                return check_number(left, e.left.location) * check_number(right, e.right.location)
 
             case TokenType.SLASH:
-                return this.check_number(left, e.left.location) / this.check_number(right, e.right.location)
+                return check_number(left, e.left.location) / check_number(right, e.right.location)
 
             // Relational
             case TokenType.LESS:
-                return this.check_number(left, e.left.location) < this.check_number(right, e.right.location)
+                return check_number(left, e.left.location) < check_number(right, e.right.location)
             case TokenType.LESS_EQUAL:
-                return this.check_number(left, e.left.location) <= this.check_number(right, e.right.location)
+                return check_number(left, e.left.location) <= check_number(right, e.right.location)
             case TokenType.GREATER:
-                return this.check_number(left, e.left.location) > this.check_number(right, e.right.location)
+                return check_number(left, e.left.location) > check_number(right, e.right.location)
             case TokenType.GREATER_EQUAL:
-                return this.check_number(left, e.left.location) >= this.check_number(right, e.right.location)
+                return check_number(left, e.left.location) >= check_number(right, e.right.location)
             case TokenType.EQUAL_EQUAL:
                 return left === right // strict non-javascript equals
             case TokenType.BANG_EQUAL:

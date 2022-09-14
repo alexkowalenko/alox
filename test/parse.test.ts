@@ -275,4 +275,25 @@ describe('Parser', () => {
         ]
         do_tests(tests)
     })
+
+    it('function', () => {
+        const tests: TestCases[] = [
+            ['fun f() {}', 'fun f(){};'],
+            ['fun f(a) {}', 'fun f(a){};'],
+            ['fun f(a,b) {}', 'fun f(a, b){};'],
+
+            ['fun f() {print 1;}', 'fun f(){print 1;};'],
+            ['fun f() {print 1;print 2;}', 'fun f(){print 1;print 2;};'],
+            ['fun f(a) {print a;}', 'fun f(a){print a;};'],
+            ['fun f(a,b) {print a;print b;}', 'fun f(a, b){print a;print b;};'],
+
+            // Errors
+            ['fun f ) {}', '', "unexpected ), expecting ("],
+            ['fun f( {}', '', "unexpected {, expecting <ident>"],
+            ['fun f(a, ) {}', '', "unexpected ), expecting <ident>"],
+            ['fun f() }', '', "unexpected <eof>, expecting }"],
+        ]
+        do_tests(tests)
+    })
+
 })

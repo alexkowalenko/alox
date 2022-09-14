@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxValue } from "./evaluator";
+import { Evaluator, LoxValue } from "./evaluator";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token"
 
@@ -35,7 +35,7 @@ export class LoxProgram extends LoxBase {
     }
 }
 
-export type LoxDeclaration = LoxVar | LoxStatement;
+export type LoxDeclaration = LoxVar | LoxFun | LoxStatement;
 
 export class LoxVar extends LoxBase {
     constructor(location: Location, readonly ident: LoxIdentifier) {
@@ -45,6 +45,19 @@ export class LoxVar extends LoxBase {
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitVar(this)
+    }
+}
+
+export class LoxFun extends LoxBase {
+    constructor(location: Location, readonly name: LoxIdentifier) {
+        super(location);
+        this.args = new Array<LoxIdentifier>;
+    }
+    public args: Array<LoxIdentifier>;
+    public body?: LoxBlock;
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitFun(this)
     }
 }
 
@@ -266,6 +279,7 @@ export abstract class AstVisitor<T> {
     abstract visitProgram(prog: LoxProgram): T // Decide what to do here in derived classes
 
     abstract visitVar(expr: LoxVar): T;
+    abstract visitFun(f: LoxFun): T;
 
     abstract visitIf(expr: LoxIf): T;
     abstract visitWhile(expr: LoxWhile): T;
@@ -310,8 +324,9 @@ export abstract class AstVisitor<T> {
 }
 
 export abstract class LoxCallable {
-    abstract call(env: SymbolTable<LoxValue>, args: Array<LoxValue>): LoxValue;
+    abstract call(interp: Evaluator, args: Array<LoxValue>): LoxValue;
+
     toString(): string {
-        return '<fn>'
+        return '<native fn>'
     }
 }

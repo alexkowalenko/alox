@@ -22,7 +22,7 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
 - [ ] Functions - Chapter 10.
   -[x] Function calls - parsing
   -[x] Native Functions
-  -[ ] Function declarations
+  -[x] Function declarations
   -[ ] Return statement
   -[ ] Lambda expressions
 - [ ] Resolution and Binding - Chapter 11.

@@ -1,0 +1,6 @@
+fun f(a, b) {
+  print a;
+  print b;
+}
+
+f(1, 2, 3, 4); // error: function f called with 4 arguments, expecting 2

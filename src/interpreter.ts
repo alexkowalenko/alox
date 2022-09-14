@@ -32,7 +32,7 @@ export class Interpreter {
 
     private setup_stdlib() {
         this.symboltable.set("clock", new class extends LoxCallable {
-            call(env: SymbolTable<LoxValue>, args: LoxValue[]): LoxValue {
+            call(i: Evaluator, args: LoxValue[]): LoxValue {
                 return Date.now();
             }
         })

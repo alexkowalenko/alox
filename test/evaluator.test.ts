@@ -271,4 +271,19 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
+    it('function', () => {
+        const tests: TestCases[] = [
+            ["fun f() {} f();", null],
+            ["fun f(a) {a;} f(1);", 1],
+            ["fun f(a) {a;} f(1+3);", 4],
+            ["fun g(a,b) {a+ b;} g(1,3);", 4],
+            ["g(f(3),3);", 6],
+            // errors
+            ["f(1,2);", null, "function f called with 2 arguments, expecting 1"],
+            ["f();", null, "function f called with 0 arguments, expecting 1"],
+        ]
+        do_tests(tests)
+    })
+
+
 })
