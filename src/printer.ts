@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 
 import { Writable } from 'stream'
 
@@ -65,7 +65,7 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitFor(e: LoxFor): string {
-        var buf = "for ( ";
+        let buf = "for ( ";
         if (e.init) {
             buf += e.init.accept(this)
         }
@@ -87,6 +87,14 @@ export class Printer extends AstVisitor<string> {
 
     visitBreak(expr: LoxBreak): string {
         return expr.what;
+    }
+
+    visitReturn(e: LoxReturn): string {
+        let buf = "return";
+        if (e.expr) {
+            buf += " " + e.expr.accept(this);
+        }
+        return buf;
     }
 
     visitBlock(expr: LoxBlock): string {

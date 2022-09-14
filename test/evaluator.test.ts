@@ -23,10 +23,11 @@ function do_tests(tests: TestCases[]) {
         }
         catch (e) {
             if (e instanceof LoxError) {
-                //console.log(`token test: ${test[0]}  ${test[1]}`)
+                // console.log(`token test: ${test[0]}  ${test[1]}`)
                 expect(e.message).toBe(test[2])
                 continue
             }
+            console.log(`expect: ${test[0]}`)
             throw e
         }
     }
@@ -281,6 +282,18 @@ describe('Evaluator', () => {
             // errors
             ["f(1,2);", null, "function f called with 2 arguments, expecting 1"],
             ["f();", null, "function f called with 0 arguments, expecting 1"],
+        ]
+        do_tests(tests)
+    })
+
+    it('return', () => {
+        const tests: TestCases[] = [
+            ["fun f() {return 1;} f();", 1],
+            ["fun f(a) {return a;} f(1);", 1],
+            ["fun g(a,b) {return a+ b;} g(1,3);", 4],
+            ["g(f(3),3);", 6],
+            // errors
+            ["return;", null, "no enclosing function to return from"],
         ]
         do_tests(tests)
     })

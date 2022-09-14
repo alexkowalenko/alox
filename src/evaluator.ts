@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable, LoxFun } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable, LoxFun, LoxReturn } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
@@ -30,6 +30,13 @@ class LoxFunction extends LoxCallable {
         let val: LoxValue = null;
         try {
             val = interp.visitBlock(this.fun.body!)
+        }
+        catch (e) {
+            if (e instanceof LoxReturn) {
+                val = e.value;
+            } else {
+                throw e;
+            }
         }
         finally {
             interp.symboltable = prev;
@@ -81,7 +88,14 @@ export class Evaluator extends AstVisitor<LoxValue> {
     visitProgram(prog: LoxProgram): LoxValue {
         let val = null
         for (const stat of prog.statements) {
-            val = stat.accept(this)
+            try {
+                val = stat.accept(this)
+            } catch (e) {
+                if (e instanceof LoxReturn) {
+                    throw new RuntimeError(`no enclosing function to return from`, e.location)
+                }
+                throw e; // rethrow
+            }
         }
         return val
     }
@@ -210,6 +224,13 @@ export class Evaluator extends AstVisitor<LoxValue> {
 
     visitBreak(e: LoxBreak): LoxValue {
         throw e
+    }
+
+    visitReturn(e: LoxReturn): LoxValue {
+        if (e.expr) {
+            e.value = e.expr.accept(this);
+        }
+        throw e;
     }
 
     visitBlock(expr: LoxBlock): LoxValue {

@@ -34,7 +34,8 @@ statement   → exprStmt
             | forStmt
             | printStmt 
             | breakStmt
-            | block;
+            | returnStmt
+            | block ;
 
 exprStmt    → expression ";" ;
 ifStmt      -> 'if' '(' expression ')' statement ('else' statement)? ;
@@ -42,6 +43,7 @@ whileStmt   -> 'while' '(' expression ')' statement ;
 forStmt     -> 'for' '(' (varDecl | statement)? ';' (expression)? ';' (expression)? ')' statement ;
 printStmt   → "print" expression ";" ;
 breakStmt   -> "break" | "continue";
+returnStmt  -> "return" (expression)?
 block       -> "{" declaration* "}" ;
 
 expression     -> primary | unary | binary | grouping ;

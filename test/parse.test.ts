@@ -296,4 +296,17 @@ describe('Parser', () => {
         do_tests(tests)
     })
 
+    it('return', () => {
+        const tests: TestCases[] = [
+            ['return;', 'return;'],
+            ['return 2;', 'return 2;'],
+            ['return 2 * 8;', 'return (2 * 8);'],
+
+            // Errors
+            ['return', '', 'unexpected <eof>'],
+            ['return 2 2;', '', 'unexpected number<2>, expecting ;'],
+        ]
+        do_tests(tests)
+    })
+
 })

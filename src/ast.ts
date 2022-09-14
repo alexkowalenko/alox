@@ -61,7 +61,7 @@ export class LoxFun extends LoxBase {
     }
 }
 
-export type LoxStatement = LoxExpr | LoxIf | LoxWhile | LoxFor | LoxPrint | LoxBreak | LoxBlock;
+export type LoxStatement = LoxExpr | LoxIf | LoxWhile | LoxFor | LoxPrint | LoxBreak | LoxReturn | LoxBlock;
 
 export class LoxIf extends LoxBase {
     constructor(location: Location, readonly expr: LoxExpr, readonly then: LoxStatement) {
@@ -121,6 +121,17 @@ export class LoxBreak extends LoxBase {
     }
 }
 
+export class LoxReturn extends LoxBase {
+    constructor(location: Location) {
+        super(location);
+    }
+    public expr?: LoxExpr
+    public value: LoxValue = null;
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitReturn(this)
+    }
+}
 
 export class LoxBlock extends LoxBase {
     constructor(location: Location) {
@@ -290,6 +301,7 @@ export abstract class AstVisitor<T> {
     }
 
     abstract visitBreak(expr: LoxBreak): T;
+    abstract visitReturn(e: LoxReturn): T;
     abstract visitBlock(expr: LoxBlock): T;
 
     visitExpr(expr: LoxExpr): T {

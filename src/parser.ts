@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType } from "./token";
 import { ParseError } from "./error";
@@ -99,6 +99,7 @@ const stat_map = new Map<TokenType, PrefixParselet>([
     [TokenType.FOR, (p: Parser) => { return p.for() }],
     [TokenType.BREAK, (p: Parser) => { return p.break() }],
     [TokenType.CONTINUE, (p: Parser) => { return p.break() }],
+    [TokenType.RETURN, (p: Parser) => { return p.ret() }],
 ])
 
 export class Parser {
@@ -274,6 +275,17 @@ export class Parser {
         }
         this.expect(TokenType.SEMICOLON)
         return new LoxBreak(tok.loc, tok.tok);
+    }
+
+    public ret(): LoxReturn {
+        let tok = this.lexer.get_token();
+        let ast = new LoxReturn(tok.loc);
+        let next = this.lexer.peek_token()
+        if (next.tok != TokenType.SEMICOLON) {
+            ast.expr = this.expr();
+        }
+        this.expect(TokenType.SEMICOLON)
+        return ast;
     }
 
     public block(): LoxBlock {
