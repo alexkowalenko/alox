@@ -4,6 +4,8 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
+import { LoxValue } from "./evaluator";
+import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token"
 
 abstract class LoxBase {
@@ -305,4 +307,11 @@ export abstract class AstVisitor<T> {
     abstract visitString(expr: LoxString): T;
     abstract visitBool(expr: LoxBool): T;
     abstract visitNil(expr: LoxNil): T;
+}
+
+export abstract class LoxCallable {
+    abstract call(env: SymbolTable<LoxValue>, args: Array<LoxValue>): LoxValue;
+    toString(): string {
+        return '<fn>'
+    }
 }

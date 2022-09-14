@@ -4,12 +4,12 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
 
-export type LoxValue = number | string | boolean | null
+export type LoxValue = number | string | boolean | null | LoxCallable
 
 export class Evaluator extends AstVisitor<LoxValue> {
 
@@ -198,8 +198,20 @@ export class Evaluator extends AstVisitor<LoxValue> {
             case TokenType.BANG:
                 return !this.check_boolean(val, e.location)
         }
-        throw new RuntimeError(`unhandled unary operator ${e.prefix}`, e.location)
+        if (val instanceof LoxCallable) {
+            if (e.call) {
+                var args = new Array<LoxValue>;
+                for (var a of e.call.arguments) {
+                    args.push(a.accept(this));
+                }
+                return (val as LoxCallable).call(this.symboltable, args);
+            }
+        } else {
+            throw new RuntimeError(`can't call ${e.expr}`, e.expr.location)
+        }
+        throw new Error("Method not implemented.");
     }
+
 
     visitCall(e: LoxCall): LoxValue {
         throw new Error("Method not implemented.");

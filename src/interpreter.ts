@@ -4,6 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
+import { LoxCallable } from "./ast";
 import { Evaluator, LoxValue } from "./evaluator";
 import { Lexer } from "./lexer";
 import { Parser } from "./parser";
@@ -22,11 +23,20 @@ export class Interpreter {
         this.parser = new Parser(this.lexer);
         this.symboltable = new SymbolTable<LoxValue>;
         this.evaluator = new Evaluator(this.symboltable)
+        this.setup_stdlib();
     };
     private lexer: Lexer;
     private parser: Parser;
     private evaluator: Evaluator;
     private symboltable: SymbolTable<LoxValue>;
+
+    private setup_stdlib() {
+        this.symboltable.set("clock", new class extends LoxCallable {
+            call(env: SymbolTable<LoxValue>, args: LoxValue[]): LoxValue {
+                return Date.now();
+            }
+        })
+    }
 
     do(line: string): LoxValue {
         const expr = this.parser.parse(line)

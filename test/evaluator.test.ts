@@ -4,27 +4,21 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Lexer } from '../src/lexer'
+
 import { LoxError } from '../src/error';
-import { Parser } from '../src/parser';
-import { Evaluator, LoxValue } from '../src/evaluator';
-import { Printer } from '../src/printer';
-import { SymbolTable } from '../src/symboltable';
+import { LoxValue } from '../src/evaluator';
+import { Interpreter, Options } from '../src/interpreter';
 
 type TestCases = [string, LoxValue, string?]
 
 function do_tests(tests: TestCases[]) {
-    const lexer = new Lexer();
-    const parser = new Parser(lexer);
-    const symboltable = new SymbolTable<LoxValue>;
-    const evaluator = new Evaluator(symboltable);
+    const opts = new Options;
+    opts.silent = true;
+    const interpreter = new Interpreter(opts);
 
     for (const test of tests) {
         try {
-            const expr = parser.parse(test[0])
-            const val = evaluator.eval(expr)
-            //const printer: Printer = new Printer();
-            //console.log(printer.print(expr))
+            const val = interpreter.do(test[0]);
             expect(val).toBe(test[1])
         }
         catch (e) {
@@ -264,7 +258,15 @@ describe('Evaluator', () => {
             ["for(x = 1; x < 10; x = x + 1) {continue; x = 30;} x;", 10],
 
             ["x = 1; while(true) { x=x+1; if(x>10) break; } x;", 11],
-            // check no leakage of variable into outer environment
+        ]
+        do_tests(tests)
+    })
+
+    it('stdlib', () => {
+        const tests: TestCases[] = [
+            ["clock() - clock();", 0],
+            // errors
+            ["tick() - clock();", 0, "identifier tick not found"],
         ]
         do_tests(tests)
     })
