@@ -13,7 +13,7 @@ export type LoxValue = number | string | boolean | null | LoxCallable
 
 class LoxFunction extends LoxCallable {
 
-    constructor(readonly fun: LoxFun) {
+    constructor(readonly fun: LoxFun, readonly closure: SymbolTable<LoxValue>) {
         super();
     }
 
@@ -22,8 +22,8 @@ class LoxFunction extends LoxCallable {
             throw new RuntimeError(`function ${this.fun.name} called with ${args.length} arguments, expecting ${this.fun.args.length}`,
                 this.fun.location)
         }
-        let prev = interp.symboltable;
-        interp.symboltable = new SymbolTable(interp.symboltable);
+        let prev = interp.symboltable
+        interp.symboltable = new SymbolTable(this.closure);
         for (let i = 0; i < args.length; i++) {
             interp.symboltable.set(this.fun.args[i].id, args[i])
         }
@@ -39,7 +39,7 @@ class LoxFunction extends LoxCallable {
             }
         }
         finally {
-            interp.symboltable = prev;
+            interp.symboltable = prev
         }
         return val;
     }
@@ -114,7 +114,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     visitFun(f: LoxFun): LoxValue {
-        const val = new LoxFunction(f);
+        const val = new LoxFunction(f, this.symboltable);
         this.symboltable.set(f.name.id, val);
         return val;
     }

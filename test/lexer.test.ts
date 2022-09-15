@@ -104,6 +104,7 @@ describe('Lexer', () => {
             ['🍎1', TokenType.IDENT, '🍎1'],
             ['a_', TokenType.IDENT, 'a_'],
             ['_', TokenType.IDENT, '_'],
+            ['a_', TokenType.IDENT, 'a_'],
         ]
         do_tests(tests)
     })
