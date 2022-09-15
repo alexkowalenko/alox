@@ -57,11 +57,11 @@ export class Lexer {
     }
 
     private line: LineReader;
-    private spare_token: Token | undefined;
+    private spare_tokens = new Array<Token>;
 
     public set_line(line: string) {
         this.line = new LineReader(line)
-        this.spare_token = undefined;
+        this.spare_tokens = new Array<Token>;
     }
 
     private get_identifier(c: string): Token {
@@ -113,10 +113,9 @@ export class Lexer {
 
     public get_token(): Token {
 
-        if (this.spare_token !== undefined) {
-            const ret = this.spare_token;
-            this.spare_token = undefined;
-            return ret;
+        if (this.spare_tokens.length !== 0) {
+            const ret = this.spare_tokens.pop();
+            return ret!;
         }
 
         const char = this.line.get_char_filter()
@@ -187,10 +186,14 @@ export class Lexer {
         return new Token(token, this.line.get_location())
     }
 
-    public peek_token() {
-        if (this.spare_token === undefined) {
-            this.spare_token = this.get_token();
+    public peek_token(): Token {
+        if (this.spare_tokens.length === 0) {
+            this.spare_tokens.push(this.get_token());
         }
-        return this.spare_token;
+        return this.spare_tokens.at(- 1)!
+    }
+
+    public push_token(t: Token): void {
+        this.spare_tokens.push(t);
     }
 }

@@ -298,5 +298,14 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
+    it('lambda', () => {
+        const tests: TestCases[] = [
+            ['fun(){return "a";}();', 'a'],
+            ['var f = fun(){return "a";}; f();', 'a'],
+            ['fun(){return fun(a){return a;};}()(2);', 2],
+        ]
+        do_tests(tests)
+    })
+
 
 })

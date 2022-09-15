@@ -40,7 +40,11 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitFun(f: LoxFun): string {
-        var buf = `fun ${f.name}(`
+        var buf = 'fun';
+        if (f.name.id !== 'λ') {
+            buf += ' ' + f.name.id;
+        }
+        buf += '('
         for (var i = 0; i < f.args.length; i++) {
             buf += f.args[i].accept(this)
             if (i < f.args.length - 1) {

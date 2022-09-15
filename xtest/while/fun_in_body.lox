@@ -1,2 +1,2 @@
 
-while (true) fun foo() {} // error: unexpected fun
+while (true) fun foo() {} // error: unexpected ident<foo>, expecting (

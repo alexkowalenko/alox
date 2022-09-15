@@ -47,8 +47,9 @@ returnStmt  -> "return" (expression)?
 block       -> "{" declaration* "}" ;
 
 expression     -> primary | unary | binary | grouping ;
-unary          -> ("-" | "!") unary | call;
+unary          -> ("-" | "!") unary | call | lambda
 call           -> primary ( "(" arguments ")" )* ;
+lambda         -> "fun" "(" parameters? ")" block ;
 arguments      -> expression ( "," expression )* ;
 binary         -> expression operator expression ;
 grouping       -> "(" expression ")" ;

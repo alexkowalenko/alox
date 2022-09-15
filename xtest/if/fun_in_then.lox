@@ -1,2 +1,2 @@
 
-if (true) fun foo() {} // error: unexpected fun
+if (true) fun foo() {} // error: unexpected ident<foo>, expecting (

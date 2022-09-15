@@ -23,6 +23,7 @@ const prefix_map: Map<TokenType, PrefixParselet> = new Map([
     [TokenType.L_PAREN, (p: Parser) => { return p.group() }],
     [TokenType.MINUS, (p: Parser) => { return p.unary() }],
     [TokenType.BANG, (p: Parser) => { return p.unary() }],
+    [TokenType.FUN, (p: Parser) => { return p.lambda() }],
 ])
 
 type InfixParselet = (P: Parser, left: LoxExpr) => LoxExpr;
@@ -130,7 +131,16 @@ export class Parser {
             case TokenType.VAR:
                 return this.var();
             case TokenType.FUN:
-                return this.fun();
+                const funct = this.lexer.get_token();
+                const next = this.lexer.peek_token();
+                if (next.tok == TokenType.IDENT) {
+                    // this is a function;
+                    this.lexer.push_token(funct);
+                    return this.fun();
+                }
+                // this is a lambda function - fallthrough
+                this.lexer.push_token(funct);
+            // fallthrough
             default:
                 return this.statement();
         }
@@ -152,28 +162,7 @@ export class Parser {
     private fun(): LoxFun {
         var tok = this.expect(TokenType.FUN)
         let id = this.identifier()
-        let ast = new LoxFun(tok.loc, id);
-        this.expect(TokenType.L_PAREN)
-        tok = this.lexer.peek_token();
-        while (tok.tok != TokenType.R_PAREN) {
-            let id = this.identifier();
-            ast.args.push(id);
-            tok = this.lexer.peek_token();
-            if (tok.tok == TokenType.COMMA) {
-                this.lexer.get_token();
-                continue;
-            }
-            if (tok.tok == TokenType.R_PAREN) {
-                break;
-            }
-            throw new ParseError(`unexpected token ${tok.tok}, expecting , or )`, tok.loc)
-        }
-        this.expect(TokenType.R_PAREN)
-        if (ast.args.length > MAX_PARAMS) {
-            throw new ParseError(`exceeded maximum numbers of parameters`, tok.loc)
-        }
-        ast.body = this.block();
-        return ast;
+        return this.lambda_body(id);
     }
 
     private statement(): LoxStatement | null {
@@ -369,6 +358,36 @@ export class Parser {
         var u = new LoxUnary(left.location, undefined, left);
         u.call = ast;
         return u;
+    }
+
+    lambda(): LoxFun {
+        var tok = this.expect(TokenType.FUN)
+        return this.lambda_body(new LoxIdentifier(tok.loc, "λ"))
+    }
+
+    lambda_body(id: LoxIdentifier): LoxFun {
+        let ast = new LoxFun(id.location, id);
+        this.expect(TokenType.L_PAREN)
+        let tok = this.lexer.peek_token();
+        while (tok.tok != TokenType.R_PAREN) {
+            let id = this.identifier();
+            ast.args.push(id);
+            tok = this.lexer.peek_token();
+            if (tok.tok == TokenType.COMMA) {
+                this.lexer.get_token();
+                continue;
+            }
+            if (tok.tok == TokenType.R_PAREN) {
+                break;
+            }
+            throw new ParseError(`unexpected token ${tok.tok}, expecting , or )`, tok.loc)
+        }
+        this.expect(TokenType.R_PAREN)
+        if (ast.args.length > MAX_PARAMS) {
+            throw new ParseError(`exceeded maximum numbers of parameters`, tok.loc)
+        }
+        ast.body = this.block();
+        return ast;
     }
 
     binary(left: LoxExpr): LoxBinary {

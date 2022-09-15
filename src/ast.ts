@@ -147,7 +147,7 @@ export class LoxBlock extends LoxBase {
 }
 
 export type LoxExpr = LoxPrimary | LoxUnary | LoxBinary | LoxGroup;
-export type LoxPrimary = LoxIdentifier | LoxLiteral;
+export type LoxPrimary = LoxIdentifier | LoxLiteral | LoxFun;
 export type LoxLiteral = LoxNumber | LoxString | LoxBool | LoxNil;
 
 export class LoxUnary extends LoxBase {

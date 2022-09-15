@@ -309,4 +309,13 @@ describe('Parser', () => {
         do_tests(tests)
     })
 
+    it('lambda', () => {
+        const tests: TestCases[] = [
+            ['fun(){return "a";}();', 'fun(){return "a";}();'],
+            ['var f = fun(){return "a";};', 'var f = fun(){return \"a\";};'],
+            ['fun(){return fun(a){return a;};}()(2);', 'fun(){return fun(a){return a;};}()(2);'],
+        ]
+        do_tests(tests)
+    })
+
 })
