@@ -77,7 +77,7 @@ function do_file(file: string, opts: Options) {
     try {
         let val = interpreter.do(content);
         if (!opts.silent) {
-            console.log(`": ${interpreter.pretty_print(val)}`)
+            console.log(`: ${interpreter.pretty_print(val)}`)
         }
     }
     catch (e) {

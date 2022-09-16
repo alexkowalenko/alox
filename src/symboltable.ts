@@ -25,6 +25,16 @@ export class SymbolTable<T> {
         }
     }
 
+    assign_at(depth: number, name: string, value: T): void {
+        if (depth === 0) {
+            if (this.table.has(name)) {
+                this.table.set(name, value);
+                return
+            }
+        }
+        this.enclosing?.assign_at(depth - 1, name, value)
+    }
+
     get(name: string): T | undefined {
         if (this.table.has(name)) {
             return this.table.get(name)
@@ -33,6 +43,13 @@ export class SymbolTable<T> {
             return this.enclosing.get(name)
         }
         return undefined
+    }
+
+    get_at(depth: number, name: string): T | undefined {
+        if (depth == 0) {
+            return this.table.get(name);
+        }
+        return this.enclosing?.get_at(depth - 1, name)
     }
 
     has(name: string): boolean {

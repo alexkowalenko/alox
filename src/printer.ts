@@ -6,8 +6,6 @@
 
 import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 
-import { Writable } from 'stream'
-
 export class Printer extends AstVisitor<string> {
 
     constructor(private newline = "", private indent = 0) { super() }

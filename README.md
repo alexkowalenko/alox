@@ -26,5 +26,12 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
   - [x] `return` statement.
   - [x] Simple lexical closures
   - [x] Lambda expressions `fun(){}`
-- [ ] Full closures - Chapter 11 - Resolution and Binding
-- [ ] Classes.
+- [x] Full closures - Chapter 11 - Resolution and Binding
+- [ ] Classes - Chapter 12.
+  - [ ] Definitions
+  - [ ] Creation
+  - [ ] Properties
+  - [ ] Methods
+  - [ ] this
+  - [ ] Constructors
+- [ ] Inheritance - Chapter 13.

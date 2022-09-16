@@ -75,6 +75,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
     constructor(public symboltable: SymbolTable<LoxValue>) {
         super()
     }
+    private locals: Map<LoxExpr, number> = new Map;
 
     eval(expr: LoxExpr): LoxValue {
         return expr.accept(this)
@@ -128,9 +129,12 @@ export class Evaluator extends AstVisitor<LoxValue> {
         //console.log(`assign to ${var_name}.`)
         //this.symboltable.dump();
         let val = right.accept(this);
-        if (this.symboltable.has(var_name)) {
-            this.symboltable.assign(var_name, val)
-            return val
+        if (this.locals.has(left)) {
+            let depth = this.locals.get(left)
+            if (depth !== undefined) {
+                this.symboltable.assign_at(depth, var_name, val)
+                return val
+            }
         }
         throw new RuntimeError(`undefined variable ${left.toString()}`, left.location)
     }
@@ -269,7 +273,6 @@ export class Evaluator extends AstVisitor<LoxValue> {
         throw new Error("Method not implemented.");
     }
 
-
     visitCall(e: LoxCall): LoxValue {
         throw new Error("Method not implemented.");
     }
@@ -336,11 +339,24 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     visitIdentifier(e: LoxIdentifier): LoxValue {
-        let val = this.symboltable.get(e.id)
-        if (val == undefined) {
-            throw new RuntimeError(`identifier ${e.id} not found`, e.location);
+        // console.log("eval id: %s", e.id)
+        if (this.locals.has(e)) {
+            var depth = this.locals.get(e)
+            if (depth !== undefined) {
+                let val = this.symboltable.get_at(depth, e.id)
+                if (val !== undefined) {
+                    return val;
+                }
+            }
         }
-        return val
+
+        // last effort to resolve function names used before declared,
+        // LOX doesn't have a forward statement. 
+        let val = this.symboltable.get(e.id);
+        if (val !== undefined) {
+            return val;
+        }
+        throw new RuntimeError(`identifier ${e.id} not found`, e.location);
     }
 
     visitNumber(expr: LoxNumber): LoxValue {
@@ -368,4 +384,9 @@ export class Evaluator extends AstVisitor<LoxValue> {
         }
         return true
     }
+
+    public resolve(expr: LoxExpr, depth: number) {
+        this.locals.set(expr, depth)
+    }
+
 }

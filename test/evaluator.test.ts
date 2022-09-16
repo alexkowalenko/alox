@@ -9,9 +9,9 @@ import { LoxError } from '../src/error';
 import { LoxValue } from '../src/evaluator';
 import { Interpreter, Options } from '../src/interpreter';
 
-type TestCases = [string, LoxValue, string?]
+export type TestCases = [string, LoxValue, string?]
 
-function do_tests(tests: TestCases[]) {
+export function do_tests(tests: TestCases[]) {
     const opts = new Options;
     opts.silent = true;
     const interpreter = new Interpreter(opts);

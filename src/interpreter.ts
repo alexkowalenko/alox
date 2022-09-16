@@ -4,6 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
+import { Analyser } from "./analyser";
 import { LoxCallable } from "./ast";
 import { Evaluator, LoxValue } from "./evaluator";
 import { Lexer } from "./lexer";
@@ -19,14 +20,16 @@ export class Options {
 
 export class Interpreter {
     constructor(private readonly options: Options) {
-        this.lexer = new Lexer();
+        this.lexer = new Lexer;
         this.parser = new Parser(this.lexer);
         this.symboltable = new SymbolTable<LoxValue>;
-        this.evaluator = new Evaluator(this.symboltable)
+        this.evaluator = new Evaluator(this.symboltable);
+        this.analyser = new Analyser(this.evaluator);
         this.setup_stdlib();
     };
     private lexer: Lexer;
     private parser: Parser;
+    private analyser: Analyser;
     private evaluator: Evaluator;
     private symboltable: SymbolTable<LoxValue>;
 
@@ -36,6 +39,7 @@ export class Interpreter {
                 return Date.now();
             }
         })
+        this.analyser.define("clock")
     }
 
     do(line: string): LoxValue {
@@ -47,6 +51,7 @@ export class Interpreter {
         if (this.options.parseOnly) {
             return null;
         }
+        this.analyser.analyse(expr);
         const val = this.evaluator.eval(expr)
         return val;
     }

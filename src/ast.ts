@@ -25,14 +25,6 @@ export class LoxProgram extends LoxBase {
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitProgram(this)
     }
-
-    toString(): string {
-        let result = "";
-        for (let stat of this.statements) {
-            result += stat.toString() + ';';
-        }
-        return result;
-    }
 }
 
 export type LoxDeclaration = LoxVar | LoxFun | LoxStatement;
