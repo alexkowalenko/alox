@@ -17,7 +17,7 @@ class LoxFunction extends LoxCallable {
         super();
     }
 
-    call(interp: Evaluator, args: LoxValue[]): LoxValue {
+    call(interp: Evaluator, args: readonly LoxValue[]): LoxValue {
         if (this.fun.args.length != args.length) {
             throw new RuntimeError(`function ${this.fun.name} called with ${args.length} arguments, expecting ${this.fun.args.length}`,
                 this.fun.location)
@@ -101,7 +101,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     visitVar(v: LoxVar): LoxValue {
-        var val = null;
+        let val = null;
         if (v.expr) {
             val = v.expr.accept(this)
         }
@@ -120,7 +120,6 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     assignment(left: LoxExpr, right: LoxExpr): LoxValue {
-
         // check if left hand expression is a lvalue - assignable
         if (!(left instanceof LoxIdentifier)) {
             throw new RuntimeError(`can't assign to ${left.toString()}`, left.location)
@@ -276,7 +275,6 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     visitBinary(e: LoxBinary): LoxValue {
-
         // check if it is assignment before evaluation
         if (e.operator == TokenType.EQUAL) {
             return this.assignment(e.left, e.right)

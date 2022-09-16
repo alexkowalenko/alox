@@ -4,7 +4,7 @@
   "description": "a Lox implementation",
   "main": "index.js",
   "scripts": {
-    "interp": "ts-node interp.ts",
+    "interp": "ts-node alox.ts",
     "test": "jest --config jest-config.json --detectOpenHandles"
   },
   "author": "Alex",

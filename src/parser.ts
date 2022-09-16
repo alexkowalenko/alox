@@ -160,7 +160,7 @@ export class Parser {
     }
 
     private fun(): LoxFun {
-        var tok = this.expect(TokenType.FUN)
+        this.consume(TokenType.FUN)
         let id = this.identifier()
         return this.lambda_body(id);
     }
@@ -174,13 +174,13 @@ export class Parser {
             return stat_map.get(tok.tok)!(this);
         }
         const e = this.expr();
-        this.expect(TokenType.SEMICOLON)
+        this.consume(TokenType.SEMICOLON)
         return e;
     }
 
     public if(): LoxIf {
         let tok = this.expect(TokenType.IF)
-        this.expect(TokenType.L_PAREN)
+        this.consume(TokenType.L_PAREN)
         const expr = this.expr();
         const paren = this.expect(TokenType.R_PAREN)
         const then = this.statement();
@@ -190,7 +190,7 @@ export class Parser {
         const ast = new LoxIf(tok.loc, expr, then!);
         tok = this.lexer.peek_token();
         if (tok.tok == TokenType.ELSE) {
-            this.expect(TokenType.ELSE)
+            this.consume(TokenType.ELSE)
             const else_stat = this.statement();
             if (!else_stat) {
                 throw new ParseError("expecting statements after else", tok.loc)
@@ -202,7 +202,7 @@ export class Parser {
 
     public while(): LoxWhile {
         let tok = this.expect(TokenType.WHILE)
-        this.expect(TokenType.L_PAREN)
+        this.consume(TokenType.L_PAREN)
         const expr = this.expr();
         const paren = this.expect(TokenType.R_PAREN)
         this.enclosing_loop++;
@@ -216,33 +216,33 @@ export class Parser {
 
     public for(): LoxFor {
         let tok = this.expect(TokenType.FOR)
-        var ast = new LoxFor(tok.loc);
-        this.expect(TokenType.L_PAREN)
+        let ast = new LoxFor(tok.loc);
+        this.consume(TokenType.L_PAREN)
         tok = this.lexer.peek_token();
         if (tok.tok != TokenType.SEMICOLON) {
             if (tok.tok == TokenType.VAR) {
                 ast.init = this.var();
             } else {
                 ast.init = this.expr();
-                this.expect(TokenType.SEMICOLON)
+                this.consume(TokenType.SEMICOLON)
             }
         } else {
-            this.expect(TokenType.SEMICOLON)
+            this.consume(TokenType.SEMICOLON)
         }
 
         tok = this.lexer.peek_token();
         if (tok.tok != TokenType.SEMICOLON) {
             ast.cond = this.expr();
         }
-        this.expect(TokenType.SEMICOLON)
+        this.consume(TokenType.SEMICOLON)
 
         tok = this.lexer.peek_token();
         if (tok.tok != TokenType.R_PAREN) {
             ast.iter = this.expr();
         }
-        this.expect(TokenType.R_PAREN)
+        this.consume(TokenType.R_PAREN)
         this.enclosing_loop++;
-        var stat = this.statement();
+        let stat = this.statement();
         this.enclosing_loop--;
         if (stat) {
             ast.stat = stat
@@ -253,7 +253,7 @@ export class Parser {
     public print(): LoxPrint {
         let tok = this.lexer.get_token(); // print
         let expr = this.expr();
-        this.expect(TokenType.SEMICOLON)
+        this.consume(TokenType.SEMICOLON)
         return new LoxPrint(tok.loc, expr);
     }
 
@@ -262,7 +262,7 @@ export class Parser {
         if (this.enclosing_loop == 0) {
             throw new ParseError(`no enclosing loop statement for ${tok.tok}`, tok.loc)
         }
-        this.expect(TokenType.SEMICOLON)
+        this.consume(TokenType.SEMICOLON)
         return new LoxBreak(tok.loc, tok.tok);
     }
 
@@ -273,7 +273,7 @@ export class Parser {
         if (next.tok != TokenType.SEMICOLON) {
             ast.expr = this.expr();
         }
-        this.expect(TokenType.SEMICOLON)
+        this.consume(TokenType.SEMICOLON)
         return ast;
     }
 
@@ -289,7 +289,7 @@ export class Parser {
             ast.statements.push(decl);
             peek = this.lexer.peek_token();
         }
-        this.expect(TokenType.R_BRACE)
+        this.consume(TokenType.R_BRACE)
         return ast
     }
 
@@ -336,9 +336,9 @@ export class Parser {
 
     call(left: LoxExpr): LoxUnary {
         //console.log('call')
-        var token = this.expect(TokenType.L_PAREN)
-        var ast = new LoxCall(token.loc);
-        var next = this.lexer.peek_token();
+        let token = this.expect(TokenType.L_PAREN)
+        let ast = new LoxCall(token.loc);
+        let next = this.lexer.peek_token();
         while (next.tok != TokenType.R_PAREN) {
             ast.arguments.push(this.expr());
             next = this.lexer.peek_token();
@@ -355,19 +355,19 @@ export class Parser {
         if (ast.arguments.length > MAX_PARAMS) {
             throw new ParseError(`exceeded maximum numbers of arguments`, token.loc)
         }
-        var u = new LoxUnary(left.location, undefined, left);
+        let u = new LoxUnary(left.location, undefined, left);
         u.call = ast;
         return u;
     }
 
     lambda(): LoxFun {
-        var tok = this.expect(TokenType.FUN)
+        let tok = this.expect(TokenType.FUN)
         return this.lambda_body(new LoxIdentifier(tok.loc, "λ"))
     }
 
     lambda_body(id: LoxIdentifier): LoxFun {
         let ast = new LoxFun(id.location, id);
-        this.expect(TokenType.L_PAREN)
+        this.consume(TokenType.L_PAREN)
         let tok = this.lexer.peek_token();
         while (tok.tok != TokenType.R_PAREN) {
             let id = this.identifier();
@@ -382,7 +382,7 @@ export class Parser {
             }
             throw new ParseError(`unexpected token ${tok.tok}, expecting , or )`, tok.loc)
         }
-        this.expect(TokenType.R_PAREN)
+        this.consume(TokenType.R_PAREN)
         if (ast.args.length > MAX_PARAMS) {
             throw new ParseError(`exceeded maximum numbers of parameters`, tok.loc)
         }
@@ -404,12 +404,12 @@ export class Parser {
         const token = this.lexer.get_token() // '('
         const expr = this.expr(Precedence.LOWEST)
         const group = new LoxGroup(token.loc, expr)
-        this.expect(TokenType.R_PAREN) // ')'
+        this.consume(TokenType.R_PAREN) // ')'
         return group
     }
 
     identifier(): LoxIdentifier {
-        var tok = this.expect(TokenType.IDENT);
+        const tok = this.expect(TokenType.IDENT);
         return new LoxIdentifier(tok.loc, tok.value!)
     }
 
@@ -444,4 +444,12 @@ export class Parser {
         }
         return tok
     }
+
+    private consume(t: TokenType): void {
+        const tok = this.lexer.get_token();
+        if (tok.tok != t) {
+            throw new ParseError(`unexpected ${tok}, expecting ${t}`, tok.loc)
+        }
+    }
+
 }
