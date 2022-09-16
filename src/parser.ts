@@ -4,9 +4,9 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClass, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
-import { Token, TokenType } from "./token";
+import { Token, TokenType, Location } from "./token";
 import { ParseError } from "./error";
 
 const MAX_PARAMS = 255;
@@ -130,6 +130,8 @@ export class Parser {
         switch (tok.tok) {
             case TokenType.VAR:
                 return this.var();
+            case TokenType.CLASS:
+                return this.class();
             case TokenType.FUN:
                 const funct = this.lexer.get_token();
                 const next = this.lexer.peek_token();
@@ -162,7 +164,29 @@ export class Parser {
     private fun(): LoxFun {
         var tok = this.expect(TokenType.FUN)
         let id = this.identifier()
-        return this.lambda_body(tok, id);
+        return this.lambda_body(tok.loc, id);
+    }
+
+    private method(): LoxFun {
+        let id = this.identifier()
+        let ast = this.lambda_body(id.location, id);
+        ast.method = true;
+        return ast;
+    }
+
+    private class(): LoxClass {
+        var tok = this.expect(TokenType.CLASS);
+        var name = this.identifier();
+        this.consume(TokenType.L_BRACE);
+        const ast = new LoxClass(tok.loc, name);
+        tok = this.lexer.peek_token()
+        while (tok.tok != TokenType.R_BRACE) {
+            var method = this.method();
+            ast.methods.push(method);
+            tok = this.lexer.peek_token();
+        }
+        this.consume(TokenType.R_BRACE);
+        return ast;
     }
 
     private statement(): LoxStatement | null {
@@ -362,15 +386,15 @@ export class Parser {
 
     lambda(): LoxFun {
         let tok = this.expect(TokenType.FUN)
-        return this.lambda_body(tok)
+        return this.lambda_body(tok.loc)
     }
 
-    lambda_body(t: Token, id?: LoxIdentifier): LoxFun {
+    lambda_body(loc: Location, id?: LoxIdentifier): LoxFun {
         let ast: LoxFun;
         if (id !== undefined) {
-            ast = new LoxFun(t.loc, id);
+            ast = new LoxFun(loc, id);
         } else {
-            ast = new LoxFun(t.loc);
+            ast = new LoxFun(loc);
         }
         this.consume(TokenType.L_PAREN)
         let tok = this.lexer.peek_token();

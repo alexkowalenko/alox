@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable, LoxFun, LoxReturn } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable, LoxFun, LoxReturn, LoxClass } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
@@ -120,6 +120,10 @@ export class Evaluator extends AstVisitor<LoxValue> {
             this.symboltable.set(f.name?.id, val);
         }
         return val;
+    }
+
+    visitClass(c: LoxClass): LoxValue {
+        throw new Error("Method not implemented.");
     }
 
     assignment(left: LoxExpr, right: LoxExpr): LoxValue {

@@ -21,12 +21,14 @@ program        → declaration* EOF ;
 
 declaration    -> varDecl
                 | funDecl
+                | classDecl
                 | statement ;
 
 varDecl     -> "var" IDENTIFIER ("=" expression)? ";" ;
 funDecl     -> "fun" function ;
 function    -> IDENTIFIER "(" parameters? ")" block ;
 parameters  -> IDENTIFIER ( "," IDENTIFIER )* ;
+classDecl   -> "class" IDENTIFIER "{" function* "}" ; 
 
 statement   → exprStmt
             | ifStmt 

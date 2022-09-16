@@ -311,9 +311,24 @@ describe('Parser', () => {
 
     it('lambda', () => {
         const tests: TestCases[] = [
-            ['fun(){return "a";}();', 'fun(){return "a";}();'],
-            ['var f = fun(){return "a";};', 'var f = fun(){return \"a\";};'],
-            ['fun(){return fun(a){return a;};}()(2);', 'fun(){return fun(a){return a;};}()(2);'],
+            ['fun(){return "a";}();', 'fun (){return "a";}();'],
+            ['var f = fun (){return "a";};', 'var f = fun (){return \"a\";};'],
+            ['fun(){return fun(a){return a;};}()(2);', 'fun (){return fun (a){return a;};}()(2);'],
+        ]
+        do_tests(tests)
+    })
+
+    it('class', () => {
+        const tests: TestCases[] = [
+            ['class A{}', 'class A {};'],
+            ['class A{ call() {}}', 'class A {call(){} };'],
+            ['class A{ call() {print 3;}}', 'class A {call(){print 3;} };'],
+            ['class A{ call() {print 3;} me() {}}', 'class A {call(){print 3;} me(){} };'],
+
+            // Error
+            ['class {}', '', 'unexpected {, expecting <ident>'],
+            ['class A }', '', 'unexpected }, expecting {'],
+            ['class A {', '', 'unexpected <eof>, expecting <ident>'],
         ]
         do_tests(tests)
     })

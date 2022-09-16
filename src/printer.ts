@@ -4,9 +4,10 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClass, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 
 export class Printer extends AstVisitor<string> {
+
 
     constructor(private newline = "", private indent = 0) { super() }
 
@@ -30,7 +31,7 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitVar(e: LoxVar): string {
-        var buf = "var " + e.ident.accept(this);
+        let buf = "var " + e.ident.accept(this);
         if (e.expr) {
             buf += " = " + e.expr.accept(this)
         }
@@ -38,12 +39,12 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitFun(f: LoxFun): string {
-        var buf = 'fun';
+        let buf = f.method ? '' : 'fun ';
         if (f.name !== undefined) {
-            buf += ' ' + f.name.id;
+            buf += f.name.id;
         }
         buf += '('
-        for (var i = 0; i < f.args.length; i++) {
+        for (let i = 0; i < f.args.length; i++) {
             buf += f.args[i].accept(this)
             if (i < f.args.length - 1) {
                 buf += ", "
@@ -52,6 +53,14 @@ export class Printer extends AstVisitor<string> {
         buf += ")" + this.newline;
         buf += f.body!.accept(this);
         return buf;
+    }
+
+    visitClass(c: LoxClass): string {
+        let buf = `class ${c.name} {` + this.newline;
+        for (const m of c.methods) {
+            buf += m.accept(this) + ' ' + this.newline;
+        }
+        return buf + '}'
     }
 
     visitIf(expr: LoxIf): string {
@@ -113,7 +122,7 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitUnary(e: LoxUnary): string {
-        var buf = '';
+        let buf = '';
         if (e.prefix) {
             buf += e.prefix;
         }
@@ -125,8 +134,8 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitCall(e: LoxCall): string {
-        var buf = '(';
-        for (var i = 0; i < e.arguments.length; i++) {
+        let buf = '(';
+        for (let i = 0; i < e.arguments.length; i++) {
             buf += e.arguments[i].accept(this)
             if (i < e.arguments.length - 1) {
                 buf += ", "
