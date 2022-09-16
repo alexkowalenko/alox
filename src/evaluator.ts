@@ -18,10 +18,6 @@ class LoxFunction extends LoxCallable {
     }
 
     call(interp: Evaluator, args: readonly LoxValue[]): LoxValue {
-        if (this.fun.args.length != args.length) {
-            throw new RuntimeError(`function ${this.fun.name} called with ${args.length} arguments, expecting ${this.fun.args.length}`,
-                this.fun.location)
-        }
         let prev = interp.symboltable
         interp.symboltable = new SymbolTable(this.closure);
         for (let i = 0; i < args.length; i++) {
@@ -44,8 +40,12 @@ class LoxFunction extends LoxCallable {
         return val;
     }
 
+    arity(): number {
+        return this.fun.args.length
+    }
+
     toString(): string {
-        return `<fn ${this.fun.name}>`
+        return `<fn ${this.fun.name ?? ''}>`
     }
 }
 
@@ -116,7 +116,9 @@ export class Evaluator extends AstVisitor<LoxValue> {
 
     visitFun(f: LoxFun): LoxValue {
         const val = new LoxFunction(f, this.symboltable);
-        this.symboltable.set(f.name.id, val);
+        if (f.name !== undefined) {
+            this.symboltable.set(f.name?.id, val);
+        }
         return val;
     }
 
@@ -180,7 +182,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
             if (e.init) {
                 e.init.accept(this);
             }
-            var val: LoxValue = true;
+            let val: LoxValue = true;
             if (e.cond) {
                 val = e.cond.accept(this);
             }
@@ -260,8 +262,13 @@ export class Evaluator extends AstVisitor<LoxValue> {
                 return !check_boolean(val, e.location)
         }
         if (val instanceof LoxCallable) {
+            let fun = val as LoxCallable;
             if (e.call) {
-                var args = new Array<LoxValue>;
+                if (fun.arity() != e.call.arguments.length) {
+                    throw new RuntimeError(`function ${e.expr} called with ${e.call.arguments.length} arguments, expecting ${fun.arity()}`,
+                        e.location)
+                }
+                let args = new Array<LoxValue>;
                 for (var a of e.call.arguments) {
                     args.push(a.accept(this));
                 }
@@ -341,7 +348,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
     visitIdentifier(e: LoxIdentifier): LoxValue {
         // console.log("eval id: %s", e.id)
         if (this.locals.has(e)) {
-            var depth = this.locals.get(e)
+            let depth = this.locals.get(e)
             if (depth !== undefined) {
                 let val = this.symboltable.get_at(depth, e.id)
                 if (val !== undefined) {

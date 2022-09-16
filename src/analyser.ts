@@ -68,7 +68,7 @@ export class Analyser extends AstVisitor<void> {
     }
 
     visitFun(f: LoxFun): void {
-        if (f.name.id !== 'λ') {
+        if (f.name !== undefined) {
             this.declare(f.name.id);
             this.define(f.name.id);
         }

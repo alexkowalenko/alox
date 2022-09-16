@@ -1,0 +1,3 @@
+var a = "a";
+var b = "b";
+a + b = "value"; // error: can't assign to (a + b)

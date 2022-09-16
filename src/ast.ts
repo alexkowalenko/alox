@@ -41,7 +41,7 @@ export class LoxVar extends LoxBase {
 }
 
 export class LoxFun extends LoxBase {
-    constructor(location: Location, readonly name: LoxIdentifier) {
+    constructor(location: Location, readonly name?: LoxIdentifier) {
         super(location);
         this.args = new Array<LoxIdentifier>;
     }
@@ -329,6 +329,7 @@ export abstract class AstVisitor<T> {
 
 export abstract class LoxCallable {
     abstract call(interp: Evaluator, args: Array<LoxValue>): LoxValue;
+    abstract arity(): number;
 
     toString(): string {
         return '<native fn>'

@@ -102,6 +102,8 @@ function do_file(file: string, opts: Options) {
     program.option('-s, --silent', 'turn off extra output')
     program.option('-f, --file <file>', 'execute <file>')
     program.option('-p, --parseonly', 'only parse the script')
+    program.option('-t, --timer', 'print out timings')
+
 
     program.parse(process.argv);
 
@@ -109,6 +111,7 @@ function do_file(file: string, opts: Options) {
     let opts = new Options();
     opts.silent = options.silent;
     opts.parseOnly = options.parseonly;
+    opts.timer = options.timer;
     if (!options.silent) {
         console.log("ALOX 👾 interpreter")
     }

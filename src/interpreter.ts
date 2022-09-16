@@ -16,6 +16,7 @@ export class Options {
     constructor() { };
     public silent = false;
     public parseOnly = false;
+    public timer = false;
 }
 
 export class Interpreter {
@@ -38,11 +39,17 @@ export class Interpreter {
             call(i: Evaluator, args: LoxValue[]): LoxValue {
                 return Date.now();
             }
+            arity(): number {
+                return 0;
+            }
         })
         this.analyser.define("clock")
     }
 
     do(line: string): LoxValue {
+        if (this.options.timer) {
+            console.time('time');
+        }
         const expr = this.parser.parse(line)
         const printer: Printer = new Printer("\n", 4);
         if (!this.options.silent) {
@@ -53,6 +60,9 @@ export class Interpreter {
         }
         this.analyser.analyse(expr);
         const val = this.evaluator.eval(expr)
+        if (this.options.timer) {
+            console.timeEnd('time');
+        }
         return val;
     }
 

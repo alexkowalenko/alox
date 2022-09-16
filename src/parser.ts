@@ -160,9 +160,9 @@ export class Parser {
     }
 
     private fun(): LoxFun {
-        this.consume(TokenType.FUN)
+        var tok = this.expect(TokenType.FUN)
         let id = this.identifier()
-        return this.lambda_body(id);
+        return this.lambda_body(tok, id);
     }
 
     private statement(): LoxStatement | null {
@@ -362,11 +362,16 @@ export class Parser {
 
     lambda(): LoxFun {
         let tok = this.expect(TokenType.FUN)
-        return this.lambda_body(new LoxIdentifier(tok.loc, "λ"))
+        return this.lambda_body(tok)
     }
 
-    lambda_body(id: LoxIdentifier): LoxFun {
-        let ast = new LoxFun(id.location, id);
+    lambda_body(t: Token, id?: LoxIdentifier): LoxFun {
+        let ast: LoxFun;
+        if (id !== undefined) {
+            ast = new LoxFun(t.loc, id);
+        } else {
+            ast = new LoxFun(t.loc);
+        }
         this.consume(TokenType.L_PAREN)
         let tok = this.lexer.peek_token();
         while (tok.tok != TokenType.R_PAREN) {
