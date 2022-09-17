@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { ForInit, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType, Location } from "./token";
 import { ParseError } from "./error";
@@ -45,7 +45,9 @@ const infix_map: Map<TokenType, InfixParselet> = new Map([
     [TokenType.GREATER_EQUAL, call_binary],
     [TokenType.AND, call_binary],
     [TokenType.OR, call_binary],
-    [TokenType.EQUAL, call_binary],
+    [TokenType.EQUAL, (p: Parser, left: LoxExpr): LoxExpr => {
+        return p.assign(left);
+    }],
     [TokenType.L_PAREN, (p: Parser, left: LoxExpr): LoxExpr => {
         return p.call(left);
     }],
@@ -362,10 +364,10 @@ export class Parser {
         return new LoxUnary(token.loc, tok, expr);
     }
 
-    call(left: LoxExpr): LoxUnary {
+    call(left: LoxExpr): LoxCall {
         //console.log('call')
         let token = this.expect(TokenType.L_PAREN)
-        let ast = new LoxCall(token.loc);
+        let ast = new LoxCall(token.loc, left);
         let next = this.lexer.peek_token();
         while (next.tok != TokenType.R_PAREN) {
             ast.arguments.push(this.expr());
@@ -383,9 +385,7 @@ export class Parser {
         if (ast.arguments.length > MAX_PARAMS) {
             throw new ParseError(`exceeded maximum numbers of arguments`, token.loc)
         }
-        let u = new LoxUnary(left.location, undefined, left);
-        u.call = ast;
-        return u;
+        return ast;
     }
 
     get(left: LoxExpr): LoxGet {
@@ -437,6 +437,17 @@ export class Parser {
         const precedence = get_precedence(operator);
         const right = this.expr(precedence);
         return new LoxBinary(token.loc, operator, left, right)
+    }
+
+    assign(left: LoxExpr): LoxAssign | LoxSet {
+        // console.log('assign')
+        let token = this.expect(TokenType.EQUAL);
+        const right = this.expr(get_precedence(TokenType.EQUAL));
+        if (left instanceof LoxGet) {
+            // console.log('assign transform to set %s', left.ident.id)
+            return new LoxSet(token.loc, left.expr, left.ident, right)
+        }
+        return new LoxAssign(token.loc, left, right)
     }
 
     group(): LoxGroup {

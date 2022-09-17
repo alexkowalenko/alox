@@ -48,12 +48,13 @@ breakStmt   -> "break" | "continue";
 returnStmt  -> "return" (expression)?
 block       -> "{" declaration* "}" ;
 
-expression     -> primary | unary | binary | grouping ;
+expression     -> primary | unary | binary | assignment | grouping ;
 unary          -> ("-" | "!") unary | call | lambda
 call           -> primary ( "(" arguments ")" | "." IDENTIFIER )* ;
 lambda         -> "fun" "(" parameters? ")" block ;
 arguments      -> expression ( "," expression )* ;
 binary         -> expression operator expression ;
+assignment     -> (call ".")? IDENTIFIER "=" assignment;
 grouping       -> "(" expression ")" ;
 operator       -> "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/" | "or" | "and" | "=" ;
 primary        -> IDENTIFIER | literal

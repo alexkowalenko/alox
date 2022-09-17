@@ -314,11 +314,21 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
-    it('class', () => {
+    it('get set', () => {
         const tests: TestCases[] = [
+            ['class A{} var x = A(); x.s = 1;', '1'],
+            ['x.s;', '1'],
+            ['x.c = 2;', '2'],
+            ['x.c;', '2'],
+            ['class B{} x.d = B();', '<instance B>'],
+            ['x.d.g = 7;', '7'],
+            ['x.d.g;', '7'],
+            ['x.c;', '2'],
+            ['x.s;', '1'],
+
             // Errors
-            ['var x = 1; x.s;', '', 'only objects have properties'],
-            ['class A{} x = A(); x.s;', '', 'undefined property s'],
+            ['x = 1; x.s;', '', 'only objects have properties'],
+            ['class X{} x = X(); x.s;', '', 'undefined property s'],
         ]
         do_tests(tests)
     })

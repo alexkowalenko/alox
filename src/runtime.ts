@@ -65,6 +65,10 @@ export class LoxInstance {
         return this.fields.get(name)
     }
 
+    set(name: string, value: LoxValue) {
+        this.fields.set(name, value)
+    }
+
     toString(): string {
         return `<instance ${this.cls.name}>`;
     }

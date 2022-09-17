@@ -30,7 +30,7 @@ export class LoxProgram extends LoxBase {
 export type LoxDeclaration = LoxVar | LoxFun | LoxClassDef | LoxStatement;
 
 export class LoxVar extends LoxBase {
-    constructor(location: Location, readonly ident: LoxIdentifier) {
+    constructor(readonly location: Location, readonly ident: LoxIdentifier) {
         super(location);
     }
     public expr?: LoxExpr;
@@ -41,7 +41,7 @@ export class LoxVar extends LoxBase {
 }
 
 export class LoxFun extends LoxBase {
-    constructor(location: Location, readonly name?: LoxIdentifier) {
+    constructor(readonly location: Location, readonly name?: LoxIdentifier) {
         super(location);
         this.args = new Array<LoxIdentifier>;
     }
@@ -55,7 +55,7 @@ export class LoxFun extends LoxBase {
 }
 
 export class LoxClassDef extends LoxBase {
-    constructor(location: Location, readonly name: LoxIdentifier) {
+    constructor(readonly location: Location, readonly name: LoxIdentifier) {
         super(location);
         this.methods = new Array;
     }
@@ -69,7 +69,7 @@ export class LoxClassDef extends LoxBase {
 export type LoxStatement = LoxExpr | LoxIf | LoxWhile | LoxFor | LoxPrint | LoxBreak | LoxReturn | LoxBlock;
 
 export class LoxIf extends LoxBase {
-    constructor(location: Location, readonly expr: LoxExpr, readonly then: LoxStatement) {
+    constructor(readonly location: Location, readonly expr: LoxExpr, readonly then: LoxStatement) {
         super(location);
     }
     public else?: LoxStatement;
@@ -80,7 +80,7 @@ export class LoxIf extends LoxBase {
 }
 
 export class LoxWhile extends LoxBase {
-    constructor(location: Location, readonly expr: LoxExpr, readonly stats: LoxStatement) {
+    constructor(readonly location: Location, readonly expr: LoxExpr, readonly stats: LoxStatement) {
         super(location);
     }
 
@@ -92,7 +92,7 @@ export class LoxWhile extends LoxBase {
 export type ForInit = LoxVar | LoxExpr;
 
 export class LoxFor extends LoxBase {
-    constructor(location: Location,) {
+    constructor(readonly location: Location,) {
         super(location);
     }
     public init?: ForInit;
@@ -107,7 +107,7 @@ export class LoxFor extends LoxBase {
 
 
 export class LoxPrint extends LoxBase {
-    constructor(location: Location, readonly expr: LoxExpr) {
+    constructor(readonly location: Location, readonly expr: LoxExpr) {
         super(location);
     }
 
@@ -117,7 +117,7 @@ export class LoxPrint extends LoxBase {
 }
 
 export class LoxBreak extends LoxBase {
-    constructor(location: Location, readonly what: TokenType) {
+    constructor(readonly location: Location, readonly what: TokenType) {
         super(location);
     }
 
@@ -127,7 +127,7 @@ export class LoxBreak extends LoxBase {
 }
 
 export class LoxReturn extends LoxBase {
-    constructor(location: Location) {
+    constructor(readonly location: Location) {
         super(location);
     }
     public expr?: LoxExpr
@@ -139,7 +139,7 @@ export class LoxReturn extends LoxBase {
 }
 
 export class LoxBlock extends LoxBase {
-    constructor(location: Location) {
+    constructor(readonly location: Location) {
         super(location);
         this.statements = new Array<LoxDeclaration>
     }
@@ -151,15 +151,14 @@ export class LoxBlock extends LoxBase {
     }
 }
 
-export type LoxExpr = LoxPrimary | LoxUnary | LoxBinary | LoxGroup | LoxGet;
+export type LoxExpr = LoxPrimary | LoxUnary | LoxBinary | LoxAssign | LoxSet | LoxGroup | LoxCall | LoxGet;
 export type LoxPrimary = LoxIdentifier | LoxLiteral | LoxFun;
 export type LoxLiteral = LoxNumber | LoxString | LoxBool | LoxNil;
 
 export class LoxUnary extends LoxBase {
-    constructor(location: Location, readonly prefix: TokenType | undefined, readonly expr: LoxExpr) {
+    constructor(readonly location: Location, readonly prefix: TokenType | undefined, readonly expr: LoxExpr) {
         super(location);
     }
-    public call?: LoxCall;
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitUnary(this)
@@ -171,7 +170,7 @@ export class LoxUnary extends LoxBase {
 }
 
 export class LoxCall extends LoxBase {
-    constructor(location: Location) {
+    constructor(readonly location: Location, readonly expr: LoxExpr) {
         super(location);
         this.arguments = new Array<LoxExpr>();
     }
@@ -183,7 +182,7 @@ export class LoxCall extends LoxBase {
 }
 
 export class LoxGet extends LoxBase {
-    constructor(location: Location, readonly expr: LoxExpr, readonly ident: LoxIdentifier) {
+    constructor(readonly location: Location, readonly expr: LoxExpr, readonly ident: LoxIdentifier) {
         super(location);
     }
 
@@ -192,8 +191,19 @@ export class LoxGet extends LoxBase {
     }
 }
 
+export class LoxSet extends LoxBase {
+    constructor(readonly location: Location, readonly expr: LoxExpr, readonly ident: LoxIdentifier, readonly value: LoxExpr,) {
+        super(location);
+    }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitSet(this)
+    }
+}
+
+
 export class LoxBinary extends LoxBase {
-    constructor(location: Location, readonly operator: TokenType, readonly left: LoxExpr, readonly right: LoxExpr) {
+    constructor(readonly location: Location, readonly operator: TokenType, readonly left: LoxExpr, readonly right: LoxExpr) {
         super(location);
     }
 
@@ -206,8 +216,22 @@ export class LoxBinary extends LoxBase {
     }
 }
 
+export class LoxAssign extends LoxBase {
+    constructor(readonly location: Location, readonly left: LoxExpr, readonly right: LoxExpr) {
+        super(location);
+    }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitAssign(this)
+    }
+
+    toString(): string {
+        return `(${this.left.toString()} = ${this.right.toString()})`
+    }
+}
+
 export class LoxGroup extends LoxBase {
-    constructor(location: Location, readonly expr: LoxExpr) {
+    constructor(readonly location: Location, readonly expr: LoxExpr) {
         super(location);
     }
 
@@ -222,7 +246,7 @@ export class LoxGroup extends LoxBase {
 
 export class LoxIdentifier extends LoxBase {
 
-    constructor(location: Location, readonly id: string) {
+    constructor(readonly location: Location, readonly id: string) {
         super(location);
     }
 
@@ -237,7 +261,7 @@ export class LoxIdentifier extends LoxBase {
 
 export class LoxNumber extends LoxBase {
 
-    constructor(location: Location, readonly value: number) {
+    constructor(readonly location: Location, readonly value: number) {
         super(location);
     }
 
@@ -252,7 +276,7 @@ export class LoxNumber extends LoxBase {
 
 export class LoxString extends LoxBase {
 
-    constructor(location: Location, readonly value: string) {
+    constructor(readonly location: Location, readonly value: string) {
         super(location);
     }
 
@@ -267,7 +291,7 @@ export class LoxString extends LoxBase {
 
 
 export class LoxBool extends LoxBase {
-    constructor(location: Location, readonly value: boolean) {
+    constructor(readonly location: Location, readonly value: boolean) {
         super(location);
     }
 
@@ -281,7 +305,7 @@ export class LoxBool extends LoxBase {
 }
 
 export class LoxNil extends LoxBase {
-    constructor(location: Location) {
+    constructor(readonly location: Location) {
         super(location)
     }
 
@@ -330,6 +354,9 @@ export abstract class AstVisitor<T> {
 
     abstract visitCall(e: LoxCall): T;
     abstract visitGet(e: LoxGet): T;
+    abstract visitSet(e: LoxSet): T
+
+    abstract visitAssign(e: LoxAssign): T;
 
     visitBinary(e: LoxBinary): T {
         e.left.accept<T>(this)

@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign } from "./ast";
 import { RuntimeError } from "./error";
 import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance } from "./runtime";
 import { SymbolTable } from "./symboltable";
@@ -90,24 +90,6 @@ export class Evaluator extends AstVisitor<LoxValue> {
         return cls;
     }
 
-    assignment(left: LoxExpr, right: LoxExpr): LoxValue {
-        // check if left hand expression is a lvalue - assignable
-        if (!(left instanceof LoxIdentifier)) {
-            throw new RuntimeError(`can't assign to ${left.toString()}`, left.location)
-        }
-        let var_name = left.id;
-        //console.log(`assign to ${var_name}.`)
-        //this.symboltable.dump();
-        let val = right.accept(this);
-        if (this.locals.has(left)) {
-            let depth = this.locals.get(left)
-            if (depth !== undefined) {
-                this.symboltable.assign_at(depth, var_name, val)
-                return val
-            }
-        }
-        throw new RuntimeError(`undefined variable ${left.toString()}`, left.location)
-    }
 
     visitIf(expr: LoxIf): LoxValue {
         const val = expr.expr.accept(this);
@@ -229,27 +211,26 @@ export class Evaluator extends AstVisitor<LoxValue> {
             case TokenType.BANG:
                 return !check_boolean(val, e.location)
         }
-        if (val instanceof LoxCallable) {
-            let fun = val as LoxCallable;
-            if (e.call instanceof LoxCall) {
-                if (fun.arity() != e.call.arguments.length) {
-                    throw new RuntimeError(`function ${e.expr} called with ${e.call.arguments.length} arguments, expecting ${fun.arity()}`,
-                        e.location)
-                }
-                let args = new Array<LoxValue>;
-                for (let a of e.call.arguments) {
-                    args.push(a.accept(this));
-                }
-                return (val as LoxCallable).call(this, args);
-            }
-        } else {
-            throw new RuntimeError(`can't call ${e.expr}`, e.expr.location)
-        }
-        throw new Error("Method not implemented.");
+        throw new RuntimeError(`${e.prefix} not defined as prefix operator`, e.location);
     }
 
     visitCall(e: LoxCall): LoxValue {
-        throw new Error("Method not implemented.");
+        const val = e.expr.accept(this)
+        if (val instanceof LoxCallable) {
+            let fun = val as LoxCallable;
+            if (fun.arity() != e.arguments.length) {
+                throw new RuntimeError(`function ${e.expr} called with ${e.arguments.length} arguments, expecting ${fun.arity()}`,
+                    e.location)
+            }
+            let args = new Array<LoxValue>;
+            for (let a of e.arguments) {
+                args.push(a.accept(this));
+            }
+            return (val as LoxCallable).call(this, args);
+
+        } else {
+            throw new RuntimeError(`can't call ${e.expr}`, e.expr.location)
+        }
     }
 
     visitGet(e: LoxGet): LoxValue {
@@ -264,12 +245,17 @@ export class Evaluator extends AstVisitor<LoxValue> {
         throw new RuntimeError("only objects have properties", e.location)
     }
 
-    visitBinary(e: LoxBinary): LoxValue {
-        // check if it is assignment before evaluation
-        if (e.operator == TokenType.EQUAL) {
-            return this.assignment(e.left, e.right)
+    visitSet(e: LoxSet): LoxValue {
+        let obj = e.expr.accept(this);
+        if (obj instanceof LoxInstance) {
+            let val = e.value.accept(this)
+            obj.set(e.ident.id, val)
+            return val;
         }
+        throw new RuntimeError("only objects have properties", e.location)
+    }
 
+    visitBinary(e: LoxBinary): LoxValue {
         if (e.operator == TokenType.AND || e.operator == TokenType.OR) {
             return this.do_logical(e)
         }
@@ -311,6 +297,25 @@ export class Evaluator extends AstVisitor<LoxValue> {
                 return left !== right
         }
         throw new RuntimeError(`unhandled binary operator ${e.operator}`, e.location)
+    }
+
+    visitAssign(e: LoxAssign): LoxValue {
+        // check if left hand expression is a lvalue - assignable
+        if (!(e.left instanceof LoxIdentifier)) {
+            throw new RuntimeError(`can't assign to ${e.left.toString()}`, e.left.location)
+        }
+        let var_name = e.left.id;
+        //console.log(`assign to ${var_name}.`)
+        //this.symboltable.dump();
+        let val = e.right.accept(this);
+        if (this.locals.has(e.left)) {
+            let depth = this.locals.get(e.left)
+            if (depth !== undefined) {
+                this.symboltable.assign_at(depth, var_name, val)
+                return val
+            }
+        }
+        throw new RuntimeError(`undefined variable ${e.left.toString()}`, e.left.location)
     }
 
     private do_logical(e: LoxBinary) {

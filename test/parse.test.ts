@@ -348,4 +348,17 @@ describe('Parser', () => {
         do_tests(tests)
     })
 
+    it('set', () => {
+        const tests: TestCases[] = [
+            ['x.s = 1;', 'x.s = 1;'],
+            ['x.s.s = 1;', 'x.s.s = 1;'],
+            ['x(s).s = 2;', 'x(s).s = 2;'],
+
+            // Error
+            ['x. = 1;', '', 'unexpected =, expecting <ident>'],
+            ['x s = 2;', '', 'unexpected ident<s>, expecting ;'],
+        ]
+        do_tests(tests)
+    })
+
 })

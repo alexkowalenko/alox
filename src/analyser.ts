@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet } from "./ast";
+import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign } from "./ast";
 import { ParseError } from "./error";
 import { Evaluator } from "./evaluator";
 import { TokenType } from "./token";
@@ -121,7 +121,7 @@ export class Analyser extends AstVisitor<void> {
         this.end_scope();
     }
 
-    private assignment(e: LoxBinary): void {
+    visitAssign(e: LoxAssign): void {
         e.right.accept(this)
         const v = e.left as LoxIdentifier;
         this.resolve(v.id, e.left)
@@ -129,10 +129,10 @@ export class Analyser extends AstVisitor<void> {
 
     visitUnary(e: LoxUnary): void {
         e.expr.accept(this);
-        e.call?.accept(this);
     }
 
     visitCall(e: LoxCall): void {
+        e.expr.accept(this);
         for (const arg of e.arguments) {
             arg.accept(this)
         }
@@ -142,11 +142,12 @@ export class Analyser extends AstVisitor<void> {
         e.expr.accept(this);
     }
 
+    visitSet(e: LoxSet): void {
+        e.value.accept(this);
+        e.expr.accept(this);
+    }
+
     visitBinary(e: LoxBinary): void {
-        if (e.operator == TokenType.EQUAL) {
-            this.assignment(e);
-            return;
-        }
         e.left.accept(this)
         e.right.accept(this)
     }

@@ -4,10 +4,9 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { AstVisitor, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 
 export class Printer extends AstVisitor<string> {
-
 
     constructor(private newline = "", private indent = 0) { super() }
 
@@ -127,14 +126,12 @@ export class Printer extends AstVisitor<string> {
             buf += e.prefix;
         }
         buf += e.expr.accept(this)
-        if (e.call) {
-            buf += e.call.accept(this)
-        }
         return buf
     }
 
     visitCall(e: LoxCall): string {
-        let buf = '(';
+        let buf = e.expr.accept(this)
+        buf += '(';
         for (let i = 0; i < e.arguments.length; i++) {
             buf += e.arguments[i].accept(this)
             if (i < e.arguments.length - 1) {
@@ -148,8 +145,16 @@ export class Printer extends AstVisitor<string> {
         return this.visitExpr(e.expr) + '.' + e.ident.id;
     }
 
+    visitSet(e: LoxSet): string {
+        return `${this.visitExpr(e.expr)}.${e.ident.id} = ${e.value}`;
+    }
+
     visitBinary(e: LoxBinary): string {
         return `(${e.left.accept(this)} ${e.operator} ${e.right.accept(this)})`
+    }
+
+    visitAssign(e: LoxAssign): string {
+        return `(${e.left.accept(this)} = ${e.right.accept(this)})`
     }
 
     visitGroup(e: LoxGroup): string {
