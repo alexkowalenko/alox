@@ -27,7 +27,7 @@ export class LoxProgram extends LoxBase {
     }
 }
 
-export type LoxDeclaration = LoxVar | LoxFun | LoxClass | LoxStatement;
+export type LoxDeclaration = LoxVar | LoxFun | LoxClassDef | LoxStatement;
 
 export class LoxVar extends LoxBase {
     constructor(location: Location, readonly ident: LoxIdentifier) {
@@ -54,7 +54,7 @@ export class LoxFun extends LoxBase {
     }
 }
 
-export class LoxClass extends LoxBase {
+export class LoxClassDef extends LoxBase {
     constructor(location: Location, readonly name: LoxIdentifier) {
         super(location);
         this.methods = new Array;
@@ -296,7 +296,7 @@ export abstract class AstVisitor<T> {
 
     abstract visitVar(expr: LoxVar): T;
     abstract visitFun(f: LoxFun): T;
-    abstract visitClass(c: LoxClass): T;
+    abstract visitClass(c: LoxClassDef): T;
 
     abstract visitIf(expr: LoxIf): T;
     abstract visitWhile(expr: LoxWhile): T;

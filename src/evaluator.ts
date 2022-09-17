@@ -4,12 +4,12 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable, LoxFun, LoxReturn, LoxClass } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable, LoxFun, LoxReturn, LoxClassDef } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
 
-export type LoxValue = number | string | boolean | null | LoxCallable
+export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance
 
 class LoxFunction extends LoxCallable {
 
@@ -46,6 +46,37 @@ class LoxFunction extends LoxCallable {
 
     toString(): string {
         return `<fn ${this.fun.name ?? ''}>`
+    }
+}
+
+class LoxInstance {
+    constructor(public readonly cls: LoxClass) { }
+
+    toString(): string {
+        return `<instance ${this.cls.name}>`;
+    }
+}
+
+class LoxClass extends LoxCallable {
+    constructor(readonly cls: LoxClassDef) {
+        super()
+    }
+
+    call(interp: Evaluator, args: LoxValue[]): LoxValue {
+        let instance = new LoxInstance(this)
+        return instance;
+    }
+
+    arity(): number {
+        return 0;
+    }
+
+    get name(): string {
+        return this.cls.name.id
+    }
+
+    toString(): string {
+        return `<${this.cls.name.id}>`;
     }
 }
 
@@ -122,8 +153,10 @@ export class Evaluator extends AstVisitor<LoxValue> {
         return val;
     }
 
-    visitClass(c: LoxClass): LoxValue {
-        throw new Error("Method not implemented.");
+    visitClass(c: LoxClassDef): LoxValue {
+        const cls = new LoxClass(c);
+        this.symboltable.set(cls.name, cls);
+        return cls;
     }
 
     assignment(left: LoxExpr, right: LoxExpr): LoxValue {
