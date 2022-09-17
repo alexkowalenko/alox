@@ -5,11 +5,11 @@
 //
 
 import { Analyser } from "./analyser";
-import { LoxCallable } from "./ast";
-import { Evaluator, LoxValue } from "./evaluator";
+import { Evaluator } from "./evaluator";
 import { Lexer } from "./lexer";
 import { Parser } from "./parser";
 import { Printer } from "./printer";
+import { LoxCallable, LoxValue } from "./runtime";
 import { SymbolTable } from "./symboltable";
 
 export class Options {

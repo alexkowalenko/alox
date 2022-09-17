@@ -6,7 +6,6 @@
 
 
 import { LoxError } from '../src/error';
-import { LoxValue } from '../src/evaluator';
 import { Interpreter, Options } from '../src/interpreter';
 
 export type TestCases = [string, string, string?]
@@ -315,4 +314,12 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
+    it('class', () => {
+        const tests: TestCases[] = [
+            // Errors
+            ['var x = 1; x.s;', '', 'only objects have properties'],
+            ['class A{} x = A(); x.s;', '', 'undefined property s'],
+        ]
+        do_tests(tests)
+    })
 })

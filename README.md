@@ -28,10 +28,10 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
   - [x] Lambda expressions `fun(){}`
 - [x] Full closures - Chapter 11 - Resolution and Binding
 - [ ] Classes - Chapter 12.
-  - [x] Definitions
+  - [x] Definitions `class`
   - [x] Creation
   - [ ] Properties
   - [ ] Methods
-  - [ ] this
+  - [ ] `this`
   - [ ] Constructors
 - [ ] Inheritance - Chapter 13.

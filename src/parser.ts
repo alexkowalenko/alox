@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { ForInit, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxStatement, LoxString, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType, Location } from "./token";
 import { ParseError } from "./error";
@@ -48,6 +48,9 @@ const infix_map: Map<TokenType, InfixParselet> = new Map([
     [TokenType.EQUAL, call_binary],
     [TokenType.L_PAREN, (p: Parser, left: LoxExpr): LoxExpr => {
         return p.call(left);
+    }],
+    [TokenType.DOT, (p: Parser, left: LoxExpr): LoxExpr => {
+        return p.get(left);
     }]
 ])
 
@@ -82,7 +85,8 @@ const precedence_map = new Map<TokenType, Precedence>([
     [TokenType.BANG, Precedence.UNARY],
     //[TokenType.MINUS, Precedence.UNARY],
     [TokenType.EQUAL, Precedence.ASSIGNMENT],
-    [TokenType.L_PAREN, Precedence.CALL]
+    [TokenType.L_PAREN, Precedence.CALL],
+    [TokenType.DOT, Precedence.CALL]
 ])
 
 export function get_precedence(t: TokenType): Precedence {
@@ -382,6 +386,13 @@ export class Parser {
         let u = new LoxUnary(left.location, undefined, left);
         u.call = ast;
         return u;
+    }
+
+    get(left: LoxExpr): LoxGet {
+        let token = this.expect(TokenType.DOT)
+        let id = this.identifier();
+        let ast = new LoxGet(token.loc, left, id);
+        return ast;
     }
 
     lambda(): LoxFun {

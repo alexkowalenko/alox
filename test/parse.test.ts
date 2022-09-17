@@ -333,4 +333,19 @@ describe('Parser', () => {
         do_tests(tests)
     })
 
+    it('get', () => {
+        const tests: TestCases[] = [
+            ['x.s;', 'x.s;'],
+            ['x.s.s;', 'x.s.s;'],
+            ['x(s).s;', 'x(s).s;'],
+            ['x(s)(s);', 'x(s)(s);'],
+            ['x.f(s);', 'x.f(s);'],
+
+            // Error
+            ['x. ;', '', 'unexpected ;, expecting <ident>'],
+            ['x s;', '', 'unexpected ident<s>, expecting ;'],
+        ]
+        do_tests(tests)
+    })
+
 })

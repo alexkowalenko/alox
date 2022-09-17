@@ -50,7 +50,7 @@ block       -> "{" declaration* "}" ;
 
 expression     -> primary | unary | binary | grouping ;
 unary          -> ("-" | "!") unary | call | lambda
-call           -> primary ( "(" arguments ")" )* ;
+call           -> primary ( "(" arguments ")" | "." IDENTIFIER )* ;
 lambda         -> "fun" "(" parameters? ")" block ;
 arguments      -> expression ( "," expression )* ;
 binary         -> expression operator expression ;

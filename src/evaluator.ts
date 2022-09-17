@@ -4,81 +4,12 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxCallable, LoxFun, LoxReturn, LoxClassDef } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet } from "./ast";
 import { RuntimeError } from "./error";
+import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance } from "./runtime";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
 
-export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance
-
-class LoxFunction extends LoxCallable {
-
-    constructor(readonly fun: LoxFun, readonly closure: SymbolTable<LoxValue>) {
-        super();
-    }
-
-    call(interp: Evaluator, args: readonly LoxValue[]): LoxValue {
-        let prev = interp.symboltable
-        interp.symboltable = new SymbolTable(this.closure);
-        for (let i = 0; i < args.length; i++) {
-            interp.symboltable.set(this.fun.args[i].id, args[i])
-        }
-        let val: LoxValue = null;
-        try {
-            val = interp.visitBlock(this.fun.body!)
-        }
-        catch (e) {
-            if (e instanceof LoxReturn) {
-                val = e.value;
-            } else {
-                throw e;
-            }
-        }
-        finally {
-            interp.symboltable = prev
-        }
-        return val;
-    }
-
-    arity(): number {
-        return this.fun.args.length
-    }
-
-    toString(): string {
-        return `<fn ${this.fun.name ?? ''}>`
-    }
-}
-
-class LoxInstance {
-    constructor(public readonly cls: LoxClass) { }
-
-    toString(): string {
-        return `<instance ${this.cls.name}>`;
-    }
-}
-
-class LoxClass extends LoxCallable {
-    constructor(readonly cls: LoxClassDef) {
-        super()
-    }
-
-    call(interp: Evaluator, args: LoxValue[]): LoxValue {
-        let instance = new LoxInstance(this)
-        return instance;
-    }
-
-    arity(): number {
-        return 0;
-    }
-
-    get name(): string {
-        return this.cls.name.id
-    }
-
-    toString(): string {
-        return `<${this.cls.name.id}>`;
-    }
-}
 
 function check_number(v: LoxValue, where: Location): number {
     if (typeof v != "number") {
@@ -300,13 +231,13 @@ export class Evaluator extends AstVisitor<LoxValue> {
         }
         if (val instanceof LoxCallable) {
             let fun = val as LoxCallable;
-            if (e.call) {
+            if (e.call instanceof LoxCall) {
                 if (fun.arity() != e.call.arguments.length) {
                     throw new RuntimeError(`function ${e.expr} called with ${e.call.arguments.length} arguments, expecting ${fun.arity()}`,
                         e.location)
                 }
                 let args = new Array<LoxValue>;
-                for (var a of e.call.arguments) {
+                for (let a of e.call.arguments) {
                     args.push(a.accept(this));
                 }
                 return (val as LoxCallable).call(this, args);
@@ -319,6 +250,18 @@ export class Evaluator extends AstVisitor<LoxValue> {
 
     visitCall(e: LoxCall): LoxValue {
         throw new Error("Method not implemented.");
+    }
+
+    visitGet(e: LoxGet): LoxValue {
+        let obj = e.expr.accept(this);
+        if (obj instanceof LoxInstance) {
+            let val = obj.get(e.ident.id)
+            if (val == undefined) {
+                throw new RuntimeError(`undefined property ${e.ident.id}`, e.ident.location)
+            }
+            return val;
+        }
+        throw new RuntimeError("only objects have properties", e.location)
     }
 
     visitBinary(e: LoxBinary): LoxValue {

@@ -4,8 +4,8 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Evaluator, LoxValue } from "./evaluator";
-import { SymbolTable } from "./symboltable";
+
+import { LoxValue } from "./runtime";
 import { Location, TokenType } from "./token"
 
 abstract class LoxBase {
@@ -151,7 +151,7 @@ export class LoxBlock extends LoxBase {
     }
 }
 
-export type LoxExpr = LoxPrimary | LoxUnary | LoxBinary | LoxGroup;
+export type LoxExpr = LoxPrimary | LoxUnary | LoxBinary | LoxGroup | LoxGet;
 export type LoxPrimary = LoxIdentifier | LoxLiteral | LoxFun;
 export type LoxLiteral = LoxNumber | LoxString | LoxBool | LoxNil;
 
@@ -171,7 +171,7 @@ export class LoxUnary extends LoxBase {
 }
 
 export class LoxCall extends LoxBase {
-    constructor(location: Location,) {
+    constructor(location: Location) {
         super(location);
         this.arguments = new Array<LoxExpr>();
     }
@@ -179,6 +179,16 @@ export class LoxCall extends LoxBase {
 
     accept<T>(visitor: AstVisitor<T>): T {
         return visitor.visitCall(this)
+    }
+}
+
+export class LoxGet extends LoxBase {
+    constructor(location: Location, readonly expr: LoxExpr, readonly ident: LoxIdentifier) {
+        super(location);
+    }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitGet(this)
     }
 }
 
@@ -319,6 +329,7 @@ export abstract class AstVisitor<T> {
     }
 
     abstract visitCall(e: LoxCall): T;
+    abstract visitGet(e: LoxGet): T;
 
     visitBinary(e: LoxBinary): T {
         e.left.accept<T>(this)
@@ -339,13 +350,4 @@ export abstract class AstVisitor<T> {
     abstract visitString(expr: LoxString): T;
     abstract visitBool(expr: LoxBool): T;
     abstract visitNil(expr: LoxNil): T;
-}
-
-export abstract class LoxCallable {
-    abstract call(interp: Evaluator, args: Array<LoxValue>): LoxValue;
-    abstract arity(): number;
-
-    toString(): string {
-        return '<native fn>'
-    }
 }
