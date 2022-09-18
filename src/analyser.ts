@@ -17,6 +17,7 @@ export class Analyser extends AstVisitor<void> {
         // for globals
         this.begin_scope();
     }
+    private enclosing_loop = 0;
 
     private scopes: Array<Map<string, boolean>>;
 
@@ -94,7 +95,9 @@ export class Analyser extends AstVisitor<void> {
 
     visitWhile(expr: LoxWhile): void {
         expr.expr.accept(this);
+        this.enclosing_loop++;
         expr.stats.accept(this);
+        this.enclosing_loop--;
     }
 
     visitFor(expr: LoxFor): void {
@@ -102,11 +105,16 @@ export class Analyser extends AstVisitor<void> {
         expr.init?.accept(this);
         expr.cond?.accept(this);
         expr.iter?.accept(this);
+        this.enclosing_loop++;
         expr.stat?.accept(this);
+        this.enclosing_loop--;
         this.end_scope();
     }
 
     visitBreak(expr: LoxBreak): void {
+        if (this.enclosing_loop == 0) {
+            throw new ParseError(`no enclosing loop statement for ${expr.what}`, expr.location)
+        }
     }
 
     visitReturn(e: LoxReturn): void {

@@ -332,4 +332,15 @@ describe('Evaluator', () => {
         ]
         do_tests(tests)
     })
+
+    it('methods', () => {
+        const tests: TestCases[] = [
+            ['class A{ f() {return 7;} } var x = A(); x.f();', '7'],
+            ['class C{ f(c) {return c;} } x = C(); x.f(77);', '77'],
+
+            // Errors
+            ['class B{ g() {return 7;} } x = B(); x.f();', '', 'undefined property f'],
+        ]
+        do_tests(tests)
+    })
 })

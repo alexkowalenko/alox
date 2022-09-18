@@ -87,6 +87,11 @@ export class Evaluator extends AstVisitor<LoxValue> {
     visitClass(c: LoxClassDef): LoxValue {
         const cls = new LoxClass(c);
         this.symboltable.set(cls.name, cls);
+
+        for (let m of c.methods) {
+            let f = m.accept(this);
+            cls.methods.set(m.name!.id, f as LoxFunction);
+        }
         return cls;
     }
 
@@ -237,10 +242,16 @@ export class Evaluator extends AstVisitor<LoxValue> {
         let obj = e.expr.accept(this);
         if (obj instanceof LoxInstance) {
             let val = obj.get(e.ident.id)
-            if (val == undefined) {
-                throw new RuntimeError(`undefined property ${e.ident.id}`, e.ident.location)
+            if (val) {
+                return val;
             }
-            return val;
+
+            // try method
+            let method = obj.cls.findMethod(e.ident.id)
+            if (method) {
+                return method;
+            }
+            throw new RuntimeError(`undefined property ${e.ident.id}`, e.ident.location)
         }
         throw new RuntimeError("only objects have properties", e.location)
     }

@@ -31,7 +31,7 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
   - [x] Definitions `class`
   - [x] Creation
   - [x] Properties
-  - [ ] Methods
+  - [x] Methods
   - [ ] `this`
   - [ ] Constructors
 - [ ] Inheritance - Chapter 13.

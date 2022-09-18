@@ -112,8 +112,6 @@ const stat_map = new Map<TokenType, PrefixParselet>([
 export class Parser {
     constructor(private readonly lexer: Lexer) { }
 
-    private enclosing_loop = 0;
-
     public parse(line: string): LoxProgram {
         this.lexer.set_line(line)
         return this.program()
@@ -235,9 +233,7 @@ export class Parser {
         this.consume(TokenType.L_PAREN)
         const expr = this.expr();
         const paren = this.expect(TokenType.R_PAREN)
-        this.enclosing_loop++;
         const stats = this.statement();
-        this.enclosing_loop--;
         if (!stats) {
             throw new ParseError("expecting statements after )", paren.loc)
         }
@@ -271,9 +267,7 @@ export class Parser {
             ast.iter = this.expr();
         }
         this.consume(TokenType.R_PAREN)
-        this.enclosing_loop++;
         let stat = this.statement();
-        this.enclosing_loop--;
         if (stat) {
             ast.stat = stat
         }
@@ -289,9 +283,6 @@ export class Parser {
 
     public break(): LoxBreak {
         let tok = this.lexer.get_token();
-        if (this.enclosing_loop == 0) {
-            throw new ParseError(`no enclosing loop statement for ${tok.tok}`, tok.loc)
-        }
         this.consume(TokenType.SEMICOLON)
         return new LoxBreak(tok.loc, tok.tok);
     }

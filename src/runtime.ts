@@ -77,7 +77,9 @@ export class LoxInstance {
 export class LoxClass extends LoxCallable {
     constructor(readonly cls: LoxClassDef) {
         super()
+
     }
+    public methods: Map<string, LoxFunction> = new Map;
 
     call(interp: Evaluator, args: LoxValue[]): LoxValue {
         let instance = new LoxInstance(this)
@@ -90,6 +92,10 @@ export class LoxClass extends LoxCallable {
 
     get name(): string {
         return this.cls.name.id
+    }
+
+    findMethod(name: string): LoxFunction | undefined {
+        return this.methods.get(name)
     }
 
     toString(): string {

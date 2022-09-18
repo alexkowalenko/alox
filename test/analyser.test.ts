@@ -13,4 +13,13 @@ describe('Analyser', () => {
         ]
         do_tests(tests)
     })
+
+    it('break', () => {
+        const tests: TestCases[] = [
+            // Error
+            ['break;', '', 'no enclosing loop statement for break'],
+            ['continue;', '', 'no enclosing loop statement for continue'],
+        ]
+        do_tests(tests)
+    })
 })
