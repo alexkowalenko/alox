@@ -21,7 +21,7 @@ export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass
 
 export class LoxFunction extends LoxCallable {
 
-    constructor(readonly fun: LoxFun, readonly closure: SymbolTable<LoxValue>) {
+    constructor(readonly fun: LoxFun, readonly closure: SymbolTable<LoxValue>, public initializer: boolean) {
         super();
     }
 
@@ -45,13 +45,16 @@ export class LoxFunction extends LoxCallable {
         finally {
             interp.symboltable = prev
         }
+        if (this.initializer) {
+            return this.closure.get_at(0, "this")!;
+        }
         return val;
     }
 
     bind(instance: LoxInstance): LoxFunction {
         let env = new SymbolTable<LoxValue>(this.closure);
         env.set("this", instance);
-        return new LoxFunction(this.fun, env);
+        return new LoxFunction(this.fun, env, this.initializer);
     }
 
     arity(): number {
@@ -88,12 +91,20 @@ export class LoxClass extends LoxCallable {
     public methods: Map<string, LoxFunction> = new Map;
 
     call(interp: Evaluator, args: LoxValue[]): LoxValue {
-        let instance = new LoxInstance(this)
+        let instance = new LoxInstance(this);
+        let init = this.findMethod("init");
+        if (init != null) {
+            init.bind(instance).call(interp, args);
+        }
         return instance;
     }
 
     arity(): number {
-        return 0;
+        let init = this.findMethod('init');
+        if (init === undefined) {
+            return 0;
+        }
+        return init.arity();
     }
 
     get name(): string {

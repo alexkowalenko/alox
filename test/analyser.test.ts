@@ -38,4 +38,12 @@ describe('Analyser', () => {
         ]
         do_tests(tests)
     })
+
+    it('init', () => {
+        const tests: TestCases[] = [
+            // errors
+            ["class A{init() {return 22;}}", '', "can't return a value from an initializer"],
+        ]
+        do_tests(tests)
+    })
 })

@@ -12,6 +12,7 @@ import { TokenType } from "./token";
 const enum FunctionType {
     NONE,
     FUNCTION,
+    INITIALIZER,
     METHOD
 }
 
@@ -117,6 +118,9 @@ export class Analyser extends AstVisitor<void> {
         for (const m of c.methods) {
             // Resolve methods 
             let declaration = FunctionType.METHOD;
+            if (m.name!.id === "init") {
+                declaration = FunctionType.INITIALIZER;
+            }
             this.resolve_function(m, declaration)
         }
         this.end_scope();
@@ -157,6 +161,9 @@ export class Analyser extends AstVisitor<void> {
     visitReturn(e: LoxReturn): void {
         if (this.current_function == FunctionType.NONE) {
             throw new ParseError(`no enclosing function to return from`, e.location)
+        }
+        if (this.current_function == FunctionType.INITIALIZER && e.expr) {
+            throw new ParseError(`can't return a value from an initializer`, e.location)
         }
         e.expr?.accept(this);
     }

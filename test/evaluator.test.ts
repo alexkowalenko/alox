@@ -347,8 +347,15 @@ describe('Evaluator', () => {
             ['class A{ f() {return this;} } var x = A(); x.f();', '<instance A>'],
             ['class C{ f() {return this.x;} g(a) { this.x = a;}} x = C(); x.x = 17; x.f();', '17'],
             ['x.g(5); x.x;', '5'],
+        ]
+        do_tests(tests)
+    })
 
-            // Errors
+    it('init', () => {
+        const tests: TestCases[] = [
+            ['class A{ init() {this.a = "jones";} } var x = A(); x.a;', '"jones"'],
+            ['class B{ init(b) {this.a = b;} } x = B("jim"); x.a;', '"jim"'],
+            ['class C{ init(a, b) {this.a = a; this.b = b;} } x = C(1, 2); x.b;', '2'],
         ]
         do_tests(tests)
     })

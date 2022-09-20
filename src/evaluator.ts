@@ -76,8 +76,8 @@ export class Evaluator extends AstVisitor<LoxValue> {
         throw new RuntimeError(`variable ${v.ident.toString()} already defined`, v.location)
     }
 
-    visitFun(f: LoxFun): LoxValue {
-        const val = new LoxFunction(f, this.symboltable);
+    visitFun(f: LoxFun) {
+        const val = new LoxFunction(f, this.symboltable, false);
         if (f.name !== undefined) {
             this.symboltable.set(f.name?.id, val);
         }
@@ -89,8 +89,11 @@ export class Evaluator extends AstVisitor<LoxValue> {
         this.symboltable.set(cls.name, cls);
 
         for (let m of c.methods) {
-            let f = m.accept(this);
-            cls.methods.set(m.name!.id, f as LoxFunction);
+            let f = m.accept(this) as LoxFunction;
+            if (m.name) {
+                f.initializer = m.name.id === "init";
+            }
+            cls.methods.set(m.name!.id, f);
         }
         return cls;
     }
