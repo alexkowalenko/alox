@@ -357,4 +357,12 @@ describe('Parser', () => {
         do_tests(tests)
     })
 
+    it('this', () => {
+        const tests: TestCases[] = [
+            ['this;', 'this;'],
+            ['class A{ f() { return this;}}', 'class A {f(){return this;} };'],
+        ]
+        do_tests(tests)
+    })
+
 })

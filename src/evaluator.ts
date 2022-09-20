@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis } from "./ast";
 import { RuntimeError } from "./error";
 import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance } from "./runtime";
 import { SymbolTable } from "./symboltable";
@@ -249,7 +249,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
             // try method
             let method = obj.cls.findMethod(e.ident.id)
             if (method) {
-                return method;
+                return method.bind(obj);
             }
             throw new RuntimeError(`undefined property ${e.ident.id}`, e.ident.location)
         }
@@ -341,12 +341,12 @@ export class Evaluator extends AstVisitor<LoxValue> {
         return e.right.accept(this);
     }
 
-    visitIdentifier(e: LoxIdentifier): LoxValue {
+    private lookup_variable(e: LoxExpr): LoxValue {
         // console.log("eval id: %s", e.id)
         if (this.locals.has(e)) {
             let depth = this.locals.get(e)
             if (depth !== undefined) {
-                let val = this.symboltable.get_at(depth, e.id)
+                let val = this.symboltable.get_at(depth, e.toString())
                 if (val !== undefined) {
                     return val;
                 }
@@ -355,12 +355,21 @@ export class Evaluator extends AstVisitor<LoxValue> {
 
         // last effort to resolve function names used before declared,
         // LOX doesn't have a forward statement. 
-        let val = this.symboltable.get(e.id);
+        let val = this.symboltable.get(e.toString());
         if (val !== undefined) {
             return val;
         }
-        throw new RuntimeError(`identifier ${e.id} not found`, e.location);
+        throw new RuntimeError(`identifier ${e.toString()} not found`, e.location);
     }
+
+    visitIdentifier(e: LoxIdentifier): LoxValue {
+        return this.lookup_variable(e);
+    }
+
+    visitThis(e: LoxThis): LoxValue {
+        return this.lookup_variable(e);
+    }
+
 
     visitNumber(expr: LoxNumber): LoxValue {
         return expr.value;

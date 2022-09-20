@@ -22,4 +22,20 @@ describe('Analyser', () => {
         ]
         do_tests(tests)
     })
+
+    it('return', () => {
+        const tests: TestCases[] = [
+            // errors
+            ["return;", 'null', "no enclosing function to return from"],
+        ]
+        do_tests(tests)
+    })
+
+    it('this', () => {
+        const tests: TestCases[] = [
+            // errors
+            ["this;", 'null', "can't use 'this' outside of a class"],
+        ]
+        do_tests(tests)
+    })
 })

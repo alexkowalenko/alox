@@ -291,8 +291,6 @@ describe('Evaluator', () => {
             ["fun f(a) {return a;} f(1);", '1'],
             ["fun g(a,b) {return a+ b;} g(1,3);", '4'],
             ["g(f(3),3);", '6'],
-            // errors
-            ["return;", 'null', "no enclosing function to return from"],
         ]
         do_tests(tests)
     })
@@ -343,4 +341,16 @@ describe('Evaluator', () => {
         ]
         do_tests(tests)
     })
+
+    it('this', () => {
+        const tests: TestCases[] = [
+            ['class A{ f() {return this;} } var x = A(); x.f();', '<instance A>'],
+            ['class C{ f() {return this.x;} g(a) { this.x = a;}} x = C(); x.x = 17; x.f();', '17'],
+            ['x.g(5); x.x;', '5'],
+
+            // Errors
+        ]
+        do_tests(tests)
+    })
+
 })

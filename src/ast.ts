@@ -152,7 +152,7 @@ export class LoxBlock extends LoxBase {
 }
 
 export type LoxExpr = LoxPrimary | LoxUnary | LoxBinary | LoxAssign | LoxSet | LoxGroup | LoxCall | LoxGet;
-export type LoxPrimary = LoxIdentifier | LoxLiteral | LoxFun;
+export type LoxPrimary = LoxIdentifier | LoxLiteral | LoxFun | LoxThis;
 export type LoxLiteral = LoxNumber | LoxString | LoxBool | LoxNil;
 
 export class LoxUnary extends LoxBase {
@@ -256,6 +256,20 @@ export class LoxIdentifier extends LoxBase {
 
     toString(): string {
         return this.id
+    }
+}
+
+export class LoxThis extends LoxBase {
+    constructor(readonly location: Location) {
+        super(location);
+    }
+
+    accept<T>(visitor: AstVisitor<T>): T {
+        return visitor.visitThis(this)
+    }
+
+    toString(): string {
+        return "this";
     }
 }
 
@@ -367,6 +381,7 @@ export abstract class AstVisitor<T> {
         return e.expr.accept<T>(this)
     }
 
+    abstract visitThis(e: LoxThis): T;
     abstract visitIdentifier(e: LoxIdentifier): T;
 
     visitLiteral(expr: LoxLiteral): T {

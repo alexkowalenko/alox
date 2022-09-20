@@ -48,6 +48,12 @@ export class LoxFunction extends LoxCallable {
         return val;
     }
 
+    bind(instance: LoxInstance): LoxFunction {
+        let env = new SymbolTable<LoxValue>(this.closure);
+        env.set("this", instance);
+        return new LoxFunction(this.fun, env);
+    }
+
     arity(): number {
         return this.fun.args.length
     }

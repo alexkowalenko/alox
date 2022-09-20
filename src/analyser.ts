@@ -4,10 +4,21 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign } from "./ast";
+import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis } from "./ast";
 import { ParseError } from "./error";
 import { Evaluator } from "./evaluator";
 import { TokenType } from "./token";
+
+const enum FunctionType {
+    NONE,
+    FUNCTION,
+    METHOD
+}
+
+const enum ClassType {
+    NONE,
+    CLASS
+}
 
 export class Analyser extends AstVisitor<void> {
 
@@ -18,8 +29,9 @@ export class Analyser extends AstVisitor<void> {
         this.begin_scope();
     }
     private enclosing_loop = 0;
-
     private scopes: Array<Map<string, boolean>>;
+    private current_function = FunctionType.NONE;
+    private current_class = ClassType.NONE;
 
     private begin_scope() {
         this.scopes.push(new Map<string, boolean>);
@@ -68,11 +80,11 @@ export class Analyser extends AstVisitor<void> {
         this.define(expr.ident.id);
     }
 
-    visitFun(f: LoxFun): void {
-        if (f.name !== undefined) {
-            this.declare(f.name.id);
-            this.define(f.name.id);
-        }
+    private resolve_function(f: LoxFun, type: FunctionType = FunctionType.FUNCTION) {
+        // Swap the current function type with the previous.
+        let enclosing_function = this.current_function;
+        this.current_function = type;
+
         this.begin_scope();
         for (const param of f.args) {
             this.declare(param.id);
@@ -80,11 +92,36 @@ export class Analyser extends AstVisitor<void> {
         }
         f.body!.accept(this);
         this.end_scope();
+
+        this.current_function = enclosing_function;
+    }
+
+    visitFun(f: LoxFun): void {
+        if (f.name !== undefined) {
+            this.declare(f.name.id);
+            this.define(f.name.id);
+        }
+        this.resolve_function(f, FunctionType.FUNCTION)
     }
 
     visitClass(c: LoxClassDef): void {
+        let enclosing_class = this.current_class;
+        this.current_class = ClassType.CLASS;
+
         this.declare(c.name.id);
         this.define(c.name.id);
+
+        this.begin_scope();
+        this.declare("this");
+
+        for (const m of c.methods) {
+            // Resolve methods 
+            let declaration = FunctionType.METHOD;
+            this.resolve_function(m, declaration)
+        }
+        this.end_scope();
+
+        this.current_class = enclosing_class;
     }
 
     visitIf(expr: LoxIf): void {
@@ -118,6 +155,9 @@ export class Analyser extends AstVisitor<void> {
     }
 
     visitReturn(e: LoxReturn): void {
+        if (this.current_function == FunctionType.NONE) {
+            throw new ParseError(`no enclosing function to return from`, e.location)
+        }
         e.expr?.accept(this);
     }
 
@@ -165,6 +205,13 @@ export class Analyser extends AstVisitor<void> {
             throw new ParseError(`can't have local variable ${e.id} in its own initializer`, e.location)
         }
         this.resolve(e.id, e)
+    }
+
+    visitThis(e: LoxThis): void {
+        if (this.current_class == ClassType.NONE) {
+            throw new ParseError(`can't use 'this' outside of a class`, e.location)
+        }
+        this.resolve(TokenType.THIS, e);
     }
 
     visitLiteral(expr: LoxLiteral): void {
