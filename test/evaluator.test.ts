@@ -360,7 +360,7 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
-    it('super', () => {
+    it('inheritance', () => {
         const tests: TestCases[] = [
             ['class A{ f(a) {this.x = a;} }', '<A>'],
             ['class B < A { g(a) {this.x = a;}} var y= B(); y.f(88); y.x;', '88'],
@@ -368,6 +368,20 @@ describe('Evaluator', () => {
 
             // Error
             ['var x = 1; class A < x{ init() {this.a = "jones";} }', '', "superclass of A must be a class"],
+        ]
+        do_tests(tests)
+    })
+
+    it('super', () => {
+        const tests: TestCases[] = [
+            ['class A{ method() { return 77; }}', '<A>'],
+            ['class B < A { method() { return 88; } test() {super.method();}}', '<B>'],
+            ['class C < B {}', '<C>'],
+            ['B().test();', '77'],
+            ['C().test();', '77'],
+
+            // Error
+            ['class BB < A { test() {super.nomethod();} } BB().test();', '77', 'undefined property on super nomethod'],
         ]
         do_tests(tests)
     })

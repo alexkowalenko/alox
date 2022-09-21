@@ -57,7 +57,7 @@ binary         -> expression operator expression ;
 assignment     -> (call ".")? IDENTIFIER "=" assignment;
 grouping       -> "(" expression ")" ;
 operator       -> "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/" | "or" | "and" | "=" ;
-primary        -> IDENTIFIER | literal | "this"
+primary        -> IDENTIFIER | literal | "this" | "super" "." IDENTIFIER
 literal        -> NUMBER | STRING | "true" | "false" | "nil" ;
 ```
 

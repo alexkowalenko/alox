@@ -365,4 +365,15 @@ describe('Parser', () => {
         do_tests(tests)
     })
 
+    it('super', () => {
+        const tests: TestCases[] = [
+            ['super.f();', 'super.f();'],
+
+            // Error
+            ['super;', '', 'unexpected ;, expecting .'],
+        ]
+        do_tests(tests)
+    })
+
+
 })

@@ -47,10 +47,19 @@ describe('Analyser', () => {
         do_tests(tests)
     })
 
-    it('super', () => {
+    it('inheritance', () => {
         const tests: TestCases[] = [
             // errors
             ["class A < A {init() {return 22;}}", '', "a class can't inherit from itself"],
+        ]
+        do_tests(tests)
+    })
+
+    it('inheritance', () => {
+        const tests: TestCases[] = [
+            // errors
+            ["super.x;", '', "can't use 'super' outside of a class"],
+            ["class A{ f() {return super.x;}}", '', "can't use 'super' in a class with no superclass"],
         ]
         do_tests(tests)
     })

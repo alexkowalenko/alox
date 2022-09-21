@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis } from "./ast";
+import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
 import { ParseError } from "./error";
 import { Evaluator } from "./evaluator";
 import { TokenType } from "./token";
@@ -18,7 +18,8 @@ const enum FunctionType {
 
 const enum ClassType {
     NONE,
-    CLASS
+    CLASS,
+    SUBCLASS,
 }
 
 export class Analyser extends AstVisitor<void> {
@@ -116,8 +117,15 @@ export class Analyser extends AstVisitor<void> {
             throw new ParseError("a class can't inherit from itself", c.super_class?.location)
         }
 
+        if (c.super_class) {
+            this.current_class = ClassType.SUBCLASS
+            this.resolve(c.super_class.id, c.super_class)
+            this.begin_scope();
+            this.define("super")
+        }
+
         this.begin_scope();
-        this.declare("this");
+        this.define("this");
 
         for (const m of c.methods) {
             // Resolve methods 
@@ -128,6 +136,10 @@ export class Analyser extends AstVisitor<void> {
             this.resolve_function(m, declaration)
         }
         this.end_scope();
+
+        if (c.super_class) {
+            this.end_scope();
+        }
 
         this.current_class = enclosing_class;
     }
@@ -223,6 +235,15 @@ export class Analyser extends AstVisitor<void> {
             throw new ParseError(`can't use 'this' outside of a class`, e.location)
         }
         this.resolve(TokenType.THIS, e);
+    }
+
+    visitSuper(e: LoxSuper): void {
+        if (this.current_class == ClassType.NONE) {
+            throw new ParseError("can't use 'super' outside of a class", e.location);
+        } else if (this.current_class == ClassType.CLASS) {
+            throw new ParseError("can't use 'super' in a class with no superclass", e.location);
+        }
+        this.resolve(TokenType.SUPER, e);
     }
 
     visitLiteral(expr: LoxLiteral): void {

@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxString, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { AstVisitor, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
 
 export class Printer extends AstVisitor<string> {
 
@@ -171,6 +171,10 @@ export class Printer extends AstVisitor<string> {
 
     visitThis(e: LoxThis): string {
         return "this"
+    }
+
+    visitSuper(e: LoxSuper): string {
+        return "super." + e.method
     }
 
     visitNumber(expr: LoxNumber): string {

@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
 import { RuntimeError } from "./error";
 import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance } from "./runtime";
 import { SymbolTable } from "./symboltable";
@@ -95,6 +95,13 @@ export class Evaluator extends AstVisitor<LoxValue> {
         }
         this.symboltable.set(cls.name, cls);
 
+        let prev: SymbolTable<LoxValue>;
+        if (c.super_class) {
+            prev = this.symboltable;
+            this.symboltable = new SymbolTable(this.symboltable);
+            this.symboltable.set("super", cls.super_class!);
+        }
+
         for (let m of c.methods) {
             let f = m.accept(this) as LoxFunction;
             if (m.name) {
@@ -102,6 +109,11 @@ export class Evaluator extends AstVisitor<LoxValue> {
             }
             cls.methods.set(m.name!.id, f);
         }
+
+        if (c.super_class) {
+            this.symboltable = prev!
+        }
+
         return cls;
     }
 
@@ -380,6 +392,21 @@ export class Evaluator extends AstVisitor<LoxValue> {
         return this.lookup_variable(e);
     }
 
+    visitSuper(e: LoxSuper): LoxValue {
+        let distance = this.locals.get(e);
+        // console.log(`super distance = ${distance}`);
+        let super_class = this.symboltable.get_at(distance!, "super") as LoxClass;
+        if (!super_class) {
+            throw new RuntimeError(`can't find superclass ${e}`, e.method.location)
+        }
+        //console.log(`super = ${super_class}`);
+        let obj: LoxInstance = this.symboltable.get_at(distance! - 1, "this")! as LoxInstance;
+        let method = super_class.findMethod(e.method.id);
+        if (method == undefined) {
+            throw new RuntimeError(`undefined property on super ${e.method.id}`, e.method.location)
+        }
+        return method?.bind(obj) as LoxValue
+    }
 
     visitNumber(expr: LoxNumber): LoxValue {
         return expr.value;

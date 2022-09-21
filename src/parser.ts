@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { ForInit, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxStatement, LoxString, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { ForInit, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxStatement, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType, Location } from "./token";
 import { ParseError } from "./error";
@@ -21,6 +21,7 @@ const prefix_map: Map<TokenType, PrefixParselet> = new Map([
     [TokenType.FALSE, (p: Parser) => { return p.bool() }],
     [TokenType.NIL, (p: Parser) => { return p.nil() }],
     [TokenType.THIS, (p: Parser) => { return p.ths() }],
+    [TokenType.SUPER, (p: Parser) => { return p.supr() }],
     [TokenType.L_PAREN, (p: Parser) => { return p.group() }],
     [TokenType.MINUS, (p: Parser) => { return p.unary() }],
     [TokenType.BANG, (p: Parser) => { return p.unary() }],
@@ -464,6 +465,12 @@ export class Parser {
     ths(): LoxThis {
         const tok = this.expect(TokenType.THIS);
         return new LoxThis(tok.loc)
+    }
+
+    supr(): LoxSuper {
+        const tok = this.expect(TokenType.SUPER);
+        this.consume(TokenType.DOT)
+        return new LoxSuper(tok.loc, this.identifier())
     }
 
     number(): LoxNumber {
