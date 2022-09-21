@@ -1,0 +1,5 @@
+class Foo {
+  method(a, b) {}
+}
+
+Foo().method(1); // error: function Foo().method called with 1 arguments, expecting 2

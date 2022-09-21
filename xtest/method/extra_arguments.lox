@@ -1,0 +1,8 @@
+class Foo {
+  method(a, b) {
+    print a;
+    print b;
+  }
+}
+
+Foo().method(1, 2, 3, 4); // error: function Foo().method called with 4 arguments, expecting 2

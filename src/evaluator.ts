@@ -6,6 +6,7 @@
 
 import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
 import { RuntimeError } from "./error";
+import { Interpreter } from "./interpreter";
 import { Printer } from "./printer";
 import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance } from "./runtime";
 import { SymbolTable } from "./symboltable";
@@ -22,13 +23,6 @@ function check_number(v: LoxValue, where: Location): number {
 function check_string(v: LoxValue, where: Location): string {
     if (typeof v != "string") {
         throw new RuntimeError("value must be a string", where)
-    }
-    return v
-}
-
-function check_boolean(v: LoxValue, where: Location): boolean {
-    if (typeof v != "boolean") {
-        throw new RuntimeError("value must be a boolean", where)
     }
     return v
 }
@@ -237,7 +231,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
             case TokenType.MINUS:
                 return - check_number(val, e.location)
             case TokenType.BANG:
-                return !check_boolean(val, e.location)
+                return !this.truthy(val)
         }
         throw new RuntimeError(`${e.prefix} not defined as prefix operator`, e.location);
     }
@@ -247,7 +241,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
         if (val instanceof LoxCallable) {
             let fun = val as LoxCallable;
             if (fun.arity() != e.arguments.length) {
-                throw new RuntimeError(`function ${e.expr} called with ${e.arguments.length} arguments, expecting ${fun.arity()}`,
+                throw new RuntimeError(`function ${new Printer().print(e.expr)} called with ${e.arguments.length} arguments, expecting ${fun.arity()}`,
                     e.location)
             }
             let args = new Array<LoxValue>;
@@ -304,7 +298,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
                 else if (typeof left === "string")
                     return check_string(left, e.left.location) + check_string(right, e.right.location)
                 else {
-                    throw new RuntimeError(`can't apply ${e.operator} to ${left}`, e.left.location)
+                    throw new RuntimeError(`can't apply ${e.operator} to ${Interpreter.prototype.pretty_print(left)}`, e.left.location)
                 }
 
             case TokenType.MINUS:

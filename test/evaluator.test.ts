@@ -63,6 +63,7 @@ describe('Evaluator', () => {
             ["!!true;", 'true'],
             ["!!!true;", 'false'],
             ["!(false);", 'true'],
+            ["!1;", 'false'],
 
             ["-1;", '-1'],
             ["--1;", '1'],
@@ -71,7 +72,6 @@ describe('Evaluator', () => {
             ["-(1);", '-1'],
 
             // Error
-            ["!1;", '', "value must be a boolean"],
             [`-"hello";`, '', "value must be a number"],
         ]
         do_tests(tests)
@@ -91,7 +91,7 @@ describe('Evaluator', () => {
             // Error
             ["1 + true;", 'null', "value must be a number"],
             [`"1" + false;`, 'null', "value must be a string"],
-            [`nil + "hello";`, 'null', "can't apply + to null"],
+            [`nil + "hello";`, 'null', "can't apply + to nil"],
         ]
         do_tests(tests)
     })

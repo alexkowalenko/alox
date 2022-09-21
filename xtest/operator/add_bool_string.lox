@@ -1,0 +1,1 @@
+true + "s"; // error: can't apply + to true

@@ -1,0 +1,1 @@
+true + nil; // error: can't apply + to true

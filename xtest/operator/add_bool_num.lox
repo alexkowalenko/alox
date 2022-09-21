@@ -1,0 +1,1 @@
+true + 123; // error: can't apply + to true
