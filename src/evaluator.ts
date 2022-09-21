@@ -6,11 +6,13 @@
 
 import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
 import { RuntimeError } from "./error";
-import { Interpreter } from "./interpreter";
+import { Interpreter, Options } from "./interpreter";
 import { Printer } from "./printer";
 import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance } from "./runtime";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
+
+import os from "os";
 
 
 function check_number(v: LoxValue, where: Location): number {
@@ -29,7 +31,7 @@ function check_string(v: LoxValue, where: Location): string {
 
 export class Evaluator extends AstVisitor<LoxValue> {
 
-    constructor(public symboltable: SymbolTable<LoxValue>) {
+    constructor(public symboltable: SymbolTable<LoxValue>, private readonly options: Options) {
         super()
     }
     private locals: Map<LoxExpr, number> = new Map;
@@ -185,9 +187,9 @@ export class Evaluator extends AstVisitor<LoxValue> {
     visitPrint(p: LoxPrint): LoxValue {
         let val = p.expr.accept(this)
         if (val === null) {
-            console.log("nil")
+            this.options.output.write("nil" + os.EOL)
         } else {
-            console.log(val.toString())
+            this.options.output.write(val.toString() + os.EOL)
         }
         return val
     }

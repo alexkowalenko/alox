@@ -57,6 +57,7 @@ function do_interactive(opts: Options) {
 
     rl.on('history', (line: string) => {
         histories.push(line)
+        fs.writeFileSync('.alox', histories.join('\n').trimEnd())
     })
 
     rl.on('SIGINT', (line: string) => {
@@ -65,43 +66,33 @@ function do_interactive(opts: Options) {
     })
 
     rl.on('close', () => {
-        fs.writeFileSync('.alox', histories.join('\n').trimEnd())
         console.log('Bye!');
         process.exit(0);
     });
 }
 
-function do_file(file: string, opts: Options) {
-    let content = fs.readFileSync(file, { encoding: "utf8" })
+async function do_file(file: string, opts: Options) {
+    opts.input = fs.createReadStream(file, { encoding: "utf8" });
     const interpreter = new Interpreter(opts);
     try {
-        let val = interpreter.do(content);
+        let val = await interpreter.do_stream();
         if (!opts.silent) {
             console.log(`: ${interpreter.pretty_print(val)}`)
         }
     }
     catch (e) {
-        if (e instanceof LoxError) {
-            if (opts.silent) {
-                console.error(e.message)
-            } else {
-                console.error(e.toString())
-            }
-            process.exit(-1)
-        } else {
-            throw e
-        }
+        console.error((e as Error).toString())
     }
 }
 
-(function run() {
+(async function run() {
     program.name('ALOX 👾 interpreter')
         .description("The ALOX programming language")
         .version("0.1.0")
 
     program.option('-s, --silent', 'turn off extra output')
     program.option('-f, --file <file>', 'execute <file>')
-    program.option('-p, --parseonly', 'only parse the script')
+    program.option('-p, --parse', 'print out the parsed script')
     program.option('-t, --timer', 'print out timings')
 
 
@@ -110,14 +101,14 @@ function do_file(file: string, opts: Options) {
     const options = program.opts();
     let opts = new Options();
     opts.silent = options.silent;
-    opts.parseOnly = options.parseonly;
+    opts.parse = options.parse;
     opts.timer = options.timer;
     if (!options.silent) {
         console.log("ALOX 👾 interpreter")
     }
 
     if (options.file) {
-        do_file(options.file, opts)
+        await do_file(options.file, opts)
     } else {
         do_interactive(opts)
     }

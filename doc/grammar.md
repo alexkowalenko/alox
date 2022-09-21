@@ -63,10 +63,16 @@ literal        -> NUMBER | STRING | "true" | "false" | "nil" ;
 
 ## Operator Precedence
 
-1. 'or'
-2. 'and'
-3. "==" | "!=" | "<" | "<=" | ">" | ">="
-4. "+" | "-"
-5. "*" | "/"
-6. "-" | "!" unary
+1. `or`
+2. `and`
+3. `==` | `!=` | `<` | `<=` | `>` | `>=`
+4. `+` | `-`
+5. `*` | `/`
+6. `-` | `!` unary
 7. exponent
+
+## Standard built-in functions
+
+`print`, `clock()`.
+
+`getc()`, `chr(c)`, `exit(status)`, `print_error(message)`.
