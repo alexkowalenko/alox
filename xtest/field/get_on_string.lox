@@ -1,0 +1,1 @@
+"str".foo; // error: only objects have properties

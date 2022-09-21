@@ -58,6 +58,10 @@ export class LineReader {
                 do {
                     char = this.get_char();
                 } while (char !== '\n' && char != "")
+                if (char === '\n') {
+                    this.line_no++;
+                    this.char_no = 1;
+                }
                 continue
             }
             return char

@@ -6,6 +6,7 @@
 
 import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
 import { RuntimeError } from "./error";
+import { Printer } from "./printer";
 import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance } from "./runtime";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
@@ -256,7 +257,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
             return (val as LoxCallable).call(this, args);
 
         } else {
-            throw new RuntimeError(`can't call ${e.expr}`, e.expr.location)
+            throw new RuntimeError(`can't call ${new Printer().print(e.expr)}`, e.expr.location)
         }
     }
 

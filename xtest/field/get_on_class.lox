@@ -1,0 +1,2 @@
+class Foo {}
+Foo.bar; // error: only objects have properties

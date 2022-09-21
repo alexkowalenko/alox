@@ -1,0 +1,1 @@
+true(); // error: can't call true

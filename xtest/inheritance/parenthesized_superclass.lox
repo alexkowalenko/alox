@@ -1,0 +1,4 @@
+class Foo {}
+
+
+class Bar < (Foo) {} // error: unexpected (, expecting <ident>
