@@ -46,4 +46,12 @@ describe('Analyser', () => {
         ]
         do_tests(tests)
     })
+
+    it('super', () => {
+        const tests: TestCases[] = [
+            // errors
+            ["class A < A {init() {return 22;}}", '', "a class can't inherit from itself"],
+        ]
+        do_tests(tests)
+    })
 })

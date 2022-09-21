@@ -180,10 +180,15 @@ export class Parser {
     }
 
     private class(): LoxClassDef {
-        var tok = this.expect(TokenType.CLASS);
-        var name = this.identifier();
-        this.consume(TokenType.L_BRACE);
+        let tok = this.expect(TokenType.CLASS);
+        let name = this.identifier();
         const ast = new LoxClassDef(tok.loc, name);
+        tok = this.lexer.peek_token();
+        if (tok.tok === TokenType.LESS) {
+            this.consume(TokenType.LESS);
+            ast.super_class = this.identifier();
+        }
+        this.consume(TokenType.L_BRACE);
         tok = this.lexer.peek_token()
         while (tok.tok != TokenType.R_BRACE) {
             var method = this.method();

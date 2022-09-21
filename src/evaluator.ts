@@ -86,6 +86,13 @@ export class Evaluator extends AstVisitor<LoxValue> {
 
     visitClass(c: LoxClassDef): LoxValue {
         const cls = new LoxClass(c);
+        if (c.super_class) {
+            let super_class = c.super_class.accept(this);
+            if (!(super_class instanceof LoxClass)) {
+                throw new RuntimeError(`superclass of ${c.name} must be a class`, c.super_class.location)
+            }
+            cls.super_class = super_class as LoxClass;
+        }
         this.symboltable.set(cls.name, cls);
 
         for (let m of c.methods) {

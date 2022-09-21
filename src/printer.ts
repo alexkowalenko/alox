@@ -55,7 +55,11 @@ export class Printer extends AstVisitor<string> {
     }
 
     visitClass(c: LoxClassDef): string {
-        let buf = `class ${c.name} {` + this.newline;
+        let buf = `class ${c.name} `;
+        if (c.super_class) {
+            buf += `< ${c.super_class} `
+        }
+        buf += '{' + this.newline;
         for (const m of c.methods) {
             buf += m.accept(this) + ' ' + this.newline;
         }

@@ -59,6 +59,7 @@ export class LoxClassDef extends LoxBase {
         super(location);
         this.methods = new Array;
     }
+    public super_class?: LoxIdentifier
     public methods: Array<LoxFun>;
 
     accept<T>(visitor: AstVisitor<T>): T {

@@ -88,6 +88,7 @@ export class LoxClass extends LoxCallable {
         super()
 
     }
+    public super_class?: LoxClass;
     public methods: Map<string, LoxFunction> = new Map;
 
     call(interp: Evaluator, args: LoxValue[]): LoxValue {
@@ -112,7 +113,13 @@ export class LoxClass extends LoxCallable {
     }
 
     findMethod(name: string): LoxFunction | undefined {
-        return this.methods.get(name)
+        if (this.methods.has(name)) {
+            return this.methods.get(name)
+        }
+        if (this.super_class) {
+            return this.super_class.findMethod(name);
+        }
+        return undefined
     }
 
     toString(): string {

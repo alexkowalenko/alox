@@ -112,6 +112,10 @@ export class Analyser extends AstVisitor<void> {
         this.declare(c.name.id);
         this.define(c.name.id);
 
+        if (c.name.id === c.super_class?.id) {
+            throw new ParseError("a class can't inherit from itself", c.super_class?.location)
+        }
+
         this.begin_scope();
         this.declare("this");
 
