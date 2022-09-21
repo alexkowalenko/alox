@@ -1,0 +1,13 @@
+class Base {
+  foo(a, b) {
+    print "Base.foo(" + a + ", " + b + ")";
+  }
+}
+
+class Derived < Base {
+  foo() {
+    super.foo(1); // error: function super.foo called with 1 arguments, expecting 2
+  }
+}
+
+Derived().foo();

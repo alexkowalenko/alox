@@ -1,6 +1,6 @@
 class Foo {
   method() {
-    print method; // error: Undefined variable 'method'.
+    print method; // error: identifier method not found
   }
 }
 

@@ -224,9 +224,6 @@ export class Analyser extends AstVisitor<void> {
     }
 
     visitIdentifier(e: LoxIdentifier): void {
-        if (this.scopes.at(-1)?.get(e.id) === false) {
-            throw new ParseError(`can't have local variable ${e.id} in its own initializer`, e.location)
-        }
         this.resolve(e.id, e)
     }
 

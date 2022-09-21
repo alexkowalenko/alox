@@ -1,0 +1,4 @@
+fun foo(arg,
+        arg) { // error: Already a variable with this name in this scope.
+  "body";
+}

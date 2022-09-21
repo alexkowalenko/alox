@@ -1,0 +1,4 @@
+var a = "outer";
+{
+  var a = a; // error: can't have local variable a in its own initializer
+}

@@ -1,0 +1,1 @@
+return "wat"; // error: no enclosing function to return from

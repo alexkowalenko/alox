@@ -1,0 +1,10 @@
+class A {
+  method() {}
+}
+
+class B < A {
+  method() {
+    // error: unexpected ), expecting .
+    (super).method();
+  }
+}

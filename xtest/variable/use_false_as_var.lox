@@ -1,0 +1,2 @@
+// error: unexpected false, expecting <ident>
+var false = "value";

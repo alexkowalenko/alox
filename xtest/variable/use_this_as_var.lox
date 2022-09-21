@@ -1,0 +1,2 @@
+// error: unexpected this, expecting <ident>
+var this = "value";

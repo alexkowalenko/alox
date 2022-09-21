@@ -1,0 +1,3 @@
+{
+  print notDefined;  // error: identifier notDefined not found
+}

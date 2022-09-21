@@ -1,0 +1,2 @@
+// error: unexpected nil, expecting <ident>
+var nil = "value";
