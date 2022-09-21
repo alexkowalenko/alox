@@ -1,4 +1,4 @@
-// Tcest for closures
+// Test for closures
 
 // Without proper closures this would print 1 and then 2.
 

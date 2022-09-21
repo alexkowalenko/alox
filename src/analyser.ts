@@ -194,6 +194,9 @@ export class Analyser extends AstVisitor<void> {
 
     visitAssign(e: LoxAssign): void {
         e.right.accept(this)
+        if (e.left instanceof LoxThis) {
+            throw new ParseError(`invalid assignment target this`, e.location)
+        }
         const v = e.left as LoxIdentifier;
         this.resolve(v.id, e.left)
     }

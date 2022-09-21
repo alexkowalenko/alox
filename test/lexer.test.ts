@@ -25,7 +25,10 @@ function do_tests(tests: TestCases[]) {
                     //console.log(`test: ${test[2]}  gen: ${token.value}`)
                     expect(test[2]).toBe(token.value)
                     break
-                case TokenType.NUMBER || TokenType.IDENT:
+                case TokenType.NUMBER:
+                    expect(test[2]).toBe(token.value)
+                    break
+                case TokenType.IDENT:
                     expect(test[2]).toBe(token.value)
                     break
             }

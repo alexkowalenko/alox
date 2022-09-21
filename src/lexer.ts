@@ -48,7 +48,7 @@ const char_zero = "0".charCodeAt(0)
 const char_nine = "9".charCodeAt(0)
 
 const alpha = /[\p{L}\p{Emoji}_]/u
-const alphanumeric = /[\p{L}\p{N}\p{Emoji}]/u
+const alphanumeric = /[\p{L}\p{N}\p{Emoji}_]/u
 
 export class Lexer {
 
