@@ -254,13 +254,13 @@ export class Evaluator extends AstVisitor<LoxValue> {
         let obj = e.expr.accept(this);
         if (obj instanceof LoxInstance) {
             let val = obj.get(e.ident.id)
-            if (val) {
+            if (val !== undefined) {
                 return val;
             }
 
             // try method
             let method = obj.cls.findMethod(e.ident.id)
-            if (method) {
+            if (method !== undefined) {
                 return method.bind(obj);
             }
             throw new RuntimeError(`undefined property ${e.ident.id}`, e.ident.location)
@@ -279,7 +279,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
     }
 
     visitBinary(e: LoxBinary): LoxValue {
-        if (e.operator == TokenType.AND || e.operator == TokenType.OR) {
+        if (e.operator === TokenType.AND || e.operator === TokenType.OR) {
             return this.do_logical(e)
         }
 
@@ -343,7 +343,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
 
     private do_logical(e: LoxBinary) {
         const left = e.left.accept(this);
-        if (e.operator == TokenType.OR) {
+        if (e.operator === TokenType.OR) {
             if (this.truthy(left))
                 return left
         } else {
