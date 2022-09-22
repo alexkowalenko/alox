@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFunDef, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFunDef, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper, LoxGroup, LoxLiteral } from "./ast";
 import { RuntimeError } from "./error";
 import { Options } from "./interpreter";
 import { Printer } from "./printer";
@@ -29,11 +29,16 @@ function check_string(v: LoxValue, where: Location): string {
     return v
 }
 
-export class Evaluator extends AstVisitor<LoxValue> {
+export interface Evaluator {
+    eval(expr: LoxExpr): LoxValue;
+    resolve(expr: LoxExpr, depth: number): void
+}
+
+export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {
 
     constructor(public symboltable: SymbolTable<LoxValue>, private readonly options: Options) {
-        super()
     }
+
     private locals: Map<LoxExpr, number> = new Map;
 
     eval(expr: LoxExpr): LoxValue {
@@ -220,6 +225,14 @@ export class Evaluator extends AstVisitor<LoxValue> {
         return result;
     }
 
+    visitExpr(expr: LoxExpr): LoxValue {
+        return expr.accept(this);
+    }
+
+    visitGroup(e: LoxGroup): LoxValue {
+        return e.expr.accept(this);
+    }
+
     visitUnary(e: LoxUnary): LoxValue {
         const val = e.expr.accept(this)
         switch (e.prefix) {
@@ -372,6 +385,10 @@ export class Evaluator extends AstVisitor<LoxValue> {
             return val;
         }
         throw new RuntimeError(`identifier ${e.toString()} not found`, e.location);
+    }
+
+    visitLiteral(expr: LoxLiteral): LoxValue {
+        return expr.accept(this);
     }
 
     visitIdentifier(e: LoxIdentifier): LoxValue {

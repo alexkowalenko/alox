@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFunDef, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
+import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFunDef, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper, LoxGroup, LoxPrint } from "./ast";
 import { ParseError } from "./error";
 import { Evaluator } from "./evaluator";
 import { TokenType } from "./token";
@@ -22,14 +22,14 @@ const enum ClassType {
     SUBCLASS,
 }
 
-export class Analyser extends AstVisitor<void> {
+export class Analyser implements AstVisitor<void> {
 
     constructor(private readonly evaluator: Evaluator) {
-        super();
         this.scopes = new Array;
         // for globals
         this.begin_scope();
     }
+
     private enclosing_loop = 0;
     private scopes: Array<Map<string, boolean>>;
     private current_function = FunctionType.NONE;
@@ -184,6 +184,15 @@ export class Analyser extends AstVisitor<void> {
         e.expr?.accept(this);
     }
 
+    visitPrint(p: LoxPrint): void {
+        p.expr.accept(this);
+    }
+
+
+    visitGroup(e: LoxGroup): void {
+        e.expr.accept(this);
+    }
+
     visitBlock(expr: LoxBlock): void {
         this.begin_scope();
         for (const stat of expr.statements) {
@@ -199,6 +208,10 @@ export class Analyser extends AstVisitor<void> {
         }
         const v = e.left as LoxIdentifier;
         this.resolve(v.id, e.left)
+    }
+
+    visitExpr(expr: LoxExpr): void {
+        expr.accept(this);
     }
 
     visitUnary(e: LoxUnary): void {

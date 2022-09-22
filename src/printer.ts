@@ -6,9 +6,9 @@
 
 import { AstVisitor, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFunDef, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
 
-export class Printer extends AstVisitor<string> {
+export class Printer implements AstVisitor<string> {
 
-    constructor(private newline = "", private indent = 0) { super() }
+    constructor(private newline = "", private indent = 0) { }
 
     public print(expr: LoxExpr): string {
         return expr.accept(this)
@@ -124,6 +124,10 @@ export class Printer extends AstVisitor<string> {
         return buf
     }
 
+    visitExpr(expr: LoxExpr): string {
+        return expr.accept(this);
+    }
+
     visitUnary(e: LoxUnary): string {
         let buf = '';
         if (e.prefix) {
@@ -163,6 +167,10 @@ export class Printer extends AstVisitor<string> {
 
     visitGroup(e: LoxGroup): string {
         return "( " + e.expr.accept(this) + " )"
+    }
+
+    visitLiteral(expr: LoxLiteral): string {
+        return expr.accept(this);
     }
 
     visitIdentifier(e: LoxIdentifier): string {

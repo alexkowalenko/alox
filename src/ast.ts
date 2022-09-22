@@ -350,62 +350,41 @@ export class LoxNil extends LoxBase {
 /**
  * Visitor class for traversing the AST
  * 
- * Never call return e.accept<T>(this) in a method  which is class not in a union,
- * as this leads to a infinite call back and forth between the visitor and the AST.
  */
-export abstract class AstVisitor<T> {
+export interface AstVisitor<T> {
 
-    abstract visitProgram(prog: LoxProgram): T // Decide what to do here in derived classes
+    visitProgram(prog: LoxProgram): T // Decide what to do here in derived classes
 
-    abstract visitVar(expr: LoxVar): T;
-    abstract visitFun(f: LoxFunDef): T;
-    abstract visitClass(c: LoxClassDef): T;
+    visitVar(expr: LoxVar): T;
+    visitFun(f: LoxFunDef): T;
+    visitClass(c: LoxClassDef): T;
 
-    abstract visitIf(expr: LoxIf): T;
-    abstract visitWhile(expr: LoxWhile): T;
-    abstract visitFor(expr: LoxFor): T;
+    visitIf(expr: LoxIf): T;
+    visitWhile(expr: LoxWhile): T;
+    visitFor(expr: LoxFor): T;
 
-    visitPrint(expr: LoxPrint): T {
-        return expr.expr.accept<T>(this)
-    }
+    visitPrint(expr: LoxPrint): T
 
-    abstract visitBreak(expr: LoxBreak): T;
-    abstract visitReturn(e: LoxReturn): T;
-    abstract visitBlock(expr: LoxBlock): T;
+    visitBreak(expr: LoxBreak): T;
+    visitReturn(e: LoxReturn): T;
+    visitBlock(expr: LoxBlock): T;
 
-    visitExpr(expr: LoxExpr): T {
-        return expr.accept<T>(this)
-    }
+    visitExpr(expr: LoxExpr): T;
+    visitUnary(e: LoxUnary): T;
+    visitCall(e: LoxCall): T;
+    visitGet(e: LoxGet): T;
+    visitSet(e: LoxSet): T
 
-    visitUnary(e: LoxUnary): T {
-        return e.expr.accept<T>(this)
-    }
+    visitAssign(e: LoxAssign): T;
+    visitBinary(e: LoxBinary): T;
+    visitGroup(e: LoxGroup): T;
 
-    abstract visitCall(e: LoxCall): T;
-    abstract visitGet(e: LoxGet): T;
-    abstract visitSet(e: LoxSet): T
-
-    abstract visitAssign(e: LoxAssign): T;
-
-    visitBinary(e: LoxBinary): T {
-        e.left.accept<T>(this)
-        return e.right.accept<T>(this)
-    }
-
-    visitGroup(e: LoxGroup): T {
-        return e.expr.accept<T>(this)
-    }
-
-    abstract visitThis(e: LoxThis): T;
-    abstract visitSuper(e: LoxSuper): T;
-    abstract visitIdentifier(e: LoxIdentifier): T;
-
-    visitLiteral(expr: LoxLiteral): T {
-        return expr.accept<T>(this)
-    }
-
-    abstract visitNumber(expr: LoxNumber): T;
-    abstract visitString(expr: LoxString): T;
-    abstract visitBool(expr: LoxBool): T;
-    abstract visitNil(expr: LoxNil): T;
+    visitThis(e: LoxThis): T;
+    visitSuper(e: LoxSuper): T;
+    visitIdentifier(e: LoxIdentifier): T;
+    visitLiteral(expr: LoxLiteral): T;
+    visitNumber(expr: LoxNumber): T;
+    visitString(expr: LoxString): T;
+    visitBool(expr: LoxBool): T;
+    visitNil(expr: LoxNil): T;
 }

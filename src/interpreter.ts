@@ -5,7 +5,7 @@
 //
 
 import { Analyser } from "./analyser";
-import { Evaluator } from "./evaluator";
+import { Evaluator, TreeEvaluator } from "./evaluator";
 import { Lexer } from "./lexer";
 import { Parser } from "./parser";
 import { Printer } from "./printer";
@@ -27,6 +27,8 @@ export class Options {
     public output: stream.Writable = process.stdout;
     public input: stream.Readable = process.stdin;
     public error: stream.Writable = process.stderr;
+
+    public bytecode = false;
 }
 
 abstract class StdlibClass extends LoxCallable {
@@ -39,7 +41,7 @@ export class Interpreter {
         this.lexer = new Lexer;
         this.parser = new Parser(this.lexer);
         this.symboltable = new SymbolTable<LoxValue>;
-        this.evaluator = new Evaluator(this.symboltable, options);
+        this.evaluator = new TreeEvaluator(this.symboltable, options);
         this.analyser = new Analyser(this.evaluator);
         this.setup_stdlib();
     };
@@ -51,7 +53,7 @@ export class Interpreter {
 
     private setup_stdlib() {
         this.symboltable.set("clock", new class extends LoxCallable {
-            call(i: Evaluator, args: LoxValue[]): LoxValue {
+            call(i: TreeEvaluator, args: LoxValue[]): LoxValue {
                 return Date.now();
             }
             arity(): number {
@@ -61,7 +63,7 @@ export class Interpreter {
         this.analyser.define("clock")
 
         this.symboltable.set("exit", new class extends LoxCallable {
-            call(i: Evaluator, args: LoxValue[]): LoxValue {
+            call(i: TreeEvaluator, args: LoxValue[]): LoxValue {
                 process.exit(args[0] as number)
             }
             arity(): number {
@@ -71,7 +73,7 @@ export class Interpreter {
         this.analyser.define("exit")
 
         this.symboltable.set("print_error", new class extends StdlibClass {
-            call(i: Evaluator, args: LoxValue[]): LoxValue {
+            call(i: TreeEvaluator, args: LoxValue[]): LoxValue {
                 this.options.error.write(args[0] + os.EOL)
                 return args[0];
             }

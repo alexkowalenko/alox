@@ -5,11 +5,11 @@
 //
 
 import { LoxClassDef, LoxFunDef, LoxReturn } from "./ast";
-import { Evaluator } from "./evaluator";
+import { TreeEvaluator } from "./evaluator";
 import { SymbolTable } from "./symboltable";
 
 export abstract class LoxCallable {
-    abstract call(interp: Evaluator, args: Array<LoxValue>): LoxValue;
+    abstract call(interp: TreeEvaluator, args: Array<LoxValue>): LoxValue;
     abstract arity(): number;
 
     toString(): string {
@@ -35,7 +35,7 @@ export class LoxFunction extends LoxCallable {
         super();
     }
 
-    call(interp: Evaluator, args: readonly LoxValue[]): LoxValue {
+    call(interp: TreeEvaluator, args: readonly LoxValue[]): LoxValue {
         let prev = interp.symboltable
         interp.symboltable = new SymbolTable(this.closure);
         for (let i = 0; i < args.length; i++) {
@@ -101,7 +101,7 @@ export class LoxClass extends LoxCallable {
     public super_class?: LoxClass;
     public methods: Map<string, LoxFunction> = new Map;
 
-    call(interp: Evaluator, args: LoxValue[]): LoxValue {
+    call(interp: TreeEvaluator, args: LoxValue[]): LoxValue {
         let instance = new LoxInstance(this);
         let init = this.findMethod("init");
         if (init != null) {
