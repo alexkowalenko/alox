@@ -7,6 +7,11 @@
 
 import * as fs from "fs";
 import child_process from "child_process"
+import * as stream from 'stream'
+import { finished } from 'node:stream/promises';
+
+import { Interpreter, Options } from "../src/interpreter";
+import { LoxValue } from "../src/runtime";
 
 const base_dir = "./xtest"
 const ts_node = "node_modules/ts-node/dist/bin.js"
@@ -32,45 +37,86 @@ function find_files(dirPath: string, suffix: string): string[] {
 const expectPattern = /\/\/ expect: (?<expect>.*)/
 const errorPattern = /\/\/ error: (?<expect>.*)/
 
-function run_test(name: string) {
+function get_expected(name: string): [Array<string>, Array<string>] {
+    const file = `${base_dir}/${name}`;
+    const content = fs.readFileSync(file, { encoding: "utf8" });
+
+    console.log(`file ${file}`)
+    let expectedOutput = new Array<string>();
+    let errorOutput = new Array<string>();
+
+    for (const line of content.split("\n")) {
+        let matcher = line.match(expectPattern)
+        if (matcher) {
+            let ex = matcher?.groups?.expect
+            //console.log(`expect: ${ex}`)
+            expectedOutput.push(ex!)
+        }
+        matcher = line.match(errorPattern)
+        if (matcher) {
+            let ex = matcher?.groups?.expect
+            // console.log(`error: ${ex}`)
+            errorOutput.push(ex!)
+        }
+    }
+    return [expectedOutput, errorOutput];
+}
+
+function execute_test(name: string): [number, string[], string[]] {
+    // Execute ALOX program and capture output
+    const file = `${base_dir}/${name}`;
+    const cmd = `${exec_file} -s -f ${file}`
+    // console.log(cmd)
+    const args = cmd.split(' ');
+    const result = child_process.spawnSync(args[0], args.slice(1))
+
+    let realOutput = result.stdout.toString().split('\n');
+    let realError = result.stderr.toString().split('\n');
+    return [result.status ?? 0, realOutput, realError]
+}
+
+async function execute_test_interp(name: string): Promise<[number, string[], string[]]> {
+    let options = new Options;
+    options.silent = true;
+
+    const file = `${base_dir}/${name}`;
+    options.input = fs.createReadStream(file, { encoding: "utf8" })
+    options.output = new stream.PassThrough;
+    options.error = new stream.PassThrough;
+    let status = 0;
+    let val: LoxValue = null;
+
+    const interpreter = new Interpreter(options);
+    try {
+        val = await interpreter.do_stream();
+        finished(options.output)
+    }
+    catch (e) {
+        console.log((e as Error).toString())
+        status = -1;
+    }
+
+    let realOutput: string[] = [];
+    options.output.on('data', (data: string) => {
+        realOutput = data.toString().split('\n');
+    });
+    let realError = options.error.toString().split('\n');
+    return [status, realOutput, realError]
+}
+
+async function run_test(name: string) {
+    let [expectedOutput, errorOutput] = get_expected(name);
+
     test(name, async () => {
-        const file = `${base_dir}/${name}`;
-        const content = fs.readFileSync(file, { encoding: "utf8" });
+        let [status, realOutput, realError] = execute_test(name);
+        // let [status, realOutput, realError] = await execute_test_interp(name);
 
-        console.log(`file ${file}`)
-        let expectedOutput = new Array<String>();
-        let errorOutput = new Array<String>();
-
-        for (const line of content.split("\n")) {
-            let matcher = line.match(expectPattern)
-            if (matcher) {
-                let ex = matcher?.groups?.expect
-                //console.log(`expect: ${ex}`)
-                expectedOutput.push(ex!)
-            }
-            matcher = line.match(errorPattern)
-            if (matcher) {
-                let ex = matcher?.groups?.expect
-                // console.log(`error: ${ex}`)
-                errorOutput.push(ex!)
-            }
-        }
-
-        // Execute ALOX program and capture output
-        const cmd = `${exec_file} -s -f ${file}`
-        // console.log(cmd)
-        const args = cmd.split(' ');
-        const result = child_process.spawnSync(args[0], args.slice(1))
-
-        let realOutput = result.stdout.toString().split('\n');
         for (let i = 0; i < realOutput.length && i < expectedOutput.length; i++) {
-            expect(expectedOutput[i]).toBe(realOutput[i]);
+            expect(realOutput[i]).toBe(expectedOutput[i]);
         }
-
-        if (result.status != 0) {
-            let realError = result.stderr.toString().split('\n');
+        if (status != 0) {
             for (let i = 0; i < errorOutput.length && i < errorOutput.length; i++) {
-                expect(errorOutput[i]).toBe(realError[i])
+                expect(realError[i]).toBe(errorOutput[i])
             }
         }
     });
