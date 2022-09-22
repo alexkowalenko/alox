@@ -4,11 +4,11 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFun, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFunDef, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
 import { RuntimeError } from "./error";
-import { Interpreter, Options } from "./interpreter";
+import { Options } from "./interpreter";
 import { Printer } from "./printer";
-import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance } from "./runtime";
+import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print } from "./runtime";
 import { SymbolTable } from "./symboltable";
 import { Location, TokenType } from "./token";
 
@@ -69,7 +69,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
         return val;
     }
 
-    visitFun(f: LoxFun) {
+    visitFun(f: LoxFunDef) {
         const val = new LoxFunction(f, this.symboltable, false);
         if (f.name !== undefined) {
             this.symboltable.set(f.name?.id, val);
@@ -293,7 +293,7 @@ export class Evaluator extends AstVisitor<LoxValue> {
                 else if (typeof left === "string")
                     return check_string(left, e.left.location) + check_string(right, e.right.location)
                 else {
-                    throw new RuntimeError(`can't apply ${e.operator} to ${Interpreter.prototype.pretty_print(left)}`, e.left.location)
+                    throw new RuntimeError(`can't apply ${e.operator} to ${pretty_print(left)}`, e.left.location)
                 }
 
             case TokenType.MINUS:

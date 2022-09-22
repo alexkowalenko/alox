@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { ForInit, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxStatement, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { ForInit, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFunDef, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxStatement, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType, Location } from "./token";
 import { ParseError } from "./error";
@@ -167,13 +167,13 @@ export class Parser {
         return ast;
     }
 
-    private fun(): LoxFun {
+    private fun(): LoxFunDef {
         var tok = this.expect(TokenType.FUN)
         let id = this.identifier()
         return this.lambda_body(tok.loc, id);
     }
 
-    private method(): LoxFun {
+    private method(): LoxFunDef {
         let id = this.identifier()
         let ast = this.lambda_body(id.location, id);
         ast.method = true;
@@ -393,17 +393,17 @@ export class Parser {
         return ast;
     }
 
-    lambda(): LoxFun {
+    lambda(): LoxFunDef {
         let tok = this.expect(TokenType.FUN)
         return this.lambda_body(tok.loc)
     }
 
-    lambda_body(loc: Location, id?: LoxIdentifier): LoxFun {
-        let ast: LoxFun;
+    lambda_body(loc: Location, id?: LoxIdentifier): LoxFunDef {
+        let ast: LoxFunDef;
         if (id !== undefined) {
-            ast = new LoxFun(loc, id);
+            ast = new LoxFunDef(loc, id);
         } else {
-            ast = new LoxFun(loc);
+            ast = new LoxFunDef(loc);
         }
         this.consume(TokenType.L_PAREN)
         let tok = this.lexer.peek_token();
@@ -429,7 +429,7 @@ export class Parser {
     }
 
     binary(left: LoxExpr): LoxBinary {
-        //console.log('binary')
+        //console.log(`binary ${left.toString()}`)
         const token = this.lexer.get_token();
         const operator = token.tok;
         const precedence = get_precedence(operator);
@@ -440,7 +440,7 @@ export class Parser {
     assign(left: LoxExpr): LoxAssign | LoxSet {
         // console.log('assign')
         let token = this.expect(TokenType.EQUAL);
-        const right = this.expr(get_precedence(TokenType.EQUAL));
+        const right = this.expr();
         if (left instanceof LoxGet) {
             // console.log('assign transform to set %s', left.ident.id)
             return new LoxSet(token.loc, left.expr, left.ident, right)

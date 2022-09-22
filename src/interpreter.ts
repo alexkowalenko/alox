@@ -124,14 +124,4 @@ export class Interpreter {
         await finished(input);
         return ret;
     }
-
-    pretty_print(v: LoxValue): string {
-        if (v === null) {
-            return 'nil'
-        }
-        if (typeof v == 'string') {
-            return '"' + v + '"'
-        }
-        return v.toString();
-    }
 }

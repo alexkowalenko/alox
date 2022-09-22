@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxClassDef, LoxFun, LoxReturn } from "./ast";
+import { LoxClassDef, LoxFunDef, LoxReturn } from "./ast";
 import { Evaluator } from "./evaluator";
 import { SymbolTable } from "./symboltable";
 
@@ -19,9 +19,19 @@ export abstract class LoxCallable {
 
 export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance
 
+export function pretty_print(v: LoxValue): string {
+    if (v === null) {
+        return 'nil'
+    }
+    if (typeof v == 'string') {
+        return '"' + v + '"'
+    }
+    return v.toString();
+}
+
 export class LoxFunction extends LoxCallable {
 
-    constructor(readonly fun: LoxFun, readonly closure: SymbolTable<LoxValue>, public initializer: boolean) {
+    constructor(readonly fun: LoxFunDef, readonly closure: SymbolTable<LoxValue>, public initializer: boolean) {
         super();
     }
 

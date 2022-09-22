@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFun, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
+import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFunDef, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper } from "./ast";
 import { ParseError } from "./error";
 import { Evaluator } from "./evaluator";
 import { TokenType } from "./token";
@@ -82,7 +82,7 @@ export class Analyser extends AstVisitor<void> {
         this.define(expr.ident.id);
     }
 
-    private resolve_function(f: LoxFun, type: FunctionType = FunctionType.FUNCTION) {
+    private resolve_function(f: LoxFunDef, type: FunctionType = FunctionType.FUNCTION) {
         // Swap the current function type with the previous.
         let enclosing_function = this.current_function;
         this.current_function = type;
@@ -98,7 +98,7 @@ export class Analyser extends AstVisitor<void> {
         this.current_function = enclosing_function;
     }
 
-    visitFun(f: LoxFun): void {
+    visitFun(f: LoxFunDef): void {
         if (f.name !== undefined) {
             this.declare(f.name.id);
             this.define(f.name.id);

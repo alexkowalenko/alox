@@ -7,6 +7,7 @@
 
 import { LoxError } from '../src/error';
 import { Interpreter, Options } from '../src/interpreter';
+import { pretty_print } from '../src/runtime';
 
 export type TestCases = [string, string, string?]
 
@@ -18,7 +19,7 @@ export function do_tests(tests: TestCases[]) {
     for (const test of tests) {
         try {
             const val = interpreter.do(test[0]);
-            expect(interpreter.pretty_print(val)).toBe(test[1])
+            expect(pretty_print(val)).toBe(test[1])
         }
         catch (e) {
             if (e instanceof LoxError) {
@@ -201,6 +202,7 @@ describe('Evaluator', () => {
             ["x + 1;", '28'],
             ["var y = 2;", '2'],
             ["x = x + y;", '29'],
+            ["var z = 3; x = y = z;", '3'],
 
             // Error
             ["b = 1;", 'null', 'undefined variable b'],
