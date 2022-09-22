@@ -24,9 +24,14 @@ export class Options {
     public parse = false;
     public timer = false;
 
-    public output = process.stdout;
+    public output: stream.Writable = process.stdout;
     public input: stream.Readable = process.stdin;
-    public error = process.stderr;
+    public error: stream.Writable = process.stderr;
+}
+
+abstract class StdlibClass extends LoxCallable {
+    constructor(readonly options: Options) { super() };
+    abstract arity(): number;
 }
 
 export class Interpreter {
@@ -64,6 +69,17 @@ export class Interpreter {
             }
         })
         this.analyser.define("exit")
+
+        this.symboltable.set("print_error", new class extends StdlibClass {
+            call(i: Evaluator, args: LoxValue[]): LoxValue {
+                this.options.error.write(args[0] + os.EOL)
+                return args[0];
+            }
+            arity(): number {
+                return 1;
+            }
+        }(this.options))
+        this.analyser.define("print_error")
     }
 
     do(line: string): LoxValue {
@@ -73,7 +89,7 @@ export class Interpreter {
         const expr = this.parser.parse(line)
         if (this.options.parse) {
             const printer: Printer = new Printer("\n", 4);
-            console.log(printer.print(expr))
+            this.options.output.write(printer.print(expr) + os.EOL)
         }
         this.analyser.analyse(expr);
         const val = this.evaluator.eval(expr)

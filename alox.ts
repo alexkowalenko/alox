@@ -13,6 +13,11 @@ import { LoxError } from './src/error';
 import { Interpreter, Options } from './src/interpreter'
 
 
+function send_output(file: string, opts: Options) {
+    let output = fs.createWriteStream(file, { encoding: "utf8" })
+    opts.output = output;
+}
+
 function do_interactive(opts: Options) {
 
     // Read history file
@@ -92,6 +97,7 @@ async function do_file(file: string, opts: Options) {
 
     program.option('-s, --silent', 'turn off extra output')
     program.option('-f, --file <file>', 'execute <file>')
+    program.option('-o, --output <file>', 'send output to <file>')
     program.option('-p, --parse', 'print out the parsed script')
     program.option('-t, --timer', 'print out timings')
 
@@ -105,6 +111,10 @@ async function do_file(file: string, opts: Options) {
     opts.timer = options.timer;
     if (!options.silent) {
         console.log("ALOX 👾 interpreter")
+    }
+
+    if (options.output) {
+        send_output(options.output, opts)
     }
 
     if (options.file) {
