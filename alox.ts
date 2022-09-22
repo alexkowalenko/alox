@@ -11,6 +11,7 @@ import { program } from 'commander'
 
 import { LoxError } from './src/error';
 import { Interpreter, Options } from './src/interpreter'
+import { pretty_print } from './src/runtime';
 
 
 function send_output(file: string, opts: Options) {
@@ -47,7 +48,7 @@ function do_interactive(opts: Options) {
         try {
             let val = interpreter.do(line);
             if (!opts.silent) {
-                console.log(`: ${interpreter.pretty_print(val)}`)
+                console.log(`: ${pretty_print(val)}`)
             }
         }
         catch (e) {
@@ -82,7 +83,7 @@ async function do_file(file: string, opts: Options) {
     try {
         let val = await interpreter.do_stream();
         if (!opts.silent) {
-            console.log(`: ${interpreter.pretty_print(val)}`)
+            console.log(`: ${pretty_print(val)}`)
         }
     }
     catch (e) {

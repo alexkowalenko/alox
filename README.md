@@ -43,3 +43,6 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
 
 - [x] Chunk - Chapter 14 - Bytecode.
 - [ ] VM - Chapter 15 - Virtual Machine.
+  - [x] Structure for VM.
+  - [x] Stack
+  - [ ] Arithmetic operators.

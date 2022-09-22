@@ -13,7 +13,7 @@ import { finished } from 'node:stream/promises';
 import { Interpreter, Options } from "../src/interpreter";
 import { LoxValue } from "../src/runtime";
 
-const base_dir = "./xtest/assignment"
+const base_dir = "./xtest"
 const ts_node = "node_modules/ts-node/dist/bin.js"
 const prog_file = "alox.ts"
 const exec_file = `${ts_node} ${prog_file}`
