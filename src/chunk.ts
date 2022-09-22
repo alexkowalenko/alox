@@ -81,7 +81,7 @@ export class Chunk {
         return this.constants.get_constant(offset)
     }
 
-    disasamble_instruction(offset: number) {
+    disassemble_instruction(offset: number) {
         let instr = this.code[offset];
         switch (instr) {
             case Opcode.RETURN:
@@ -90,14 +90,16 @@ export class Chunk {
                 return constant_instruction(instr as Opcode, offset, this);
             case Opcode.LINE:
                 return constant_instruction(instr as Opcode, offset, this);
+            case Opcode.NEGATE, Opcode.ADD, Opcode.SUBTRACT, Opcode.MULTIPLY, Opcode.DIVIDE:
+                return simple_instruction(instr as Opcode, offset);
         }
         return simple_instruction(instr as Opcode, offset);
     }
 
-    disasamble(name: string) {
+    disassemble(name: string) {
         console.log(name);
         for (let offset = 0; offset < this.count;) {
-            offset = this.disasamble_instruction(offset);
+            offset = this.disassemble_instruction(offset);
         }
     }
 }

@@ -42,7 +42,11 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
 ## Part II Bytecode compiler
 
 - [x] Chunk - Chapter 14 - Bytecode.
-- [ ] VM - Chapter 15 - Virtual Machine.
+- [x] VM - Chapter 15 - Virtual Machine.
   - [x] Structure for VM.
   - [x] Stack
-  - [ ] Arithmetic operators.
+  - [x] Arithmetic operators.
+- [ ] Lexical Scanner - Chapter 16 = Reuse above.
+- [ ] Compiling expressions - Chapter 17.
+  -[ ] Emitting Bytecode
+  -[ ] `print`.

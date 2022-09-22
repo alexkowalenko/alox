@@ -17,6 +17,6 @@ describe('chunk', () => {
         chunk.write_word(constant);
         chunk.write_byte(Opcode.RETURN); expect(chunk.get_byte(6)).toBe(Opcode.RETURN);
 
-        chunk.disasamble("test");
+        chunk.disassemble("test");
     });
 });
