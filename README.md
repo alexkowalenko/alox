@@ -38,3 +38,8 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
   - [x] Super classes
   - [x] Inheriting methods
   - [x] Calling superclass methods
+
+## Part II Bytecode compiler
+
+- [x] Chunk - Chapter 14 - Bytecode.
+- [ ] VM - Chapter 15 - Virtual Machine.
