@@ -2,6 +2,8 @@
 
 ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Crafting Interpreters_](http://www.craftinginterpreters.com/) by Robert Nystrom.
 
+Run the REPL by invoking `alox.ts`.
+
 ## Progress
 
 - [x] Lexer - Chapter 4: Scanning.
@@ -46,7 +48,7 @@ ALOX - A Lox implementation in Typescript. Following (not exactly) the book [_Cr
   - [x] Structure for VM.
   - [x] Stack
   - [x] Arithmetic operators.
-- [ ] Lexical Scanner - Chapter 16 = Reuse above.
+- [x] Lexical Scanner - Chapter 16 = Reuse lexer, parser, and analyser.
 - [ ] Compiling expressions - Chapter 17.
-  -[ ] Emitting Bytecode
+  -[ ] Emitting Bytecode and running bytecode.
   -[ ] `print`.

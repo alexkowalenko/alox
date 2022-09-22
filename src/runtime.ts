@@ -35,6 +35,7 @@ export class LoxFunction extends LoxCallable {
         super();
     }
 
+    // Todo: This needs to move back into the Evaluator class, and have a generic Evaluator interface.
     call(interp: TreeEvaluator, args: readonly LoxValue[]): LoxValue {
         let prev = interp.symboltable
         interp.symboltable = new SymbolTable(this.closure);

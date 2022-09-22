@@ -32,6 +32,7 @@ function check_string(v: LoxValue, where: Location): string {
 export interface Evaluator {
     eval(expr: LoxExpr): LoxValue;
     resolve(expr: LoxExpr, depth: number): void
+    // call(f: Callable, args: const LoxValue[]): LoxValue
 }
 
 export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {

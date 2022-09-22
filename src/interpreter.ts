@@ -16,6 +16,7 @@ import { LoxError } from "./error";
 import * as stream from "node:stream";
 import os from "os";
 import { finished } from 'node:stream/promises';
+import { Compiler } from "./compiler";
 
 
 export class Options {
@@ -41,7 +42,11 @@ export class Interpreter {
         this.lexer = new Lexer;
         this.parser = new Parser(this.lexer);
         this.symboltable = new SymbolTable<LoxValue>;
-        this.evaluator = new TreeEvaluator(this.symboltable, options);
+        if (options.bytecode) {
+            this.evaluator = new Compiler(this.symboltable, options);
+        } else {
+            this.evaluator = new TreeEvaluator(this.symboltable, options);
+        }
         this.analyser = new Analyser(this.evaluator);
         this.setup_stdlib();
     };
