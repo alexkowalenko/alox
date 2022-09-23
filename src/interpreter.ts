@@ -31,6 +31,7 @@ export class Options {
 
     public bytecode = false;
     public debug = false;
+    public trace = false;
 }
 
 abstract class StdlibClass extends LoxCallable {

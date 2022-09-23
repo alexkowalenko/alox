@@ -102,7 +102,8 @@ async function do_file(file: string, opts: Options) {
     program.option('-p, --parse', 'print out the parsed script')
     program.option('-t, --timer', 'print out timings')
     program.option('-b, --bytecode', 'use the bytecode compiler')
-    program.option('-d, --debug', 'use the bytecode compiler')
+    program.option('-d, --debug', 'debug')
+    program.option('-t, --trace', 'trace execution')
 
     program.parse(process.argv);
 
@@ -113,6 +114,7 @@ async function do_file(file: string, opts: Options) {
     opts.timer = options.timer;
     opts.bytecode = options.bytecode;
     opts.debug = options.debug;
+    opts.trace = options.trace;
     if (!options.silent) {
         console.log("ALOX 👾 interpreter")
         if (opts.bytecode) {

@@ -64,5 +64,6 @@ Run the REPL by invoking `alox.ts`.
   - [x] Access global variables
 - [ ] Test structure for running files with bytecode engine.
 - [ ] Local Variables - Chapter 22.
-  - [ ] Block scopes
-  - [ ] Define and access local variables
+  - [x] Block scopes
+  - [x] Define local variables
+  - [ ] Access local variables

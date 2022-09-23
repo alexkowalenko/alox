@@ -15,12 +15,18 @@ import { TokenType, Location } from "./token";
 import { RuntimeError } from "./error";
 
 
+class Local {
+    constructor(public name: LoxIdentifier, public depth: number) { }
+}
+
 export class Compiler implements AstVisitor<void>, Evaluator {
 
     constructor(public symboltable: SymbolTable<LoxValue>, private readonly options: Options) {
         this.bytecodes = new Chunk();
     }
     private bytecodes: Chunk;
+    private scope_depth = 0;
+    private locals = new Array<Local>;
 
     private init() {
         this.bytecodes = new Chunk();
@@ -36,7 +42,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         }
 
         let vm = new VM(this.bytecodes, this.symboltable, this.options);
-        vm.debug = false;
+        vm.debug = this.options.trace;
         let val = vm.interpret();
         if (this.options.debug) {
             vm.dump_symboltable();
@@ -46,17 +52,16 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     visitProgram(prog: LoxProgram): void {
         //console.log("program")
-        for (let i = 0; i < prog.statements.length; i++) {
-            let stat = prog.statements[i]
+        prog.statements.forEach((stat, i) => {
             if (this.options.debug) {
                 this.emit_location(stat.location);
             }
             stat.accept(this)
-            if (i < prog.statements.length - 1) {
+            if (i < prog.statements.length - 2) {
                 // get rid value, except last
                 this.emit_instruction(Opcode.POP)
             }
-        }
+        })
     }
 
     visitVar(v: LoxVar): void {
@@ -65,6 +70,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             v.expr.accept(this);
         } else {
             this.emit_instruction(Opcode.NIL)
+        }
+        this.define_var(v.ident);
+        if (this.scope_depth > 0) {
+            return;
         }
         this.emit_constant(Opcode.DEF_GLOBAL, v.ident.id)
     }
@@ -102,8 +111,19 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.emit_instruction(Opcode.PRINT);
     }
 
-    visitBlock(expr: LoxBlock): void {
-        throw new Error("Method not implemented.");
+    visitBlock(block: LoxBlock): void {
+        this.begin_scope();
+        block.statements.forEach((stat, i) => {
+            if (this.options.debug) {
+                this.emit_location(stat.location);
+            }
+            stat.accept(this)
+            if (i < block.statements.length - 1) {
+                // get rid value, except last
+                this.emit_instruction(Opcode.POP)
+            }
+        })
+        this.end_scope();
     }
 
     visitExpr(expr: LoxExpr): void {
@@ -210,6 +230,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitIdentifier(e: LoxIdentifier): void {
+        if (this.scope_depth > 0) {
+            return;
+        }
         this.emit_constant(Opcode.GET_GLOBAL, e.id)
     }
 
@@ -231,6 +254,37 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     resolve(expr: LoxExpr, depth: number): void {
         // closure?
+    }
+
+    begin_scope() {
+        this.scope_depth++;
+    }
+
+    end_scope() {
+        //console.log(`end_scope: locals count: ${this.locals.length}`)
+        this.scope_depth--;
+
+        // pop local from the stack
+        this.locals.forEach((local) => {
+            if (local.depth > this.scope_depth) {
+                //console.log(`remove local ${local.name.id} depth ${local.depth}`)
+                this.emit_instruction(Opcode.POP_LOCAL)
+            }
+        })
+        // remove locals from the list
+        this.locals = this.locals.filter((local) => {
+            return local.depth <= this.scope_depth
+        })
+        //console.log(`end_scope: locals count: ${this.locals.length}`)
+    }
+
+    define_var(v: LoxIdentifier) {
+        if (this.scope_depth == 0) {
+            return;
+        }
+        //console.log(`define_var ${v.id} depth ${this.scope_depth}`)
+        this.locals.push(new Local(v, this.scope_depth))
+        this.emit_constant(Opcode.DEF_LOCAL, this.locals.length - 1)
     }
 
     emit_instruction(instr: Opcode) {

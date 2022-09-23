@@ -61,10 +61,19 @@ function simple_instruction(op: Opcode, offset: number): number {
         case Opcode.PRINT:
             console.log(str + " PRINT");
             break;
+        case Opcode.POP_LOCAL:
+            console.log(str + " POP_LOCAL");
+            break;
         default:
             console.log(str + ` <unknown ${op}>`);
     }
     return offset + 1;
+}
+
+function const_name(offset: number, chunk: Chunk, name: string): string {
+    let word = chunk.get_word(offset + 1)
+    let val = chunk.get_constant(word);
+    return ` ${name} - ${word}\t'${val?.toString()}'`;
 }
 
 function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number {
@@ -82,21 +91,27 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             break;
         }
         case Opcode.DEF_GLOBAL: {
-            let word = chunk.get_word(offset + 1)
-            let val = chunk.get_constant(word);
-            console.log(`${str} DEF_GLOBAL - ${word}\t'${val?.toString()}'`);
+            console.log(str + const_name(offset, chunk, "DEF_GLOBAL"));
             break;
         }
         case Opcode.SET_GLOBAL: {
-            let word = chunk.get_word(offset + 1)
-            let val = chunk.get_constant(word);
-            console.log(`${str} SET_GLOBAL - ${word}\t'${val?.toString()}'`);
+            console.log(str + const_name(offset, chunk, "SET_GLOBAL"));
             break;
         }
         case Opcode.GET_GLOBAL: {
-            let word = chunk.get_word(offset + 1)
-            let val = chunk.get_constant(word);
-            console.log(`${str} GET_GLOBAL - ${word}\t'${val?.toString()}'`);
+            console.log(str + const_name(offset, chunk, "GET_GLOBAL"));
+            break;
+        }
+        case Opcode.DEF_LOCAL: {
+            console.log(str + const_name(offset, chunk, "DEF_LOCAL"));
+            break;
+        }
+        case Opcode.GET_LOCAL: {
+            console.log(str + const_name(offset, chunk, "GET_LOCAL"));
+            break;
+        }
+        case Opcode.SET_LOCAL: {
+            console.log(str + const_name(offset, chunk, "SET_LOCAL"));
             break;
         }
 
@@ -114,6 +129,8 @@ export function disassemble_instruction(offset: number, chunk: Chunk) {
         case Opcode.CONSTANT: case Opcode.LINE:
             return constant_instruction(instr as Opcode, offset, chunk);
         case Opcode.DEF_GLOBAL: case Opcode.GET_GLOBAL: case Opcode.SET_GLOBAL:
+            return constant_instruction(instr as Opcode, offset, chunk);
+        case Opcode.DEF_LOCAL: case Opcode.GET_LOCAL: case Opcode.SET_LOCAL:
             return constant_instruction(instr as Opcode, offset, chunk);
     }
     return simple_instruction(instr as Opcode, offset);

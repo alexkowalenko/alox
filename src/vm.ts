@@ -36,14 +36,21 @@ export const enum Opcode {
     PRINT,
     DEF_GLOBAL,
     GET_GLOBAL,
-    SET_GLOBAL
+    SET_GLOBAL,
+    DEF_LOCAL,
+    GET_LOCAL,
+    SET_LOCAL,
+    POP_LOCAL,
 }
 
 export class VM {
     constructor(private chunk: Chunk, private symboltable: SymbolTable<LoxValue>, private options: Options) {
         this.stack = new Array;
+        this.locals_stack = new Array;
     }
     private stack: Array<LoxValue>;
+    private locals_stack: Array<LoxValue>;
+
     private ip = 0;
     private last_line = 0;
 
@@ -84,6 +91,9 @@ export class VM {
     }
 
     interpret() {
+        if (this.debug) {
+            console.log("START:")
+        }
         for (; ;) {
             let instr = this.chunk.get_byte(this.ip);
             if (this.debug) {
@@ -100,7 +110,7 @@ export class VM {
                 }
                 case Opcode.POP: {
                     this.pop();
-                    continue;
+                    break;
                 }
                 case Opcode.CONSTANT: {
                     let val = this.get_word_arg()
@@ -108,21 +118,20 @@ export class VM {
                         console.log("constant: " + pretty_print(val))
                     }
                     this.push(val)
-                    continue;
+                    break;
                 }
                 case Opcode.LINE: { //NOP
-                    this.last_line = this.chunk.get_word(this.ip);
-                    this.ip += 2;
+                    this.last_line = this.get_word_arg() as number;
                     continue;
                 }
                 case Opcode.NEGATE:
                     this.check_number();
                     this.push(- this.pop()!)
-                    continue;
+                    break;
 
                 case Opcode.NOT:
                     this.push(!truthy(this.pop()!));
-                    continue;
+                    break;
 
                 case Opcode.AND: {
                     let right = this.pop();
@@ -132,7 +141,7 @@ export class VM {
                     } else {
                         this.push(right!)
                     }
-                    continue;
+                    break;
                 }
 
                 case Opcode.OR: {
@@ -143,35 +152,35 @@ export class VM {
                     } else {
                         this.push(right!)
                     }
-                    continue;
+                    break;
                 }
 
                 case Opcode.EQUAL:
                     this.push(this.pop() === this.pop());
-                    continue;
+                    break;
 
                 case Opcode.LESS:
                     this.check_number();
                     this.check_number(1);
                     this.push((this.pop() as number) < (this.pop() as number));
-                    continue;
+                    break;
                 case Opcode.GREATER:
                     this.check_number();
                     this.check_number(1);
                     this.push((this.pop() as number) > (this.pop() as number));
-                    continue;
+                    break;
 
                 case Opcode.ADD: {
                     if (typeof this.peek() === "number") {
                         this.check_number();
                         this.check_number(1);
                         this.push((this.pop() as number) + (this.pop() as number));
-                        continue;
+                        break;
                     } else if (typeof this.peek() === "string") {
                         this.check_string();
                         this.check_string(1);
                         this.push((this.pop() as string) + (this.pop() as string));
-                        continue;
+                        break;
                     } else {
                         throw new RuntimeError(`can't apply + to ${pretty_print(this.peek())}`, this.get_location())
                     }
@@ -180,27 +189,27 @@ export class VM {
                     this.check_number();
                     this.check_number(1);
                     this.push((this.pop() as number) - (this.pop() as number));
-                    continue;
+                    break;
                 case Opcode.MULTIPLY:
                     this.check_number();
                     this.check_number(1);
                     this.push((this.pop() as number) * (this.pop() as number));
-                    continue;
+                    break;
                 case Opcode.DIVIDE:
                     this.check_number();
                     this.check_number(1);
                     this.push((this.pop() as number) / (this.pop() as number));
-                    continue;
+                    break;
 
                 case Opcode.NIL:
                     this.push(null);
-                    continue;
+                    break;
                 case Opcode.TRUE:
                     this.push(true);
-                    continue;
+                    break;
                 case Opcode.FALSE:
                     this.push(false);
-                    continue;
+                    break;
 
                 case Opcode.PRINT: {
                     let val = this.peek();
@@ -209,14 +218,14 @@ export class VM {
                     } else {
                         this.options.output.write(val!.toString() + os.EOL)
                     }
-                    continue;
+                    break;
                 }
 
                 case Opcode.DEF_GLOBAL: {
                     let id = this.get_word_arg()
                     let expr = this.peek();
                     this.symboltable.set(id as string, expr!)
-                    continue;
+                    break;
                 }
 
                 case Opcode.SET_GLOBAL: {
@@ -224,7 +233,7 @@ export class VM {
                     let expr = this.peek();
                     if (this.symboltable.has(id as string)) {
                         this.symboltable.assign(id as string, expr!)
-                        continue;
+                        break;
                     }
                     throw new RuntimeError(`undefined variable ${id!.toString()}`, this.get_location())
                 }
@@ -236,18 +245,57 @@ export class VM {
                         throw new RuntimeError(`identifier ${id!.toString()} not found`, this.get_location());
                     }
                     this.push(val)
-                    continue;
+                    break;
                 }
 
+                case Opcode.DEF_LOCAL: {
+                    let id = this.get_word_arg()
+                    let expr = this.peek();
+                    this.locals_stack.push(expr)
+                    break;
+                }
+
+                case Opcode.SET_LOCAL: {
+                    let id = this.get_word_arg() as number
+                    let expr = this.peek();
+                    this.locals_stack[this.locals_stack.length - 1 - id] = expr;
+                    break;
+                }
+
+                case Opcode.GET_LOCAL: {
+                    let id = this.get_word_arg() as number;
+                    this.push(this.locals_stack.at(-1 - id)!)
+                    break;
+                }
+
+                case Opcode.POP_LOCAL:
+                    this.locals_stack.pop();
+                    break;
 
                 default:
                     throw new RuntimeError("implementation: unknown instruction " + instr, this.get_location())
+            }
+            if (this.debug) {
+                this.dump_stack();
             }
         }
     }
 
     dump_symboltable() {
         this.symboltable.dump();
+    }
+
+    dump_stack() {
+        let buf = "";
+        this.stack.forEach((v) => {
+            buf += ` ${pretty_print(v)} |`
+        })
+        console.log("stack:" + buf);
+        buf = "";
+        this.locals_stack.forEach((v) => {
+            buf += ` ${pretty_print(v)} |`
+        })
+        console.log("local:" + buf);
     }
 }
 

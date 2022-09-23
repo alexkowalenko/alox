@@ -222,22 +222,23 @@ describe('Evaluator', () => {
             ["b = 1;", '', 'undefined variable b'],
             ["x + 1 = 1;", 'null', "can't assign to (x + 1)"],
         ]
-
         it('assignment', () => { do_tests(tests) })
         it('assignment-b', () => { do_tests(tests, true) })
     }
 
-    it('block', () => {
+    {
         const tests: TestCases[] = [
             ["{}", 'nil'],
-            ["{var x = 1 + 4;}", '5'],
             ["{ print 1; print 2;}", '2'],
-
-            ["var z = 1;{z + 4;}", '5'],
-            ["var y = 1;{var y = 2; y + 4;}", '6'], // shadow
+            ["{var x = 1 + 4;}", '5'],
+            ["var z = 1; {z + 4;}", '5'],
         ]
-        do_tests(tests)
-    })
+        it('block-b', () => { do_tests(tests, true) })
+        tests.concat([
+            ["var y = 1;{var y = 2; y + 4;}", 'nil'], // shadow
+        ])
+        it('block', () => { do_tests(tests) })
+    }
 
     it('if', () => {
         const tests: TestCases[] = [
