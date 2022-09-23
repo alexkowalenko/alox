@@ -57,6 +57,7 @@ Run the REPL by invoking `alox.ts`.
 - [x] Strings - Chapter 19.
 - [x] Hash Tables - Chapter 20. Implemented in TypeScript/JavaScript.
 - [ ] Global Variables - Chapter 21.
-  - [ ] `print` & POP
-  - [ ] Define global variables
-  - [ ] Access global variables
+  - [x] `print` & POP
+  - [x] Define global variables
+  - [x] Access global variables
+- [ ] Local Variables - Chapter 22.

@@ -36,6 +36,10 @@ export class Chunk {
     private code: Buffer;
     private constants: Constant;
 
+    get end() {
+        return this.count;
+    }
+
     private extend_buffer() {
         // double the buffer
         let new_capacity = this.capacity * 2;

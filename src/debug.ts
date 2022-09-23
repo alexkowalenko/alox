@@ -40,6 +40,12 @@ function simple_instruction(op: Opcode, offset: number): number {
         case Opcode.NOT:
             console.log(str + " NOT");
             break;
+        case Opcode.AND:
+            console.log(str + " AND");
+            break;
+        case Opcode.OR:
+            console.log(str + " OR");
+            break;
         case Opcode.EQUAL:
             console.log(str + " EQUAL");
             break;
@@ -48,6 +54,12 @@ function simple_instruction(op: Opcode, offset: number): number {
             break;
         case Opcode.GREATER:
             console.log(str + " GREATER");
+            break;
+        case Opcode.POP:
+            console.log(str + " POP");
+            break;
+        case Opcode.PRINT:
+            console.log(str + " PRINT");
             break;
         default:
             console.log(str + ` <unknown ${op}>`);
@@ -69,6 +81,25 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             console.log(`${str} LINE-- - ${word}`);
             break;
         }
+        case Opcode.DEF_GLOBAL: {
+            let word = chunk.get_word(offset + 1)
+            let val = chunk.get_constant(word);
+            console.log(`${str} DEF_GLOBAL - ${word}\t'${val?.toString()}'`);
+            break;
+        }
+        case Opcode.SET_GLOBAL: {
+            let word = chunk.get_word(offset + 1)
+            let val = chunk.get_constant(word);
+            console.log(`${str} SET_GLOBAL - ${word}\t'${val?.toString()}'`);
+            break;
+        }
+        case Opcode.GET_GLOBAL: {
+            let word = chunk.get_word(offset + 1)
+            let val = chunk.get_constant(word);
+            console.log(`${str} GET_GLOBAL - ${word}\t'${val?.toString()}'`);
+            break;
+        }
+
         default:
             console.log(str + ` <unknown ${op}>`);
     }
@@ -80,13 +111,10 @@ export function disassemble_instruction(offset: number, chunk: Chunk) {
     switch (instr) {
         case Opcode.RETURN:
             return simple_instruction(instr as Opcode, offset);
-        case Opcode.CONSTANT:
+        case Opcode.CONSTANT: case Opcode.LINE:
             return constant_instruction(instr as Opcode, offset, chunk);
-        case Opcode.LINE:
+        case Opcode.DEF_GLOBAL: case Opcode.GET_GLOBAL: case Opcode.SET_GLOBAL:
             return constant_instruction(instr as Opcode, offset, chunk);
-        case Opcode.NEGATE, Opcode.ADD, Opcode.SUBTRACT, Opcode.MULTIPLY, Opcode.DIVIDE, Opcode.NIL,
-            Opcode.TRUE, Opcode.FALSE, Opcode.NOT, Opcode.EQUAL, Opcode.LESS, Opcode.GREATER:
-            return simple_instruction(instr as Opcode, offset);
     }
     return simple_instruction(instr as Opcode, offset);
 }

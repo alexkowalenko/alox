@@ -150,7 +150,7 @@ describe('Evaluator', () => {
         it('relational-b', () => { do_tests(tests, true) })
     }
 
-    it('logical', () => {
+    {
         const tests: TestCases[] = [
             ["true and true;", 'true'],
             ["true and false;", 'false'],
@@ -162,17 +162,19 @@ describe('Evaluator', () => {
             ["1 or nil;", '1'],
             ["nil or 2;", '2'],
         ]
-        do_tests(tests)
-    })
+        it('logical', () => { do_tests(tests) })
+        it('logical-b', () => { do_tests(tests, true) })
+    }
 
-    it('print', () => {
+    {
         const tests: TestCases[] = [
             ["print true;", 'true'],
         ]
-        do_tests(tests)
-    })
+        it('print', () => { do_tests(tests) })
+        it('print-b', () => { do_tests(tests, true) })
+    }
 
-    it('var', () => {
+    {
         const tests: TestCases[] = [
             ["var x = 1;", '1'],
             ["var z = 1; var y = 2.5;", '2.5'],
@@ -185,10 +187,11 @@ describe('Evaluator', () => {
             // Error
             ["var a = 1; var a = 1;", '1', 'variable a already defined'],
         ]
-        do_tests(tests)
-    })
+        it('var', () => { do_tests(tests) })
+        it('var-b', () => { do_tests(tests, true) })
+    }
 
-    it('identifiers', () => {
+    {
         const tests: TestCases[] = [
             ["var x = 1;", '1'],
             ["x + 1;", '2'],
@@ -201,10 +204,11 @@ describe('Evaluator', () => {
             // Error
             ["b + 1;", 'null', 'identifier b not found'],
         ]
-        do_tests(tests)
-    })
+        it('identifiers', () => { do_tests(tests) })
+        it('identifiers-b', () => { do_tests(tests, true) })
+    }
 
-    it('assignment', () => {
+    {
         const tests: TestCases[] = [
             ["var x = 1;", '1'],
             ["x + 1;", '2'],
@@ -215,11 +219,13 @@ describe('Evaluator', () => {
             ["var z = 3; x = y = z;", '3'],
 
             // Error
-            ["b = 1;", 'null', 'undefined variable b'],
+            ["b = 1;", '', 'undefined variable b'],
             ["x + 1 = 1;", 'null', "can't assign to (x + 1)"],
         ]
-        do_tests(tests)
-    })
+
+        it('assignment', () => { do_tests(tests) })
+        it('assignment-b', () => { do_tests(tests, true) })
+    }
 
     it('block', () => {
         const tests: TestCases[] = [

@@ -7,8 +7,12 @@
 import { Chunk } from "./chunk";
 import { disassemble_instruction } from "./debug";
 import { RuntimeError } from "./error";
+import { Options } from "./interpreter";
 import { check_number, check_string, LoxValue, pretty_print, truthy } from "./runtime";
 import { Location } from "./token";
+
+import os from "os";
+import { SymbolTable } from "./symboltable";
 
 export const enum Opcode {
     CONSTANT,
@@ -23,13 +27,20 @@ export const enum Opcode {
     TRUE,
     FALSE,
     NOT,
+    AND,
+    OR,
     EQUAL,
     LESS,
-    GREATER
+    GREATER,
+    POP,
+    PRINT,
+    DEF_GLOBAL,
+    GET_GLOBAL,
+    SET_GLOBAL
 }
 
 export class VM {
-    constructor(private chunk: Chunk) {
+    constructor(private chunk: Chunk, private symboltable: SymbolTable<LoxValue>, private options: Options) {
         this.stack = new Array;
     }
     private stack: Array<LoxValue>;
@@ -66,6 +77,12 @@ export class VM {
         check_string(this.peek(index), this.get_location());
     }
 
+    get_word_arg() {
+        let val = this.chunk.get_constant(this.chunk.get_word(this.ip))
+        this.ip += 2;
+        return val;
+    }
+
     interpret() {
         for (; ;) {
             let instr = this.chunk.get_byte(this.ip);
@@ -73,14 +90,20 @@ export class VM {
                 disassemble_instruction(this.ip, this.chunk);
             }
             this.ip++;
+            if (this.ip >= this.chunk.end) {
+                return this.pop() ?? null;
+            }
             switch (instr) {
                 case Opcode.RETURN: {
                     let val = this.pop()
                     return val;
                 }
+                case Opcode.POP: {
+                    this.pop();
+                    continue;
+                }
                 case Opcode.CONSTANT: {
-                    let val = this.chunk.get_constant(this.chunk.get_word(this.ip))
-                    this.ip += 2;
+                    let val = this.get_word_arg()
                     if (this.debug) {
                         console.log("constant: " + pretty_print(val))
                     }
@@ -100,6 +123,28 @@ export class VM {
                 case Opcode.NOT:
                     this.push(!truthy(this.pop()!));
                     continue;
+
+                case Opcode.AND: {
+                    let right = this.pop();
+                    let left = this.pop();
+                    if (!truthy(left!)) {
+                        this.push(left!)
+                    } else {
+                        this.push(right!)
+                    }
+                    continue;
+                }
+
+                case Opcode.OR: {
+                    let right = this.pop();
+                    let left = this.pop();
+                    if (truthy(left!)) {
+                        this.push(left!)
+                    } else {
+                        this.push(right!)
+                    }
+                    continue;
+                }
 
                 case Opcode.EQUAL:
                     this.push(this.pop() === this.pop());
@@ -157,10 +202,52 @@ export class VM {
                     this.push(false);
                     continue;
 
+                case Opcode.PRINT: {
+                    let val = this.peek();
+                    if (val === null) {
+                        this.options.output.write("nil" + os.EOL)
+                    } else {
+                        this.options.output.write(val!.toString() + os.EOL)
+                    }
+                    continue;
+                }
+
+                case Opcode.DEF_GLOBAL: {
+                    let id = this.get_word_arg()
+                    let expr = this.peek();
+                    this.symboltable.set(id as string, expr!)
+                    continue;
+                }
+
+                case Opcode.SET_GLOBAL: {
+                    let id = this.get_word_arg()
+                    let expr = this.peek();
+                    if (this.symboltable.has(id as string)) {
+                        this.symboltable.assign(id as string, expr!)
+                        continue;
+                    }
+                    throw new RuntimeError(`undefined variable ${id!.toString()}`, this.get_location())
+                }
+
+                case Opcode.GET_GLOBAL: {
+                    let id = this.get_word_arg()
+                    let val = this.symboltable.get(id as string);
+                    if (val == undefined) {
+                        throw new RuntimeError(`identifier ${id!.toString()} not found`, this.get_location());
+                    }
+                    this.push(val)
+                    continue;
+                }
+
+
                 default:
                     throw new RuntimeError("implementation: unknown instruction " + instr, this.get_location())
             }
         }
+    }
+
+    dump_symboltable() {
+        this.symboltable.dump();
     }
 }
 

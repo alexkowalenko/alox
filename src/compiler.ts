@@ -12,6 +12,7 @@ import { Options } from "./interpreter";
 import { Chunk } from "./chunk";
 import { Opcode, VM } from "./vm";
 import { TokenType, Location } from "./token";
+import { RuntimeError } from "./error";
 
 
 export class Compiler implements AstVisitor<void>, Evaluator {
@@ -34,23 +35,36 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             this.bytecodes.disassemble("program:")
         }
 
-        let vm = new VM(this.bytecodes);
+        let vm = new VM(this.bytecodes, this.symboltable, this.options);
         vm.debug = false;
         let val = vm.interpret();
+        if (this.options.debug) {
+            vm.dump_symboltable();
+        }
         return val!;
     }
 
     visitProgram(prog: LoxProgram): void {
-        for (const stat of prog.statements) {
+        for (let i = 0; i < prog.statements.length; i++) {
+            let stat = prog.statements[i]
             if (this.options.debug) {
                 this.emit_location(stat.location);
             }
             stat.accept(this)
+            if (i < prog.statements.length - 1) {
+                // get rid value, except last
+                this.emit_instruction(Opcode.POP)
+            }
         }
     }
 
-    visitVar(expr: LoxVar): void {
-        throw new Error("Method not implemented.");
+    visitVar(v: LoxVar): void {
+        if (v.expr) {
+            v.expr.accept(this);
+        } else {
+            this.emit_instruction(Opcode.NIL)
+        }
+        this.emit_constant(Opcode.DEF_GLOBAL, v.ident.id)
     }
 
     visitFun(f: LoxFunDef): void {
@@ -81,8 +95,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         throw new Error("Method not implemented.");
     }
 
-    visitPrint(expr: LoxPrint): void {
-        throw new Error("Method not implemented.");
+    visitPrint(p: LoxPrint): void {
+        p.expr.accept(this);
+        this.emit_instruction(Opcode.PRINT);
     }
 
     visitBlock(expr: LoxBlock): void {
@@ -143,6 +158,12 @@ export class Compiler implements AstVisitor<void>, Evaluator {
                 this.emit_instruction(Opcode.LESS)
                 this.emit_instruction(Opcode.NOT)
                 return
+            case TokenType.AND:
+                this.emit_instruction(Opcode.AND)
+                return
+            case TokenType.OR:
+                this.emit_instruction(Opcode.OR)
+                return
         }
         throw new Error("Method not implemented.");
     }
@@ -164,7 +185,12 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitAssign(e: LoxAssign): void {
-        throw new Error("Method not implemented.");
+        e.right.accept(this);
+        if (e.left instanceof LoxIdentifier) {
+            this.emit_constant(Opcode.SET_GLOBAL, (e.left as LoxIdentifier).id)
+            return
+        }
+        throw new RuntimeError(`can't assign to ${e.left.toString()}`, e.left.location)
     }
 
     visitLiteral(expr: LoxLiteral): void {
@@ -180,7 +206,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitIdentifier(e: LoxIdentifier): void {
-        throw new Error("Method not implemented.");
+        this.emit_constant(Opcode.GET_GLOBAL, e.id)
     }
 
     visitNumber(expr: LoxNumber): void {
@@ -200,7 +226,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     resolve(expr: LoxExpr, depth: number): void {
-        throw new Error("Method not implemented.");
+        // closure?
     }
 
     emit_instruction(instr: Opcode) {
@@ -210,6 +236,12 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     add_constant(val: LoxValue) {
         let c = this.bytecodes.add_constant(val);
         this.emit_instruction(Opcode.CONSTANT);
+        this.bytecodes.write_word(c);
+    }
+
+    emit_constant(instr: Opcode, val: LoxValue) {
+        let c = this.bytecodes.add_constant(val);
+        this.emit_instruction(instr);
         this.bytecodes.write_word(c);
     }
 
