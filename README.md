@@ -50,5 +50,5 @@ Run the REPL by invoking `alox.ts`.
   - [x] Arithmetic operators.
 - [x] Lexical Scanner - Chapter 16 = Reuse lexer, parser, and analyser.
 - [ ] Compiling expressions - Chapter 17.
-  -[ ] Emitting Bytecode and running bytecode.
-  -[ ] `print`.
+  - [x] Emitting Bytecode and running bytecode.
+  - [ ] `print`.

@@ -30,6 +30,7 @@ export class Options {
     public error: stream.Writable = process.stderr;
 
     public bytecode = false;
+    public debug = false;
 }
 
 abstract class StdlibClass extends LoxCallable {

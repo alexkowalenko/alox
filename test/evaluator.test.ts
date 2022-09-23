@@ -11,14 +11,17 @@ import { pretty_print } from '../src/runtime';
 
 export type TestCases = [string, string, string?]
 
-export function do_tests(tests: TestCases[]) {
+export function do_tests(tests: TestCases[], bytecode = false) {
     const opts = new Options;
     opts.silent = true;
+    opts.bytecode = bytecode;
+    opts.debug = false;
     const interpreter = new Interpreter(opts);
 
     for (const test of tests) {
         try {
             const val = interpreter.do(test[0]);
+            // console.log(`test: ${val}  ${test[1]}`)
             expect(pretty_print(val)).toBe(test[1])
         }
         catch (e) {
@@ -34,57 +37,85 @@ export function do_tests(tests: TestCases[]) {
 }
 
 describe('Evaluator', () => {
-    it('numbers', () => {
+    {
         const tests: TestCases[] = [
-            ["1;", '1'],
+            ["2;", '2'],
             ["1.1;", '1.1'],
         ]
-        do_tests(tests)
-    })
 
-    it('bools', () => {
+        it('numbers', () => {
+            do_tests(tests)
+        })
+        it('numbers-b', () => {
+            do_tests(tests, true)
+        })
+    }
+
+    {
         const tests: TestCases[] = [
             ["true;", 'true'],
             ["false;", 'false'],
         ]
-        do_tests(tests)
-    })
+        it('bools', () => {
+            do_tests(tests)
+        })
+        it('bools-b', () => {
+            do_tests(tests, true)
+        })
+    }
 
-    it('nil', () => {
+    {
         const tests: TestCases[] = [
             ["nil;", 'nil'],
         ]
-        do_tests(tests)
-    })
+        it('nil', () => {
+            do_tests(tests)
+        })
+        it('nil-b', () => {
+            do_tests(tests, true)
+        })
+    }
 
-    it('unary', () => {
+    {
         const tests: TestCases[] = [
+            ["-1;", '-1'],
+            ["--1;", '1'],
+            ["---1;", '-1'],
+            ["----1;", '1'],
+            ["-(1);", '-1'],
+        ]
+        it('unary-b', () => {
+            do_tests(tests, true)
+        })
+
+        tests.concat([
+            // Error
+            [`-"hello";`, '', "value must be a number"],
+
             ["!true;", 'false'],
             ["!false;", 'true'],
             ["!!true;", 'true'],
             ["!!!true;", 'false'],
             ["!(false);", 'true'],
             ["!1;", 'false'],
+        ])
+        it('unary', () => {
+            do_tests(tests)
+        })
+    }
 
-            ["-1;", '-1'],
-            ["--1;", '1'],
-            ["---1;", '-1'],
-            ["----1;", '1'],
-            ["-(1);", '-1'],
-
-            // Error
-            [`-"hello";`, '', "value must be a number"],
-        ]
-        do_tests(tests)
-    })
-
-    it('plus', () => {
+    {
         const tests: TestCases[] = [
             ["1 + 2;", '3'],
             ["-1 + 2;", '1'],
             ["1 + -2;", '-1'],
             ["1 + 2 + 3;", '6'],
+        ]
+        it('plus-b', () => {
+            do_tests(tests, true)
+        })
 
+        tests.concat([
             ['"wolf" + "man";', '"wolfman"'],
             ['"wolf" + "";', '"wolf"'],
             ['"👾" + "man";', '"👾man"'],
@@ -93,11 +124,13 @@ describe('Evaluator', () => {
             ["1 + true;", 'null', "value must be a number"],
             [`"1" + false;`, 'null', "value must be a string"],
             [`nil + "hello";`, 'null', "can't apply + to nil"],
-        ]
-        do_tests(tests)
-    })
+        ])
+        it('plus', () => {
+            do_tests(tests)
+        })
+    }
 
-    it('arithmetic', () => {
+    {
         const tests: TestCases[] = [
             ["1 + 2;", '3'],
             ["-1 - 2;", '-3'],
@@ -105,13 +138,20 @@ describe('Evaluator', () => {
             ["1 * 2 + 3;", '5'],
             ["33/3;", '11'],
             ["2 - 6 / 3;", '0'],
+        ]
+        it('arithmetic-b', () => {
+            do_tests(tests, true)
+        })
 
+        tests.concat([
             // Error
             ["1 * true;", 'null', "value must be a number"],
             [`nil / "hello";`, 'null', "value must be a number"],
-        ]
-        do_tests(tests)
-    })
+        ])
+        it('arithmetic', () => {
+            do_tests(tests)
+        })
+    }
 
     it('relational', () => {
         const tests: TestCases[] = [
