@@ -8,26 +8,11 @@ import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, L
 import { RuntimeError } from "./error";
 import { Options } from "./interpreter";
 import { Printer } from "./printer";
-import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print } from "./runtime";
+import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print, check_number, check_string } from "./runtime";
 import { SymbolTable } from "./symboltable";
-import { Location, TokenType } from "./token";
+import { TokenType } from "./token";
 
 import os from "os";
-
-
-function check_number(v: LoxValue, where: Location): number {
-    if (typeof v != "number") {
-        throw new RuntimeError("value must be a number", where)
-    }
-    return v
-}
-
-function check_string(v: LoxValue, where: Location): string {
-    if (typeof v != "string") {
-        throw new RuntimeError("value must be a string", where)
-    }
-    return v
-}
 
 export interface Evaluator {
     eval(expr: LoxExpr): LoxValue;

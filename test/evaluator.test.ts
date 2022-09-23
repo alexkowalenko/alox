@@ -42,13 +42,8 @@ describe('Evaluator', () => {
             ["2;", '2'],
             ["1.1;", '1.1'],
         ]
-
-        it('numbers', () => {
-            do_tests(tests)
-        })
-        it('numbers-b', () => {
-            do_tests(tests, true)
-        })
+        it('numbers', () => { do_tests(tests) })
+        it('numbers-b', () => { do_tests(tests, true) })
     }
 
     {
@@ -56,24 +51,16 @@ describe('Evaluator', () => {
             ["true;", 'true'],
             ["false;", 'false'],
         ]
-        it('bools', () => {
-            do_tests(tests)
-        })
-        it('bools-b', () => {
-            do_tests(tests, true)
-        })
+        it('bools', () => { do_tests(tests) })
+        it('bools-b', () => { do_tests(tests, true) })
     }
 
     {
         const tests: TestCases[] = [
             ["nil;", 'nil'],
         ]
-        it('nil', () => {
-            do_tests(tests)
-        })
-        it('nil-b', () => {
-            do_tests(tests, true)
-        })
+        it('nil', () => { do_tests(tests) })
+        it('nil-b', () => { do_tests(tests, true) })
     }
 
     {
@@ -83,15 +70,15 @@ describe('Evaluator', () => {
             ["---1;", '-1'],
             ["----1;", '1'],
             ["-(1);", '-1'],
+
+            // Error
+            [`-"hello";`, '', "value must be a number"],
         ]
         it('unary-b', () => {
             do_tests(tests, true)
         })
 
         tests.concat([
-            // Error
-            [`-"hello";`, '', "value must be a number"],
-
             ["!true;", 'false'],
             ["!false;", 'true'],
             ["!!true;", 'true'],
@@ -110,6 +97,9 @@ describe('Evaluator', () => {
             ["-1 + 2;", '1'],
             ["1 + -2;", '-1'],
             ["1 + 2 + 3;", '6'],
+
+            // Error
+            ["1 + true;", 'null', "value must be a number"],
         ]
         it('plus-b', () => {
             do_tests(tests, true)
@@ -120,8 +110,7 @@ describe('Evaluator', () => {
             ['"wolf" + "";', '"wolf"'],
             ['"👾" + "man";', '"👾man"'],
 
-            // Error
-            ["1 + true;", 'null', "value must be a number"],
+
             [`"1" + false;`, 'null', "value must be a string"],
             [`nil + "hello";`, 'null', "can't apply + to nil"],
         ])
@@ -138,19 +127,13 @@ describe('Evaluator', () => {
             ["1 * 2 + 3;", '5'],
             ["33/3;", '11'],
             ["2 - 6 / 3;", '0'],
-        ]
-        it('arithmetic-b', () => {
-            do_tests(tests, true)
-        })
 
-        tests.concat([
             // Error
             ["1 * true;", 'null', "value must be a number"],
             [`nil / "hello";`, 'null', "value must be a number"],
-        ])
-        it('arithmetic', () => {
-            do_tests(tests)
-        })
+        ]
+        it('arithmetic-b', () => { do_tests(tests, true) })
+        it('arithmetic', () => { do_tests(tests) })
     }
 
     it('relational', () => {
@@ -195,7 +178,7 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
-    it('prog', () => {
+    it('print', () => {
         const tests: TestCases[] = [
             ["print true;", 'true'],
         ]

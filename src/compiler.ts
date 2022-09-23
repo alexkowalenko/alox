@@ -11,7 +11,7 @@ import { SymbolTable } from "./symboltable";
 import { Options } from "./interpreter";
 import { Chunk } from "./chunk";
 import { Opcode, VM } from "./vm";
-import { TokenType } from "./token";
+import { TokenType, Location } from "./token";
 
 
 export class Compiler implements AstVisitor<void>, Evaluator {
@@ -29,6 +29,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.init();
         expr.accept(this);
         this.emit_instruction(Opcode.RETURN);
+
         if (this.options.debug) {
             this.bytecodes.disassemble("program:")
         }
@@ -41,6 +42,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     visitProgram(prog: LoxProgram): void {
         for (const stat of prog.statements) {
+            if (this.options.debug) {
+                this.emit_location(stat.location);
+            }
             stat.accept(this)
         }
     }
@@ -163,11 +167,11 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitBool(expr: LoxBool): void {
-        this.add_constant(expr.value);
+        expr.value ? this.emit_instruction(Opcode.TRUE) : this.emit_instruction(Opcode.FALSE)
     }
 
     visitNil(expr: LoxNil): void {
-        this.add_constant(null);
+        this.emit_instruction(Opcode.NIL);
     }
 
     resolve(expr: LoxExpr, depth: number): void {
@@ -182,5 +186,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         let c = this.bytecodes.add_constant(val);
         this.emit_instruction(Opcode.CONSTANT);
         this.bytecodes.write_word(c);
+    }
+
+    emit_location(location: Location) {
+        this.emit_instruction(Opcode.LINE);
+        this.bytecodes.write_word(location.line)
     }
 }

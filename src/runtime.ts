@@ -5,8 +5,10 @@
 //
 
 import { LoxClassDef, LoxFunDef, LoxReturn } from "./ast";
+import { RuntimeError } from "./error";
 import { TreeEvaluator } from "./evaluator";
 import { SymbolTable } from "./symboltable";
+import { Location } from "./token";
 
 export abstract class LoxCallable {
     abstract call(interp: TreeEvaluator, args: Array<LoxValue>): LoxValue;
@@ -27,6 +29,20 @@ export function pretty_print(v: LoxValue): string {
         return '"' + v + '"'
     }
     return v.toString();
+}
+
+export function check_number(v: LoxValue, where: Location): number {
+    if (typeof v != "number") {
+        throw new RuntimeError("value must be a number", where)
+    }
+    return v
+}
+
+export function check_string(v: LoxValue, where: Location): string {
+    if (typeof v != "string") {
+        throw new RuntimeError("value must be a string", where)
+    }
+    return v
 }
 
 export class LoxFunction extends LoxCallable {

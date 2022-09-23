@@ -90,7 +90,7 @@ export class Chunk {
                 return constant_instruction(instr as Opcode, offset, this);
             case Opcode.LINE:
                 return constant_instruction(instr as Opcode, offset, this);
-            case Opcode.NEGATE, Opcode.ADD, Opcode.SUBTRACT, Opcode.MULTIPLY, Opcode.DIVIDE:
+            case Opcode.NEGATE, Opcode.ADD, Opcode.SUBTRACT, Opcode.MULTIPLY, Opcode.DIVIDE, Opcode.NIL, Opcode.TRUE, Opcode.FALSE:
                 return simple_instruction(instr as Opcode, offset);
         }
         return simple_instruction(instr as Opcode, offset);

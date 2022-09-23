@@ -49,6 +49,11 @@ Run the REPL by invoking `alox.ts`.
   - [x] Stack
   - [x] Arithmetic operators.
 - [x] Lexical Scanner - Chapter 16 = Reuse lexer, parser, and analyser.
-- [ ] Compiling expressions - Chapter 17.
-  - [x] Emitting Bytecode and running bytecode.
-  - [ ] `print`.
+- [x] Compiling expressions - Chapter 17.
+  - [x] Emitting Bytecode and running bytecode..
+- [ ] Runtime type checking - Chapter 18 Types of Values.
+  - [x] Arithmetic operations.
+  - [ ] Relational and Not operations.
+- [ ] Strings - Chapter 19.
+- [x] Hash Tables - Chapter 20. Implemented in TypeScript/JavaScript.
+- [ ] Global Variables - Chapter 21.

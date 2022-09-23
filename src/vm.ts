@@ -6,7 +6,7 @@
 
 import { Chunk } from "./chunk";
 import { RuntimeError } from "./error";
-import { LoxValue, pretty_print } from "./runtime";
+import { check_number, LoxValue, pretty_print } from "./runtime";
 import { Location } from "./token";
 
 export const enum Opcode {
@@ -18,6 +18,9 @@ export const enum Opcode {
     SUBTRACT,
     MULTIPLY,
     DIVIDE,
+    NIL,
+    TRUE,
+    FALSE
 }
 
 export function simple_instruction(op: Opcode, offset: number): number {
@@ -41,7 +44,15 @@ export function simple_instruction(op: Opcode, offset: number): number {
         case Opcode.DIVIDE:
             console.log(str + " DIVIDE");
             return offset + 1;
-
+        case Opcode.NIL:
+            console.log(str + " NIL");
+            return offset + 1;
+        case Opcode.TRUE:
+            console.log(str + " TRUE");
+            return offset + 1;
+        case Opcode.FALSE:
+            console.log(str + " FALSE");
+            return offset + 1;
     }
     return offset;
 }
@@ -86,6 +97,18 @@ export class VM {
         this.stack.push(val)
     }
 
+    peek(index: number = 0): LoxValue {
+        return this.stack.at(-1 - index)!
+    }
+
+    get_location(): Location {
+        return new Location(this.last_line, 0);
+    }
+
+    check_number(index: number = 0) {
+        check_number(this.peek(index), this.get_location());
+    }
+
     interpret() {
         for (; ;) {
             let instr = this.chunk.get_byte(this.ip);
@@ -113,24 +136,43 @@ export class VM {
                     continue;
                 }
                 case Opcode.NEGATE:
+                    this.check_number();
                     this.push(- this.pop()!)
                     continue;
 
                 case Opcode.ADD:
+                    this.check_number();
+                    this.check_number(1);
                     this.push((this.pop() as number) + (this.pop() as number));
                     continue;
                 case Opcode.SUBTRACT:
+                    this.check_number();
+                    this.check_number(1);
                     this.push((this.pop() as number) - (this.pop() as number));
                     continue;
                 case Opcode.MULTIPLY:
+                    this.check_number();
+                    this.check_number(1);
                     this.push((this.pop() as number) * (this.pop() as number));
                     continue;
                 case Opcode.DIVIDE:
+                    this.check_number();
+                    this.check_number(1);
                     this.push((this.pop() as number) / (this.pop() as number));
                     continue;
 
+                case Opcode.NIL:
+                    this.push(null);
+                    continue;
+                case Opcode.TRUE:
+                    this.push(true);
+                    continue;
+                case Opcode.FALSE:
+                    this.push(false);
+                    continue;
+
                 default:
-                    throw new RuntimeError("implementation: unknown instruction " + instr, new Location(this.last_line, 0))
+                    throw new RuntimeError("implementation: unknown instruction " + instr, this.get_location())
             }
         }
     }
