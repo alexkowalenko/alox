@@ -6,7 +6,7 @@
 
 import { Chunk } from "./chunk";
 import { RuntimeError } from "./error";
-import { check_number, LoxValue, pretty_print } from "./runtime";
+import { check_number, LoxValue, pretty_print, truthy } from "./runtime";
 import { Location } from "./token";
 
 export const enum Opcode {
@@ -20,7 +20,11 @@ export const enum Opcode {
     DIVIDE,
     NIL,
     TRUE,
-    FALSE
+    FALSE,
+    NOT,
+    EQUAL,
+    LESS,
+    GREATER
 }
 
 export function simple_instruction(op: Opcode, offset: number): number {
@@ -28,33 +32,47 @@ export function simple_instruction(op: Opcode, offset: number): number {
     switch (op) {
         case Opcode.RETURN:
             console.log(str + " RETURN");
-            return offset + 1;
+            break;
         case Opcode.NEGATE:
             console.log(str + " NEGATE");
-            return offset + 1;
+            break;
         case Opcode.ADD:
             console.log(str + " ADD");
-            return offset + 1;
+            break;
         case Opcode.SUBTRACT:
             console.log(str + " SUBTRACT");
-            return offset + 1;
+            break;
         case Opcode.MULTIPLY:
             console.log(str + " MULTIPLY");
-            return offset + 1;
+            break;
         case Opcode.DIVIDE:
             console.log(str + " DIVIDE");
-            return offset + 1;
+            break;
         case Opcode.NIL:
             console.log(str + " NIL");
-            return offset + 1;
+            break;
         case Opcode.TRUE:
             console.log(str + " TRUE");
-            return offset + 1;
+            break;
         case Opcode.FALSE:
             console.log(str + " FALSE");
-            return offset + 1;
+            break;
+        case Opcode.NOT:
+            console.log(str + " NOT");
+            break;
+        case Opcode.EQUAL:
+            console.log(str + " EQUAL");
+            break;
+        case Opcode.LESS:
+            console.log(str + " LESS");
+            break;
+        case Opcode.GREATER:
+            console.log(str + " GREATER");
+            break;
+        default:
+            console.log(str + ` <unknown ${op}>`);
     }
-    return offset;
+    return offset + 1;
 }
 
 export function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number {
@@ -64,15 +82,17 @@ export function constant_instruction(op: Opcode, offset: number, chunk: Chunk): 
             let word = chunk.get_word(offset + 1)
             let val = chunk.get_constant(word);
             console.log(`${str} CONSTANT ${word}\t'${val?.toString()}'`);
-            return offset + 3;
+            break;
         }
         case Opcode.LINE: {
             let word = chunk.get_word(offset + 1)
-            console.log(`${str} LINE --- ${word}`);
-            return offset + 3;
+            console.log(`${str} LINE-- - ${word}`);
+            break;
         }
+        default:
+            console.log(str + ` <unknown ${op}>`);
     }
-    return offset;
+    return offset + 3;
 }
 
 export class VM {
@@ -138,6 +158,25 @@ export class VM {
                 case Opcode.NEGATE:
                     this.check_number();
                     this.push(- this.pop()!)
+                    continue;
+
+                case Opcode.NOT:
+                    this.push(!truthy(this.pop()!));
+                    continue;
+
+                case Opcode.EQUAL:
+                    this.push(this.pop() === this.pop());
+                    continue;
+
+                case Opcode.LESS:
+                    this.check_number();
+                    this.check_number(1);
+                    this.push((this.pop() as number) < (this.pop() as number));
+                    continue;
+                case Opcode.GREATER:
+                    this.check_number();
+                    this.check_number(1);
+                    this.push((this.pop() as number) > (this.pop() as number));
                     continue;
 
                 case Opcode.ADD:

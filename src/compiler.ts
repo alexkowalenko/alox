@@ -95,9 +95,13 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     visitUnary(e: LoxUnary): void {
         e.expr.accept(this);
-        if (e.prefix == TokenType.MINUS) {
-            this.emit_instruction(Opcode.NEGATE)
-            return;
+        switch (e.prefix) {
+            case TokenType.MINUS:
+                this.emit_instruction(Opcode.NEGATE)
+                return;
+            case TokenType.BANG:
+                this.emit_instruction(Opcode.NOT)
+                return;
         }
         throw new Error("Method not implemented.");
     }
@@ -117,6 +121,27 @@ export class Compiler implements AstVisitor<void>, Evaluator {
                 return
             case TokenType.SLASH:
                 this.emit_instruction(Opcode.DIVIDE)
+                return
+            case TokenType.EQUAL_EQUAL:
+                this.emit_instruction(Opcode.EQUAL)
+                return
+            case TokenType.BANG_EQUAL:
+                this.emit_instruction(Opcode.EQUAL)
+                this.emit_instruction(Opcode.NOT)
+                return
+            case TokenType.LESS:
+                this.emit_instruction(Opcode.LESS)
+                return
+            case TokenType.LESS_EQUAL:
+                this.emit_instruction(Opcode.GREATER)
+                this.emit_instruction(Opcode.NOT)
+                return
+            case TokenType.GREATER:
+                this.emit_instruction(Opcode.GREATER)
+                return
+            case TokenType.GREATER_EQUAL:
+                this.emit_instruction(Opcode.LESS)
+                this.emit_instruction(Opcode.NOT)
                 return
         }
         throw new Error("Method not implemented.");

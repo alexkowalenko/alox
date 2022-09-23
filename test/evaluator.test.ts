@@ -71,24 +71,18 @@ describe('Evaluator', () => {
             ["----1;", '1'],
             ["-(1);", '-1'],
 
-            // Error
-            [`-"hello";`, '', "value must be a number"],
-        ]
-        it('unary-b', () => {
-            do_tests(tests, true)
-        })
-
-        tests.concat([
             ["!true;", 'false'],
             ["!false;", 'true'],
             ["!!true;", 'true'],
             ["!!!true;", 'false'],
             ["!(false);", 'true'],
             ["!1;", 'false'],
-        ])
-        it('unary', () => {
-            do_tests(tests)
-        })
+
+            // Error
+            [`-"hello";`, '', "value must be a number"],
+        ]
+        it('unary-b', () => { do_tests(tests, true) })
+        it('unary', () => { do_tests(tests) })
     }
 
     {
@@ -109,7 +103,6 @@ describe('Evaluator', () => {
             ['"wolf" + "man";', '"wolfman"'],
             ['"wolf" + "";', '"wolf"'],
             ['"👾" + "man";', '"👾man"'],
-
 
             [`"1" + false;`, 'null', "value must be a string"],
             [`nil + "hello";`, 'null', "can't apply + to nil"],
@@ -136,7 +129,7 @@ describe('Evaluator', () => {
         it('arithmetic', () => { do_tests(tests) })
     }
 
-    it('relational', () => {
+    {
         const tests: TestCases[] = [
             ["1 < 2;", 'true'],
             ["-1 <= 2;", 'true'],
@@ -160,8 +153,9 @@ describe('Evaluator', () => {
             // Error
             ["1 < true;", 'null', "value must be a number"],
         ]
-        do_tests(tests)
-    })
+        it('relational', () => { do_tests(tests) })
+        it('relational-b', () => { do_tests(tests, true) })
+    }
 
     it('logical', () => {
         const tests: TestCases[] = [

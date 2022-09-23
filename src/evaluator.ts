@@ -8,7 +8,7 @@ import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, L
 import { RuntimeError } from "./error";
 import { Options } from "./interpreter";
 import { Printer } from "./printer";
-import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print, check_number, check_string } from "./runtime";
+import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print, check_number, check_string, truthy } from "./runtime";
 import { SymbolTable } from "./symboltable";
 import { TokenType } from "./token";
 
@@ -101,7 +101,7 @@ export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {
 
     visitIf(expr: LoxIf): LoxValue {
         const val = expr.expr.accept(this);
-        if (this.truthy(val)) {
+        if (truthy(val)) {
             return expr.then.accept(this)
         }
         if (expr.else) {
@@ -113,7 +113,7 @@ export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {
     visitWhile(e: LoxWhile): LoxValue {
         let v = e.expr.accept(this);
         let stat: LoxValue = null;
-        while (this.truthy(v)) {
+        while (truthy(v)) {
             try {
                 stat = e.stats.accept(this)
             }
@@ -146,7 +146,7 @@ export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {
             }
             //console.log(`for cond = ${val}`)
             var ret: LoxValue = null;
-            while (this.truthy(val)) {
+            while (truthy(val)) {
                 if (e.stat) {
                     try {
                         ret = e.stat.accept(this);
@@ -225,7 +225,7 @@ export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {
             case TokenType.MINUS:
                 return - check_number(val, e.location)
             case TokenType.BANG:
-                return !this.truthy(val)
+                return !truthy(val)
         }
         throw new RuntimeError(`${e.prefix} not defined as prefix operator`, e.location);
     }
@@ -343,10 +343,10 @@ export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {
     private do_logical(e: LoxBinary) {
         const left = e.left.accept(this);
         if (e.operator === TokenType.OR) {
-            if (this.truthy(left))
+            if (truthy(left))
                 return left
         } else {
-            if (!this.truthy(left))
+            if (!truthy(left))
                 return left
         }
         return e.right.accept(this);
@@ -415,16 +415,6 @@ export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {
 
     visitNil(expr: LoxNil): LoxValue {
         return null;
-    }
-
-    private truthy(v: LoxValue): boolean {
-        if (v == null) {
-            return false;
-        }
-        if (typeof v === "boolean") {
-            return v
-        }
-        return true
     }
 
     public resolve(expr: LoxExpr, depth: number) {

@@ -45,6 +45,16 @@ export function check_string(v: LoxValue, where: Location): string {
     return v
 }
 
+export function truthy(v: LoxValue): boolean {
+    if (v == null) {
+        return false;
+    }
+    if (typeof v === "boolean") {
+        return v
+    }
+    return true
+}
+
 export class LoxFunction extends LoxCallable {
 
     constructor(readonly fun: LoxFunDef, readonly closure: SymbolTable<LoxValue>, public initializer: boolean) {
