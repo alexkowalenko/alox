@@ -54,6 +54,9 @@ Run the REPL by invoking `alox.ts`.
 - [x] Runtime type checking - Chapter 18 Types of Values.
   - [x] Arithmetic operations.
   - [x] Relational and Not operations.
-- [ ] Strings - Chapter 19.
+- [x] Strings - Chapter 19.
 - [x] Hash Tables - Chapter 20. Implemented in TypeScript/JavaScript.
 - [ ] Global Variables - Chapter 21.
+  - [ ] `print` & POP
+  - [ ] Define global variables
+  - [ ] Access global variables

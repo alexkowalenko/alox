@@ -92,24 +92,17 @@ describe('Evaluator', () => {
             ["1 + -2;", '-1'],
             ["1 + 2 + 3;", '6'],
 
-            // Error
-            ["1 + true;", 'null', "value must be a number"],
-        ]
-        it('plus-b', () => {
-            do_tests(tests, true)
-        })
-
-        tests.concat([
             ['"wolf" + "man";', '"wolfman"'],
             ['"wolf" + "";', '"wolf"'],
             ['"👾" + "man";', '"👾man"'],
 
+            // Error
+            ["1 + true;", 'null', "value must be a number"],
             [`"1" + false;`, 'null', "value must be a string"],
             [`nil + "hello";`, 'null', "can't apply + to nil"],
-        ])
-        it('plus', () => {
-            do_tests(tests)
-        })
+        ]
+        it('plus-b', () => { do_tests(tests, true) })
+        it('plus', () => { do_tests(tests) })
     }
 
     {

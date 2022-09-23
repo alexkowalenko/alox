@@ -5,8 +5,9 @@
 //
 
 
+import { disassemble_instruction } from "./debug";
 import { LoxValue } from "./runtime";
-import { constant_instruction, Opcode, simple_instruction } from "./vm";
+import { Opcode } from "./vm";
 
 const DEFAULT_SIZE = 8;
 
@@ -81,26 +82,10 @@ export class Chunk {
         return this.constants.get_constant(offset)
     }
 
-    disassemble_instruction(offset: number) {
-        let instr = this.code[offset];
-        switch (instr) {
-            case Opcode.RETURN:
-                return simple_instruction(instr as Opcode, offset);
-            case Opcode.CONSTANT:
-                return constant_instruction(instr as Opcode, offset, this);
-            case Opcode.LINE:
-                return constant_instruction(instr as Opcode, offset, this);
-            case Opcode.NEGATE, Opcode.ADD, Opcode.SUBTRACT, Opcode.MULTIPLY, Opcode.DIVIDE, Opcode.NIL,
-                Opcode.TRUE, Opcode.FALSE, Opcode.NOT, Opcode.EQUAL, Opcode.LESS, Opcode.GREATER:
-                return simple_instruction(instr as Opcode, offset);
-        }
-        return simple_instruction(instr as Opcode, offset);
-    }
-
     disassemble(name: string) {
         console.log(name);
         for (let offset = 0; offset < this.count;) {
-            offset = this.disassemble_instruction(offset);
+            offset = disassemble_instruction(offset, this);
         }
     }
 }
