@@ -5,9 +5,15 @@
 //
 
 import { Chunk } from "../src/chunk";
+import { Options } from "../src/interpreter";
+import { LoxValue } from "../src/runtime";
+import { SymbolTable } from "../src/symboltable";
 import { Opcode, VM } from "../src/vm";
 
 describe('vm', () => {
+    let st = new SymbolTable<LoxValue>();
+    let opts = new Options;
+
     it('basic', () => {
         let chunk = new Chunk;
         chunk.write_line(123);
@@ -16,7 +22,8 @@ describe('vm', () => {
         chunk.write_word(constant);
         chunk.write_byte(Opcode.RETURN);
 
-        let vm = new VM(chunk);
+        let st = new SymbolTable<LoxValue>();
+        let vm = new VM(chunk, st, opts);
         vm.debug = false;
         let val = vm.interpret();
         expect(val).toBe(1.2)
@@ -30,7 +37,7 @@ describe('vm', () => {
         chunk.write_byte(Opcode.NEGATE);
         chunk.write_byte(Opcode.RETURN);
 
-        let vm = new VM(chunk);
+        let vm = new VM(chunk, st, opts);
         vm.debug = false;
         let val = vm.interpret();
         expect(val).toBe(-1)
@@ -59,7 +66,7 @@ describe('vm', () => {
         chunk.write_byte(Opcode.SUBTRACT); // 3 - 3 = 0
         chunk.write_byte(Opcode.RETURN);
 
-        let vm = new VM(chunk);
+        let vm = new VM(chunk, st, opts);
         vm.debug = false;
         let val = vm.interpret();
         expect(val).toBe(0)

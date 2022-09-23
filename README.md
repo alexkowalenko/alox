@@ -40,6 +40,8 @@ Run the REPL by invoking `alox.ts`.
   - [x] Super classes
   - [x] Inheriting methods
   - [x] Calling superclass methods
+- [ ] Extras
+  - [ ] `getc()`, `chr()`, `ord()`.
 
 ## Part II Bytecode compiler
 
@@ -56,8 +58,11 @@ Run the REPL by invoking `alox.ts`.
   - [x] Relational and Not operations.
 - [x] Strings - Chapter 19.
 - [x] Hash Tables - Chapter 20. Implemented in TypeScript/JavaScript.
-- [ ] Global Variables - Chapter 21.
+- [x] Global Variables - Chapter 21.
   - [x] `print` & POP
   - [x] Define global variables
   - [x] Access global variables
+- [ ] Test structure for running files with bytecode engine.
 - [ ] Local Variables - Chapter 22.
+  - [ ] Block scopes
+  - [ ] Define and access local variables

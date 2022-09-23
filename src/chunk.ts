@@ -9,7 +9,7 @@ import { disassemble_instruction } from "./debug";
 import { LoxValue } from "./runtime";
 import { Opcode } from "./vm";
 
-const DEFAULT_SIZE = 8;
+const DEFAULT_SIZE = 32;
 
 export class Constant {
     constructor(private capacity: number = DEFAULT_SIZE) {
@@ -18,6 +18,10 @@ export class Constant {
     private pool: Array<LoxValue>;
 
     add_constant(val: LoxValue) {
+        let pos = this.pool.findIndex((e) => { return e === val })
+        if (pos >= 0) {
+            return pos;
+        }
         this.pool.push(val);
         return this.pool.length - 1;
     }
@@ -42,7 +46,9 @@ export class Chunk {
 
     private extend_buffer() {
         // double the buffer
+        //console.log("extend_buffer")
         let new_capacity = this.capacity * 2;
+
         let new_code = Buffer.alloc(new_capacity)
         this.code.copy(new_code, 0, 0, this.capacity);
         this.code = new_code;
@@ -50,7 +56,7 @@ export class Chunk {
     }
 
     write_byte(byte: number) {
-        if (this.capacity > this.count + 1) {
+        if (this.capacity < this.count + 1) {
             this.extend_buffer();
         }
         this.code.writeInt8(byte, this.count);
@@ -58,7 +64,7 @@ export class Chunk {
     }
 
     write_word(word: number) {
-        if (this.capacity > this.count + 2) {
+        if (this.capacity < this.count + 2) {
             this.extend_buffer();
         }
         this.code.writeInt16LE(word, this.count);

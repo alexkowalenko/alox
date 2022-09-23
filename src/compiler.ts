@@ -45,6 +45,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitProgram(prog: LoxProgram): void {
+        //console.log("program")
         for (let i = 0; i < prog.statements.length; i++) {
             let stat = prog.statements[i]
             if (this.options.debug) {
@@ -59,6 +60,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitVar(v: LoxVar): void {
+        //console.log("var")
         if (v.expr) {
             v.expr.accept(this);
         } else {
@@ -105,6 +107,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitExpr(expr: LoxExpr): void {
+        // console.log("expr")
         expr.accept(this);
     }
 
@@ -185,6 +188,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitAssign(e: LoxAssign): void {
+        // console.log("assign")
         e.right.accept(this);
         if (e.left instanceof LoxIdentifier) {
             this.emit_constant(Opcode.SET_GLOBAL, (e.left as LoxIdentifier).id)
