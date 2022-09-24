@@ -71,6 +71,6 @@ Run the REPL by invoking `alox.ts`.
 - [ ] Control Statements - Chapter 23.
   - [x] `if` statement.
   - [x] logical operators `and`, `or`.
-  - [ ] `while` statement.
+  - [x] `while` statement.
   - [ ] `for` statement.
 - [ ] Functions - Chapter 24.

@@ -256,13 +256,14 @@ describe('Evaluator', () => {
         it('if-b', () => { do_tests(tests, true) })
     }
 
-    it('while', () => {
+    {
         const tests: TestCases[] = [
             ["var x = 4; while (x > 1) x = x - 1; x;", '1'],
             ["x = 4; while (false) { x = x - 1; } x;", '4'],
         ]
-        do_tests(tests)
-    })
+        it('while', () => { do_tests(tests) })
+        it('while-b', () => { do_tests(tests, true) })
+    }
 
     it('for', () => {
         const tests: TestCases[] = [

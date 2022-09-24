@@ -104,7 +104,14 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitWhile(expr: LoxWhile): void {
-        throw new Error("Method not implemented.");
+        let start = this.bytecodes.end;
+        expr.expr.accept(this);
+        let exit = this.emit_jump(Opcode.JMP_IF_FALSE)
+        this.emit_instruction(Opcode.POP)
+
+        expr.stats.accept(this);
+        this.emit_jump_back(Opcode.JUMP, start)
+        this.patch_jump(exit)
     }
 
     visitFor(expr: LoxFor): void {
@@ -357,11 +364,15 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.bytecodes.write_word(location.line)
     }
 
-    emit_jump(instr: Opcode): number {
+    emit_jump(instr: Opcode, where = 0): number {
         this.emit_instruction(instr);
-        this.bytecodes.write_word(0);
+        this.bytecodes.write_word(where);
         //console.log(`jump loc: ${this.bytecodes.end - 2}`)
         return this.bytecodes.end - 2;
+    }
+
+    emit_jump_back(intr: Opcode, where: number) {
+        this.emit_jump(intr, where - this.bytecodes.end - 3)
     }
 
     patch_jump(offset: number) {
