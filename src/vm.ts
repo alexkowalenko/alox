@@ -44,6 +44,7 @@ export const enum Opcode {
     JMP_IF_FALSE,
     JMP_IF_TRUE,
     JUMP,
+    CALL,
 }
 
 export class VM {
@@ -305,6 +306,13 @@ export class VM {
                     break;
                 }
 
+                case Opcode.CALL: {
+                    let id = this.get_word_arg()
+                    let val = this.symboltable.get(id as string);
+                    console.log(`call ${id} - ${typeof val} `)
+                    break;
+                }
+
                 default:
                     throw new RuntimeError("implementation: unknown instruction " + instr, this.get_location())
             }
@@ -321,12 +329,12 @@ export class VM {
     dump_stack() {
         let buf = "";
         this.stack.forEach((v) => {
-            buf += ` ${pretty_print(v)} |`
+            buf += ` ${pretty_print(v)} | `
         })
         console.log("stack:" + buf);
         buf = "";
         this.locals_stack.forEach((v) => {
-            buf += ` ${pretty_print(v)} |`
+            buf += ` ${pretty_print(v)} | `
         })
         console.log("local:" + buf);
     }

@@ -6,7 +6,7 @@
 
 import { AstVisitor, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFunDef, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Evaluator } from "./evaluator";
-import { LoxValue } from "./runtime";
+import { LoxValue, LoxFunction } from "./runtime";
 import { SymbolTable } from "./symboltable";
 import { Options } from "./interpreter";
 import { Chunk } from "./chunk";
@@ -19,20 +19,36 @@ class Local {
     constructor(public name: LoxIdentifier, public depth: number) { }
 }
 
+export class CompiledFunction extends LoxFunction {
+
+    constructor(public fn: LoxFunDef) {
+        super(fn, new SymbolTable, false)
+        this.bytecodes = new Chunk;
+    }
+
+    bytecodes: Chunk;
+    scope_depth = 0;
+    locals = new Array<Local>;
+
+    last_continue: number | undefined = undefined;
+    last_break: number | undefined = undefined;
+
+}
+
 export class Compiler implements AstVisitor<void>, Evaluator {
 
-    constructor(public symboltable: SymbolTable<LoxValue>, private readonly options: Options) {
-        this.bytecodes = new Chunk();
+    constructor(public symboltable: SymbolTable<LoxValue>,
+        private readonly options: Options) {
     }
-    private bytecodes: Chunk;
-    private scope_depth = 0;
-    private locals = new Array<Local>;
+    private current_function!: CompiledFunction;
 
-    private last_continue: number | undefined = undefined;
-    private last_break: number | undefined = undefined;
+    init() {
+        let fn = new LoxFunDef(new Location(), new LoxIdentifier(new Location(), "_main"));
+        this.current_function = new CompiledFunction(fn);
+    }
 
-    private init() {
-        this.bytecodes = new Chunk();
+    current() {
+        return this.current_function;
     }
 
     eval(expr: LoxExpr): LoxValue {
@@ -41,10 +57,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.emit_instruction(Opcode.RETURN);
 
         if (this.options.debug) {
-            this.bytecodes.disassemble("program:")
+            this.current().bytecodes.disassemble("program:")
         }
 
-        let vm = new VM(this.bytecodes, this.symboltable, this.options);
+        let vm = new VM(this.current().bytecodes, this.symboltable, this.options);
         vm.debug = this.options.trace;
         let val = vm.interpret();
         if (this.options.debug) {
@@ -75,14 +91,21 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             this.emit_instruction(Opcode.NIL)
         }
         this.define_var(v.ident);
-        if (this.scope_depth > 0) {
+        if (this.current().scope_depth > 0) {
             return;
         }
         this.emit_constant(Opcode.DEF_GLOBAL, v.ident.id)
     }
 
     visitFun(f: LoxFunDef): void {
-        throw new Error("Method not implemented.");
+        let funct = new CompiledFunction(f);
+        let prev = this.current_function
+        this.current_function = funct;
+
+        f.body?.accept(this);
+
+        this.current_function = prev;
+        this.symboltable.set(f.name?.id!, funct);
     }
 
     visitClass(c: LoxClassDef): void {
@@ -107,8 +130,8 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitWhile(expr: LoxWhile): void {
-        let start = this.bytecodes.end;
-        this.last_continue = this.bytecodes.end;
+        let start = this.current().bytecodes.end;
+        this.current().last_continue = this.current().bytecodes.end;
 
         expr.expr.accept(this);
         let exit = this.emit_jump(Opcode.JMP_IF_FALSE)
@@ -119,9 +142,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.patch_jump(exit)
         this.emit_instruction(Opcode.POP)
 
-        if (this.last_break) {
-            this.patch_jump(this.last_break)
-            this.last_break = undefined;
+        if (this.current().last_break) {
+            this.patch_jump(this.current().last_break!)
+            this.current().last_break = undefined;
         }
     }
 
@@ -136,9 +159,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         }
 
         // condition
-        let start = this.bytecodes.end;
+        let start = this.current().bytecodes.end;
 
-        this.last_continue = this.bytecodes.end;
+        this.current().last_continue = this.current().bytecodes.end;
         if (expr.cond) {
             expr.cond.accept(this);
             exit = this.emit_jump(Opcode.JMP_IF_FALSE)
@@ -162,21 +185,21 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             this.patch_jump(exit);
             this.emit_instruction(Opcode.POP)
         }
-        if (this.last_break) {
-            this.patch_jump(this.last_break)
-            this.last_break = undefined;
+        if (this.current().last_break) {
+            this.patch_jump(this.current().last_break!)
+            this.current().last_break = undefined;
         }
         this.end_scope();
     }
 
     visitBreak(expr: LoxBreak): void {
         if (expr.what == TokenType.CONTINUE) {
-            if (this.last_continue) {
-                this.emit_jump_back(Opcode.JUMP, this.last_continue)
-                this.last_continue = undefined;
+            if (this.current().last_continue) {
+                this.emit_jump_back(Opcode.JUMP, this.current().last_continue!)
+                this.current().last_continue = undefined;
             }
         }
-        this.last_break = this.emit_jump(Opcode.JUMP);
+        this.current().last_break = this.emit_jump(Opcode.JUMP);
     }
 
     visitReturn(e: LoxReturn): void {
@@ -280,7 +303,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitCall(e: LoxCall): void {
-        throw new Error("Method not implemented.");
+        if (e.expr instanceof LoxIdentifier) {
+            let name = (e.expr as LoxIdentifier).id
+            this.emit_constant(Opcode.CALL, name);
+        }
     }
 
     visitGet(e: LoxGet): void {
@@ -322,7 +348,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     visitIdentifier(e: LoxIdentifier): void {
         // console.log(`find var: ${e.id}`)
-        if (this.scope_depth > 0) {
+        if (this.current().scope_depth > 0) {
             let index = this.find_var(e);
             if (index >= 0) {
                 this.emit_instruction_word(Opcode.GET_LOCAL, index)
@@ -353,89 +379,89 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     begin_scope() {
-        this.scope_depth++;
+        this.current().scope_depth++;
     }
 
     end_scope() {
         //console.log(`end_scope: locals count: ${this.locals.length}`)
-        this.scope_depth--;
+        this.current().scope_depth--;
 
         // pop local from the stack
-        this.locals.forEach((local) => {
-            if (local.depth > this.scope_depth) {
+        this.current().locals.forEach((local) => {
+            if (local.depth > this.current().scope_depth) {
                 //console.log(`remove local ${local.name.id} depth ${local.depth}`)
                 this.emit_instruction(Opcode.POP_LOCAL)
             }
         })
         // remove locals from the list
-        this.locals = this.locals.filter((local) => {
-            return local.depth <= this.scope_depth
+        this.current().locals = this.current().locals.filter((local) => {
+            return local.depth <= this.current().scope_depth
         })
         //console.log(`end_scope: locals count: ${this.locals.length}`)
     }
 
     define_var(v: LoxIdentifier) {
-        if (this.scope_depth == 0) {
+        if (this.current().scope_depth == 0) {
             return;
         }
         // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
-        this.locals.push(new Local(v, this.scope_depth))
-        this.emit_instruction_word(Opcode.DEF_LOCAL, this.locals.length - 1)
+        this.current().locals.push(new Local(v, this.current().scope_depth))
+        this.emit_instruction_word(Opcode.DEF_LOCAL, this.current().locals.length - 1)
     }
 
     find_var(v: LoxIdentifier): number {
-        let index = this.locals.reverse().findIndex((local) => {
+        let index = this.current().locals.reverse().findIndex((local) => {
             return local.name.id === v.id
         })
         //console.log(`find var: ${e.id} - index: ${index}`)
         if (index >= 0) {
-            return this.locals.length - index - 1;
+            return this.current().locals.length - index - 1;
         } else {
             return -1;
         }
     }
 
     emit_instruction(instr: Opcode) {
-        this.bytecodes.write_byte(instr);
+        this.current().bytecodes.write_byte(instr);
     }
 
     emit_instruction_word(instr: Opcode, val: number) {
-        this.bytecodes.write_byte(instr);
-        this.bytecodes.write_word(val);
+        this.current().bytecodes.write_byte(instr);
+        this.current().bytecodes.write_word(val);
     }
 
     add_constant(val: LoxValue) {
-        let c = this.bytecodes.add_constant(val);
+        let c = this.current().bytecodes.add_constant(val);
         this.emit_instruction(Opcode.CONSTANT);
-        this.bytecodes.write_word(c);
+        this.current().bytecodes.write_word(c);
     }
 
     emit_constant(instr: Opcode, val: LoxValue) {
-        let c = this.bytecodes.add_constant(val);
+        let c = this.current().bytecodes.add_constant(val);
         this.emit_instruction(instr);
-        this.bytecodes.write_word(c);
+        this.current().bytecodes.write_word(c);
     }
 
     emit_location(location: Location) {
         this.emit_instruction(Opcode.LINE);
-        this.bytecodes.write_word(location.line)
+        this.current().bytecodes.write_word(location.line)
     }
 
     emit_jump(instr: Opcode, where = 0): number {
         this.emit_instruction(instr);
-        this.bytecodes.write_word(where);
+        this.current().bytecodes.write_word(where);
         //console.log(`jump loc: ${this.bytecodes.end - 2}`)
-        return this.bytecodes.end - 2;
+        return this.current().bytecodes.end - 2;
     }
 
     emit_jump_back(intr: Opcode, where: number) {
-        this.emit_jump(intr, where - this.bytecodes.end - 3)
+        this.emit_jump(intr, where - this.current().bytecodes.end - 3)
     }
 
     patch_jump(offset: number) {
-        let jump = this.bytecodes.end - offset - 2;
+        let jump = this.current().bytecodes.end - offset - 2;
         //console.log(`jump patch: ${jump}`)
-        this.bytecodes.write_loc_word(offset, jump);
+        this.current().bytecodes.write_loc_word(offset, jump);
     }
 
 

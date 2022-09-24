@@ -131,6 +131,10 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             console.log(str + val_name(offset, chunk, "JUMP"));
             break;
         }
+        case Opcode.CALL: {
+            console.log(str + const_name(offset, chunk, "CALL"));
+            break;
+        }
 
         default:
             console.log(str + ` <unknown ${op}>`);
@@ -149,6 +153,7 @@ export function disassemble_instruction(offset: number, chunk: Chunk) {
             return constant_instruction(instr as Opcode, offset, chunk);
         case Opcode.DEF_LOCAL: case Opcode.GET_LOCAL: case Opcode.SET_LOCAL:
         case Opcode.JMP_IF_FALSE: case Opcode.JMP_IF_TRUE: case Opcode.JUMP:
+        case Opcode.CALL:
             return constant_instruction(instr as Opcode, offset, chunk);
     }
     return simple_instruction(instr as Opcode, offset);
