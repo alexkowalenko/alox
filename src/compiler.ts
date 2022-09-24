@@ -57,7 +57,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.emit_instruction(Opcode.RETURN);
 
         if (this.options.debug) {
-            this.current().bytecodes.disassemble("program:")
+            this.current().bytecodes.disassemble(this.current().fn.name!.id);
         }
 
         let vm = new VM(this.current().bytecodes, this.symboltable, this.options);
@@ -103,8 +103,13 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.current_function = funct;
 
         f.body?.accept(this);
-
+        this.emit_instruction(Opcode.RETURN)
         this.current_function = prev;
+
+        if (this.options.debug) {
+            funct.bytecodes.disassemble(f.name!.id)
+        }
+
         this.symboltable.set(f.name?.id!, funct);
     }
 

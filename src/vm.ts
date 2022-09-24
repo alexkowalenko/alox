@@ -47,18 +47,31 @@ export const enum Opcode {
     CALL,
 }
 
+class Frame {
+    constructor(previous_stack_ptr: number,
+        previous_locals_ptr: number,
+        public chunk: Chunk,
+        public ip: number,
+        public last_line: number) { };
+}
+
 export class VM {
     constructor(private chunk: Chunk, private symboltable: SymbolTable<LoxValue>, private options: Options) {
         this.stack = new Array;
         this.locals_stack = new Array;
+
+        this.current_frame = new Frame(0, 0, chunk, 0, 0);
     }
     private stack: Array<LoxValue>;
     private locals_stack: Array<LoxValue>;
 
-    private ip = 0;
-    private last_line = 0;
-
     public debug = true;
+
+    public current_frame: Frame
+
+    current() {
+        return this.current_frame;
+    }
 
     reset_stack() {
         this.stack.length = 0;
@@ -77,7 +90,7 @@ export class VM {
     }
 
     get_location(): Location {
-        return new Location(this.last_line, 0);
+        return new Location(this.current().last_line, 0);
     }
 
     check_number(index: number = 0) {
@@ -89,14 +102,14 @@ export class VM {
     }
 
     get_word_arg() {
-        let val = this.chunk.get_constant(this.chunk.get_word(this.ip))
-        this.ip += 2;
+        let val = this.chunk.get_constant(this.chunk.get_word(this.current().ip))
+        this.current().ip += 2;
         return val;
     }
 
     get_word() {
-        let val = this.chunk.get_word(this.ip);
-        this.ip += 2;
+        let val = this.chunk.get_word(this.current().ip);
+        this.current().ip += 2;
         return val;
     }
 
@@ -105,12 +118,12 @@ export class VM {
             console.log("START:")
         }
         for (; ;) {
-            let instr = this.chunk.get_byte(this.ip);
+            let instr = this.chunk.get_byte(this.current().ip);
             if (this.debug) {
-                disassemble_instruction(this.ip, this.chunk);
+                disassemble_instruction(this.current().ip, this.chunk);
             }
-            this.ip++;
-            if (this.ip >= this.chunk.end) {
+            this.current().ip++;
+            if (this.current().ip >= this.chunk.end) {
                 return this.pop() ?? null;
             }
             switch (instr) {
@@ -131,7 +144,7 @@ export class VM {
                     break;
                 }
                 case Opcode.LINE: { //NOP
-                    this.last_line = this.get_word_arg() as number;
+                    this.current().last_line = this.get_word_arg() as number;
                     continue;
                 }
                 case Opcode.NEGATE:
@@ -286,7 +299,7 @@ export class VM {
                     let offset = this.get_word();
                     let val = this.peek();
                     if (!truthy(val!)) {
-                        this.ip += offset;
+                        this.current().ip += offset;
                     }
                     break;
                 }
@@ -295,14 +308,14 @@ export class VM {
                     let offset = this.get_word();
                     let val = this.peek();
                     if (truthy(val!)) {
-                        this.ip += offset;
+                        this.current().ip += offset;
                     }
                     break;
                 }
 
                 case Opcode.JUMP: {
                     let offset = this.get_word();
-                    this.ip += offset;
+                    this.current().ip += offset;
                     break;
                 }
 
