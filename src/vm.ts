@@ -41,6 +41,8 @@ export const enum Opcode {
     GET_LOCAL,
     SET_LOCAL,
     POP_LOCAL,
+    JMP_IF_FALSE,
+    JUMP,
 }
 
 export class VM {
@@ -264,7 +266,7 @@ export class VM {
                 case Opcode.SET_LOCAL: {
                     let id = this.get_word()
                     let expr = this.peek();
-                    this.locals_stack[this.locals_stack.length - 1 - id] = expr;
+                    this.locals_stack[id] = expr;
                     break;
                 }
 
@@ -277,6 +279,21 @@ export class VM {
                 case Opcode.POP_LOCAL:
                     this.locals_stack.pop();
                     break;
+
+                case Opcode.JMP_IF_FALSE: {
+                    let offset = this.get_word();
+                    let val = this.pop();
+                    if (!truthy(val!)) {
+                        this.ip += offset;
+                    }
+                    break;
+                }
+
+                case Opcode.JUMP: {
+                    let offset = this.get_word();
+                    this.ip += offset;
+                    break;
+                }
 
                 default:
                     throw new RuntimeError("implementation: unknown instruction " + instr, this.get_location())

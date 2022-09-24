@@ -63,13 +63,13 @@ Run the REPL by invoking `alox.ts`.
   - [x] Define global variables
   - [x] Access global variables
 - [ ] Test structure for running files with bytecode engine.
-- [ ] Local Variables - Chapter 22.
+- [x] Local Variables - Chapter 22.
   - [x] Block scopes
   - [x] Define local variables
   - [x] Access local variables
-  - [ ] Set local variables
+  - [x] Set local variables
 - [ ] Control Statements - Chapter 23.
-  - [ ] `if` statement.
+  - [x] `if` statement.
   - [ ] logical operators `and`, `or`.
   - [ ] `while` statement.
   - [ ] `for` statement.

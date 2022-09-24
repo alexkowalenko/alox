@@ -87,7 +87,18 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitIf(expr: LoxIf): void {
-        throw new Error("Method not implemented.");
+        expr.expr.accept(this);
+        let then_jump = this.emit_jump(Opcode.JMP_IF_FALSE);
+
+        expr.then.accept(this);
+        if (expr.else) {
+            let else_jump = this.emit_jump(Opcode.JUMP);
+            this.patch_jump(then_jump);
+            expr.else.accept(this);
+            this.patch_jump(else_jump);
+            return;
+        }
+        this.patch_jump(then_jump);
     }
 
     visitWhile(expr: LoxWhile): void {
@@ -210,7 +221,14 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     visitAssign(e: LoxAssign): void {
         // console.log("assign")
         e.right.accept(this);
+
         if (e.left instanceof LoxIdentifier) {
+            let id = e.left as LoxIdentifier;
+            let index = this.find_var(id);
+            if (index >= 0) {
+                this.emit_instruction_word(Opcode.SET_LOCAL, index)
+                return;
+            }
             this.emit_constant(Opcode.SET_GLOBAL, (e.left as LoxIdentifier).id)
             return
         }
@@ -232,13 +250,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     visitIdentifier(e: LoxIdentifier): void {
         // console.log(`find var: ${e.id}`)
         if (this.scope_depth > 0) {
-            let index = this.locals.reverse().findIndex((local) => {
-                return local.name.id === e.id
-            })
-            //console.log(`find var: ${e.id} - index: ${index}`)
+            let index = this.find_var(e);
             if (index >= 0) {
-                index = this.locals.length - index;
-                this.emit_instruction_word(Opcode.GET_LOCAL, this.locals.length - 1)
+                this.emit_instruction_word(Opcode.GET_LOCAL, index)
                 return;
             }
         }
@@ -296,6 +310,18 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.emit_instruction_word(Opcode.DEF_LOCAL, this.locals.length - 1)
     }
 
+    find_var(v: LoxIdentifier): number {
+        let index = this.locals.reverse().findIndex((local) => {
+            return local.name.id === v.id
+        })
+        //console.log(`find var: ${e.id} - index: ${index}`)
+        if (index >= 0) {
+            return this.locals.length - index - 1;
+        } else {
+            return -1;
+        }
+    }
+
     emit_instruction(instr: Opcode) {
         this.bytecodes.write_byte(instr);
     }
@@ -321,4 +347,19 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.emit_instruction(Opcode.LINE);
         this.bytecodes.write_word(location.line)
     }
+
+    emit_jump(instr: Opcode): number {
+        this.emit_instruction(instr);
+        this.bytecodes.write_word(0);
+        //console.log(`jump loc: ${this.bytecodes.end - 2}`)
+        return this.bytecodes.end - 2;
+    }
+
+    patch_jump(offset: number) {
+        let jump = this.bytecodes.end - offset - 2;
+        //console.log(`jump patch: ${jump}`)
+        this.bytecodes.write_loc_word(offset, jump);
+    }
+
+
 }

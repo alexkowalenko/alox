@@ -71,6 +71,10 @@ export class Chunk {
         this.count += 2;
     }
 
+    write_loc_word(loc: number, val: number) {
+        this.code.writeInt16LE(val, loc);
+    }
+
     write_line(line: number) {
         this.write_byte(Opcode.LINE);
         this.write_word(line);
