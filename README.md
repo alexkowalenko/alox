@@ -68,11 +68,11 @@ Run the REPL by invoking `alox.ts`.
   - [x] Define local variables
   - [x] Access local variables
   - [x] Set local variables
-- [ ] Control Statements - Chapter 23.
+- [x] Control Statements - Chapter 23.
   - [x] `if` statement.
   - [x] logical operators `and`, `or`.
   - [x] `while` statement.
   - [x] `for` statement.
-  - [ ] `continue` and `break`.
+  - [x] `continue` and `break`.
 - [ ] Functions - Chapter 24.
   - [ ] Native Functions

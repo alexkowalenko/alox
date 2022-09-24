@@ -283,12 +283,12 @@ describe('Evaluator', () => {
         const tests: TestCases[] = [
             ["while(true) break;", 'nil'],
             ["var x = 1; while(true) { x=x+1; if(x>10) break; } x;", '11'],
+            // ["for(x = 1; x < 10; x = x + 1) {continue; x = 30;} x;", '10'],
+            ["x = 1; while(true) { x=x+1; if(x>10) break; } x;", '11'],
+            ["var i = 0; while(i < 9) {i = 10;continue;} i;", '10'],
+            ["for(i = 0; i < 9; i = i + 1) {i = 20; continue; }", 'nil'],
         ]
         it('break-b', () => { do_tests(tests, true) })
-        tests.concat([
-            ["for(x = 1; x < 10; x = x + 1) {continue; x = 30;} x;", '10'],
-            ["x = 1; while(true) { x=x+1; if(x>10) break; } x;", '11'],
-        ])
         it('break', () => { do_tests(tests) })
     }
 

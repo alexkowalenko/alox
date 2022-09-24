@@ -129,12 +129,15 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.begin_scope();
         let exit = 0;
 
+        // initialise
         if (expr.init) {
             expr.init.accept(this);
             this.emit_instruction(Opcode.POP)
         }
 
+        // condition
         let start = this.bytecodes.end;
+
         this.last_continue = this.bytecodes.end;
         if (expr.cond) {
             expr.cond.accept(this);
@@ -142,15 +145,19 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             this.emit_instruction(Opcode.POP)
         }
 
+        // statements
         expr.stat?.accept(this);
+
+        // do iterator
 
         if (expr.iter) {
             expr.iter.accept(this);
             this.emit_instruction(Opcode.POP)
         }
 
-        this.emit_jump_back(Opcode.JUMP, start)
+        // jump back
 
+        this.emit_jump_back(Opcode.JUMP, start)
         if (expr.cond) {
             this.patch_jump(exit);
             this.emit_instruction(Opcode.POP)
@@ -166,6 +173,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         if (expr.what == TokenType.CONTINUE) {
             if (this.last_continue) {
                 this.emit_jump_back(Opcode.JUMP, this.last_continue)
+                this.last_continue = undefined;
             }
         }
         this.last_break = this.emit_jump(Opcode.JUMP);
