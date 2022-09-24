@@ -265,7 +265,7 @@ describe('Evaluator', () => {
         it('while-b', () => { do_tests(tests, true) })
     }
 
-    it('for', () => {
+    {
         const tests: TestCases[] = [
             ["var x = 1; for( ; x < 10; x = x + 1) {} x;", '10'],
             ["for(x = 1; x < 10; x = x + 1) {} x;", '10'],
@@ -275,8 +275,9 @@ describe('Evaluator', () => {
             // check no leakage of variable into outer environment
             ["for(var x = 1; x < 10; x = x + 1) {}", 'nil'],
         ]
-        do_tests(tests)
-    })
+        it('for', () => { do_tests(tests) })
+        it('for-b', () => { do_tests(tests, true) })
+    }
 
     it('break', () => {
         const tests: TestCases[] = [

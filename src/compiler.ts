@@ -115,7 +115,35 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitFor(expr: LoxFor): void {
-        throw new Error("Method not implemented.");
+        this.begin_scope();
+        let exit = 0;
+
+        if (expr.init) {
+            expr.init.accept(this);
+            this.emit_instruction(Opcode.POP)
+        }
+
+        let start = this.bytecodes.end;
+        if (expr.cond) {
+            expr.cond.accept(this);
+            exit = this.emit_jump(Opcode.JMP_IF_FALSE)
+            this.emit_instruction(Opcode.POP)
+        }
+
+        expr.stat?.accept(this);
+
+        if (expr.iter) {
+            expr.iter.accept(this);
+            this.emit_instruction(Opcode.POP)
+        }
+        this.emit_jump_back(Opcode.JUMP, start)
+
+        if (expr.cond) {
+            this.patch_jump(exit);
+            this.emit_instruction(Opcode.POP)
+        }
+
+        this.end_scope();
     }
 
     visitBreak(expr: LoxBreak): void {

@@ -72,5 +72,7 @@ Run the REPL by invoking `alox.ts`.
   - [x] `if` statement.
   - [x] logical operators `and`, `or`.
   - [x] `while` statement.
-  - [ ] `for` statement.
+  - [x] `for` statement.
+  - [ ] `continue` and `break`.
 - [ ] Functions - Chapter 24.
+  - [ ] Native Functions
