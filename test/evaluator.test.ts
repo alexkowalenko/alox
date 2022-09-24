@@ -279,16 +279,18 @@ describe('Evaluator', () => {
         it('for-b', () => { do_tests(tests, true) })
     }
 
-    it('break', () => {
+    {
         const tests: TestCases[] = [
             ["while(true) break;", 'nil'],
-            ["var x; for(x = 1; x < 10; x = x + 1) {continue; x= 20;} x;", '10'],
-            ["for(x = 1; x < 10; x = x + 1) {continue; x = 30;} x;", '10'],
-
-            ["x = 1; while(true) { x=x+1; if(x>10) break; } x;", '11'],
+            ["var x = 1; while(true) { x=x+1; if(x>10) break; } x;", '11'],
         ]
-        do_tests(tests)
-    })
+        it('break-b', () => { do_tests(tests, true) })
+        tests.concat([
+            ["for(x = 1; x < 10; x = x + 1) {continue; x = 30;} x;", '10'],
+            ["x = 1; while(true) { x=x+1; if(x>10) break; } x;", '11'],
+        ])
+        it('break', () => { do_tests(tests) })
+    }
 
     it('stdlib', () => {
         const tests: TestCases[] = [

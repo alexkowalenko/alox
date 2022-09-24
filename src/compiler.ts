@@ -28,6 +28,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     private scope_depth = 0;
     private locals = new Array<Local>;
 
+    private last_continue: number | undefined = undefined;
+    private last_break: number | undefined = undefined;
+
     private init() {
         this.bytecodes = new Chunk();
     }
@@ -105,6 +108,8 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     visitWhile(expr: LoxWhile): void {
         let start = this.bytecodes.end;
+        this.last_continue = this.bytecodes.end;
+
         expr.expr.accept(this);
         let exit = this.emit_jump(Opcode.JMP_IF_FALSE)
         this.emit_instruction(Opcode.POP)
@@ -112,6 +117,12 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         expr.stats.accept(this);
         this.emit_jump_back(Opcode.JUMP, start)
         this.patch_jump(exit)
+        this.emit_instruction(Opcode.POP)
+
+        if (this.last_break) {
+            this.patch_jump(this.last_break)
+            this.last_break = undefined;
+        }
     }
 
     visitFor(expr: LoxFor): void {
@@ -124,6 +135,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         }
 
         let start = this.bytecodes.end;
+        this.last_continue = this.bytecodes.end;
         if (expr.cond) {
             expr.cond.accept(this);
             exit = this.emit_jump(Opcode.JMP_IF_FALSE)
@@ -136,18 +148,27 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             expr.iter.accept(this);
             this.emit_instruction(Opcode.POP)
         }
+
         this.emit_jump_back(Opcode.JUMP, start)
 
         if (expr.cond) {
             this.patch_jump(exit);
             this.emit_instruction(Opcode.POP)
         }
-
+        if (this.last_break) {
+            this.patch_jump(this.last_break)
+            this.last_break = undefined;
+        }
         this.end_scope();
     }
 
     visitBreak(expr: LoxBreak): void {
-        throw new Error("Method not implemented.");
+        if (expr.what == TokenType.CONTINUE) {
+            if (this.last_continue) {
+                this.emit_jump_back(Opcode.JUMP, this.last_continue)
+            }
+        }
+        this.last_break = this.emit_jump(Opcode.JUMP);
     }
 
     visitReturn(e: LoxReturn): void {
