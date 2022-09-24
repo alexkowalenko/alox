@@ -123,6 +123,10 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             console.log(str + val_name(offset, chunk, "JMP_IF_FALSE"));
             break;
         }
+        case Opcode.JMP_IF_TRUE: {
+            console.log(str + val_name(offset, chunk, "JMP_IF_TRUE"));
+            break;
+        }
         case Opcode.JUMP: {
             console.log(str + val_name(offset, chunk, "JUMP"));
             break;
@@ -144,7 +148,7 @@ export function disassemble_instruction(offset: number, chunk: Chunk) {
         case Opcode.DEF_GLOBAL: case Opcode.GET_GLOBAL: case Opcode.SET_GLOBAL:
             return constant_instruction(instr as Opcode, offset, chunk);
         case Opcode.DEF_LOCAL: case Opcode.GET_LOCAL: case Opcode.SET_LOCAL:
-        case Opcode.JMP_IF_FALSE: case Opcode.JUMP:
+        case Opcode.JMP_IF_FALSE: case Opcode.JMP_IF_TRUE: case Opcode.JUMP:
             return constant_instruction(instr as Opcode, offset, chunk);
     }
     return simple_instruction(instr as Opcode, offset);

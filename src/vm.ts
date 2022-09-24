@@ -42,6 +42,7 @@ export const enum Opcode {
     SET_LOCAL,
     POP_LOCAL,
     JMP_IF_FALSE,
+    JMP_IF_TRUE,
     JUMP,
 }
 
@@ -282,8 +283,17 @@ export class VM {
 
                 case Opcode.JMP_IF_FALSE: {
                     let offset = this.get_word();
-                    let val = this.pop();
+                    let val = this.peek();
                     if (!truthy(val!)) {
+                        this.ip += offset;
+                    }
+                    break;
+                }
+
+                case Opcode.JMP_IF_TRUE: {
+                    let offset = this.get_word();
+                    let val = this.peek();
+                    if (truthy(val!)) {
                         this.ip += offset;
                     }
                     break;

@@ -161,6 +161,9 @@ describe('Evaluator', () => {
 
             ["1 or nil;", '1'],
             ["nil or 2;", '2'],
+
+            ["1 and 2;", '2'],
+            ["1 or 2;", '1'],
         ]
         it('logical', () => { do_tests(tests) })
         it('logical-b', () => { do_tests(tests, true) })

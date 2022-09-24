@@ -89,11 +89,13 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     visitIf(expr: LoxIf): void {
         expr.expr.accept(this);
         let then_jump = this.emit_jump(Opcode.JMP_IF_FALSE);
+        this.emit_instruction(Opcode.POP)
 
         expr.then.accept(this);
         if (expr.else) {
             let else_jump = this.emit_jump(Opcode.JUMP);
             this.patch_jump(then_jump);
+            this.emit_instruction(Opcode.POP)
             expr.else.accept(this);
             this.patch_jump(else_jump);
             return;
@@ -155,7 +157,20 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         throw new Error("Method not implemented.");
     }
 
+    logical(e: LoxBinary) {
+        let op = e.operator == TokenType.AND ? Opcode.JMP_IF_FALSE : Opcode.JMP_IF_TRUE;
+        e.left.accept(this);
+        let jump = this.emit_jump(op)
+        this.emit_instruction(Opcode.POP)
+        e.right.accept(this);
+        this.patch_jump(jump);
+    }
+
     visitBinary(e: LoxBinary): void {
+        if (e.operator == TokenType.AND || e.operator == TokenType.OR) {
+            this.logical(e);
+            return;
+        }
         e.right.accept(this);
         e.left.accept(this);
         switch (e.operator) {
@@ -191,12 +206,6 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             case TokenType.GREATER_EQUAL:
                 this.emit_instruction(Opcode.LESS)
                 this.emit_instruction(Opcode.NOT)
-                return
-            case TokenType.AND:
-                this.emit_instruction(Opcode.AND)
-                return
-            case TokenType.OR:
-                this.emit_instruction(Opcode.OR)
                 return
         }
         throw new Error("Method not implemented.");
