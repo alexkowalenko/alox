@@ -232,11 +232,10 @@ describe('Evaluator', () => {
             ["{ print 1; print 2;}", '2'],
             ["{var x = 1 + 4;}", '5'],
             ["var z = 1; {z + 4;}", '5'],
+            ["var y = 1;{var y = 2; y + 4;}", '6'], // shadow
+            ["var b = 1; {var b = 2;  {var b = 4; b + 4;}}", '8'], // shadow
         ]
         it('block-b', () => { do_tests(tests, true) })
-        tests.concat([
-            ["var y = 1;{var y = 2; y + 4;}", 'nil'], // shadow
-        ])
         it('block', () => { do_tests(tests) })
     }
 
@@ -283,7 +282,7 @@ describe('Evaluator', () => {
 
     it('stdlib', () => {
         const tests: TestCases[] = [
-            ["clock() - clock();", '0'],
+            ["clock() * 0;", '0'],
             // errors
             ["tick() - clock();", '0', "identifier tick not found"],
         ]

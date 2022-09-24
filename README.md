@@ -66,4 +66,10 @@ Run the REPL by invoking `alox.ts`.
 - [ ] Local Variables - Chapter 22.
   - [x] Block scopes
   - [x] Define local variables
-  - [ ] Access local variables
+  - [x] Access local variables
+  - [ ] Set local variables
+- [ ] Control Statements - Chapter 23.
+  - [ ] `if` statement.
+  - [ ] logical operators `and`, `or`.
+  - [ ] `while` statement.
+  - [ ] `for` statement.

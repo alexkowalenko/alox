@@ -90,6 +90,12 @@ export class VM {
         return val;
     }
 
+    get_word() {
+        let val = this.chunk.get_word(this.ip);
+        this.ip += 2;
+        return val;
+    }
+
     interpret() {
         if (this.debug) {
             console.log("START:")
@@ -249,22 +255,22 @@ export class VM {
                 }
 
                 case Opcode.DEF_LOCAL: {
-                    let id = this.get_word_arg()
+                    let id = this.get_word()
                     let expr = this.peek();
                     this.locals_stack.push(expr)
                     break;
                 }
 
                 case Opcode.SET_LOCAL: {
-                    let id = this.get_word_arg() as number
+                    let id = this.get_word()
                     let expr = this.peek();
                     this.locals_stack[this.locals_stack.length - 1 - id] = expr;
                     break;
                 }
 
                 case Opcode.GET_LOCAL: {
-                    let id = this.get_word_arg() as number;
-                    this.push(this.locals_stack.at(-1 - id)!)
+                    let id = this.get_word();
+                    this.push(this.locals_stack[id])
                     break;
                 }
 

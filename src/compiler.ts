@@ -230,8 +230,17 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitIdentifier(e: LoxIdentifier): void {
+        // console.log(`find var: ${e.id}`)
         if (this.scope_depth > 0) {
-            return;
+            let index = this.locals.reverse().findIndex((local) => {
+                return local.name.id === e.id
+            })
+            //console.log(`find var: ${e.id} - index: ${index}`)
+            if (index >= 0) {
+                index = this.locals.length - index;
+                this.emit_instruction_word(Opcode.GET_LOCAL, this.locals.length - 1)
+                return;
+            }
         }
         this.emit_constant(Opcode.GET_GLOBAL, e.id)
     }
@@ -282,13 +291,18 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         if (this.scope_depth == 0) {
             return;
         }
-        //console.log(`define_var ${v.id} depth ${this.scope_depth}`)
+        // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
         this.locals.push(new Local(v, this.scope_depth))
-        this.emit_constant(Opcode.DEF_LOCAL, this.locals.length - 1)
+        this.emit_instruction_word(Opcode.DEF_LOCAL, this.locals.length - 1)
     }
 
     emit_instruction(instr: Opcode) {
         this.bytecodes.write_byte(instr);
+    }
+
+    emit_instruction_word(instr: Opcode, val: number) {
+        this.bytecodes.write_byte(instr);
+        this.bytecodes.write_word(val);
     }
 
     add_constant(val: LoxValue) {

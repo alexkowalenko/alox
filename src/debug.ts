@@ -70,6 +70,11 @@ function simple_instruction(op: Opcode, offset: number): number {
     return offset + 1;
 }
 
+function val_name(offset: number, chunk: Chunk, name: string): string {
+    let word = chunk.get_word(offset + 1)
+    return ` ${name} - ${word}`;
+}
+
 function const_name(offset: number, chunk: Chunk, name: string): string {
     let word = chunk.get_word(offset + 1)
     let val = chunk.get_constant(word);
@@ -103,15 +108,15 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             break;
         }
         case Opcode.DEF_LOCAL: {
-            console.log(str + const_name(offset, chunk, "DEF_LOCAL"));
+            console.log(str + val_name(offset, chunk, "DEF_LOCAL"));
             break;
         }
         case Opcode.GET_LOCAL: {
-            console.log(str + const_name(offset, chunk, "GET_LOCAL"));
+            console.log(str + val_name(offset, chunk, "GET_LOCAL"));
             break;
         }
         case Opcode.SET_LOCAL: {
-            console.log(str + const_name(offset, chunk, "SET_LOCAL"));
+            console.log(str + val_name(offset, chunk, "SET_LOCAL"));
             break;
         }
 
