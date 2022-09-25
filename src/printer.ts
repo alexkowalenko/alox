@@ -43,12 +43,12 @@ export class Printer implements AstVisitor<string> {
             buf += f.name.id;
         }
         buf += '('
-        for (let i = 0; i < f.args.length; i++) {
-            buf += f.args[i].accept(this)
+        f.args.forEach((arg, i) => {
+            buf += arg.accept(this)
             if (i < f.args.length - 1) {
                 buf += ", "
             }
-        }
+        })
         buf += ")" + this.newline;
         buf += f.body!.accept(this);
         return buf;
@@ -140,12 +140,12 @@ export class Printer implements AstVisitor<string> {
     visitCall(e: LoxCall): string {
         let buf = e.expr.accept(this)
         buf += '(';
-        for (let i = 0; i < e.arguments.length; i++) {
-            buf += e.arguments[i].accept(this)
+        e.arguments.forEach((arg, i) => {
+            buf += arg.accept(this)
             if (i < e.arguments.length - 1) {
                 buf += ", "
             }
-        }
+        })
         return buf + ")";
     }
 

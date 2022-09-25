@@ -76,6 +76,6 @@ Run the REPL by invoking `alox.ts`.
   - [x] `continue` and `break`.
 - [ ] Functions - Chapter 24.
   - [x] Function context for compiler, frames for the vm.
-  - [ ] Call functions with no arguments.
+  - [x] Call functions with no arguments.
   - [ ] Argument passing.
   - [ ] Native Functions

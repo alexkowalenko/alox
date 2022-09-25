@@ -68,9 +68,9 @@ export class SymbolTable<T> {
 
     dump() {
         console.log("Symbols: ----------")
-        for (const s of this.table) {
-            console.log(`  ${s[0]} = ${s[1]}`)
-        }
+        this.table.forEach((v, k) => {
+            console.log(`  ${k}\t = ${v}`)
+        })
         if (this.enclosing) {
             this.enclosing.dump();
         }

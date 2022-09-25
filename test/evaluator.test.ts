@@ -30,7 +30,7 @@ export function do_tests(tests: TestCases[], bytecode = false) {
                 expect(e.message).toBe(test[2])
                 continue
             }
-            console.log(`expect: ${test[0]}`)
+            console.log(`${test[0]} expect: ${test[0]}`)
             throw e
         }
     }

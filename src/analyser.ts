@@ -55,14 +55,14 @@ export class Analyser implements AstVisitor<void> {
 
     private resolve(name: string, expr: LoxExpr) {
         // console.log(`resolve ${name}`)
-        for (let i = this.scopes.length - 1; i >= 0; i--) {
-            if (this.scopes[i].has(name)) {
+        this.scopes.forEach((scope, i) => {
+            if (scope.has(name)) {
                 let depth = this.scopes.length - 1 - i;
                 //console.log(`resolve: ${name} - depth ${depth}`)
                 this.evaluator.resolve(expr, depth)
                 return
             }
-        }
+        })
         // console.log(`could not resolve ${name}`)
     }
 
