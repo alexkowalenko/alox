@@ -54,6 +54,8 @@ class Frame {
         public chunk: Chunk,
         public ip: number = 0,
         public last_line: number = 0) { };
+
+    fn?: CompiledFunction;
 }
 
 export class VM {
@@ -153,7 +155,7 @@ export class VM {
                     break;
                 }
                 case Opcode.LINE: { //NOP
-                    this.current().last_line = this.get_word_arg() as number;
+                    this.current().last_line = this.get_word();
                     continue;
                 }
                 case Opcode.NEGATE:
@@ -281,7 +283,6 @@ export class VM {
                 }
 
                 case Opcode.DEF_LOCAL: {
-                    let id = this.get_word()
                     let expr = this.peek();
                     this.locals_stack.push(expr)
                     break;
@@ -333,6 +334,7 @@ export class VM {
                     let val = this.symboltable.get(id as string);
                     var fun = val as CompiledFunction;
                     var new_frame = new Frame(this.stack.length, this.locals_stack.length, fun.bytecodes);
+                    new_frame.fn = fun;
                     this.frame_stack.push(new_frame);
                     // execute function
                     break;
@@ -362,6 +364,13 @@ export class VM {
             buf += ` ${pretty_print(v)} | `
         })
         console.log("local:" + buf);
+    }
+
+    dump_frame() {
+        console.log("Frames:")
+        for (let frame of this.frame_stack) {
+            console.log(`    line ${frame.last_line} in ${frame.fn ?? '_main'}`)
+        }
     }
 }
 

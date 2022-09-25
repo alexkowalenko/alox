@@ -64,6 +64,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         vm.debug = this.options.trace;
         let val = vm.interpret();
         if (this.options.debug) {
+            vm.dump_stack();
             vm.dump_symboltable();
         }
         return val!;
@@ -416,19 +417,19 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         }
         // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
         this.current().locals.push(new Local(v, this.current().scope_depth))
-        this.emit_instruction_word(Opcode.DEF_LOCAL, this.current().locals.length - 1)
+        this.emit_instruction(Opcode.DEF_LOCAL)
     }
 
     find_var(v: LoxIdentifier): number {
-        let index = this.current().locals.reverse().findIndex((local) => {
-            return local.name.id === v.id
-        })
-        //console.log(`find var: ${e.id} - index: ${index}`)
-        if (index >= 0) {
-            return this.current().locals.length - index - 1;
-        } else {
-            return -1;
+        // search the list backwards and return its index.
+        let index = -1;
+        for (let i = this.current().locals.length - 1; i >= 0; i--) {
+            if (this.current().locals[i].name.id === v.id) {
+                index = i;
+                break;
+            }
         }
+        return index;
     }
 
     emit_instruction(instr: Opcode) {

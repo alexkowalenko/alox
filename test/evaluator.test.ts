@@ -241,6 +241,8 @@ describe('Evaluator', () => {
             ["{var x = 1; {x = x + 4;}}", '5'],
             ["{var x = 1; {var x = 2; x = x + 4;}}", '6'],
             ["{var x = 1; {var x = 2; x = x + 4;} x;}", '1'],
+            ["{var x = 1; var y = 2; x + y;}", '3'],
+            ["{var x = 1; var y = 2; var z = 3; x + y + z;}", '6']
         ]
         it('block-b', () => { do_tests(tests, true) })
         it('block', () => { do_tests(tests) })
@@ -321,6 +323,7 @@ describe('Evaluator', () => {
     {
         const tests: TestCases[] = [
             ["fun f() {return 1;} f();", '1'],
+            ["fun g() { var x = 1; var y = 2; return x + y;} g();", '3']
         ]
         it('return-b', () => { do_tests(tests, true) })
         tests.concat([

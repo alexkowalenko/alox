@@ -64,6 +64,9 @@ function simple_instruction(op: Opcode, offset: number): number {
         case Opcode.POP_LOCAL:
             console.log(str + " POP_LOCAL");
             break;
+        case Opcode.DEF_LOCAL:
+            console.log(str + " DEF_LOCAL");
+            break;
         default:
             console.log(str + ` <unknown ${op}>`);
     }
@@ -151,7 +154,7 @@ export function disassemble_instruction(offset: number, chunk: Chunk) {
             return constant_instruction(instr as Opcode, offset, chunk);
         case Opcode.DEF_GLOBAL: case Opcode.GET_GLOBAL: case Opcode.SET_GLOBAL:
             return constant_instruction(instr as Opcode, offset, chunk);
-        case Opcode.DEF_LOCAL: case Opcode.GET_LOCAL: case Opcode.SET_LOCAL:
+        case Opcode.GET_LOCAL: case Opcode.SET_LOCAL:
         case Opcode.JMP_IF_FALSE: case Opcode.JMP_IF_TRUE: case Opcode.JUMP:
         case Opcode.CALL:
             return constant_instruction(instr as Opcode, offset, chunk);
