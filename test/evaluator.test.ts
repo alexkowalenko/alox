@@ -301,9 +301,12 @@ describe('Evaluator', () => {
         do_tests(tests)
     })
 
-    it('function', () => {
+    {
         const tests: TestCases[] = [
             ["fun f() {} f();", 'nil'],
+        ]
+        it('function-b', () => { do_tests(tests, true) })
+        tests.concat([
             ["fun f(a) {a;} f(1);", '1'],
             ["fun f(a) {a;} f(1+3);", '4'],
             ["fun g(a,b) {a+ b;} g(1,3);", '4'],
@@ -311,19 +314,22 @@ describe('Evaluator', () => {
             // errors
             ["f(1,2);", 'null', "function f called with 2 arguments, expecting 1"],
             ["f();", 'null', "function f called with 0 arguments, expecting 1"],
-        ]
-        do_tests(tests)
-    })
+        ])
+        it('function', () => { do_tests(tests) })
+    }
 
-    it('return', () => {
+    {
         const tests: TestCases[] = [
             ["fun f() {return 1;} f();", '1'],
+        ]
+        it('return-b', () => { do_tests(tests, true) })
+        tests.concat([
             ["fun f(a) {return a;} f(1);", '1'],
             ["fun g(a,b) {return a+ b;} g(1,3);", '4'],
             ["g(f(3),3);", '6'],
-        ]
-        do_tests(tests)
-    })
+        ])
+        it('return', () => { do_tests(tests) })
+    }
 
     it('lambda', () => {
         const tests: TestCases[] = [

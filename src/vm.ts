@@ -13,6 +13,7 @@ import { Location } from "./token";
 
 import os from "os";
 import { SymbolTable } from "./symboltable";
+import { CompiledFunction } from "./compiler";
 
 export const enum Opcode {
     CONSTANT,
@@ -48,29 +49,28 @@ export const enum Opcode {
 }
 
 class Frame {
-    constructor(previous_stack_ptr: number,
-        previous_locals_ptr: number,
+    constructor(public previous_stack_ptr: number,
+        public previous_locals_ptr: number,
         public chunk: Chunk,
-        public ip: number,
-        public last_line: number) { };
+        public ip: number = 0,
+        public last_line: number = 0) { };
 }
 
 export class VM {
-    constructor(private chunk: Chunk, private symboltable: SymbolTable<LoxValue>, private options: Options) {
+    constructor(chunk: Chunk, private symboltable: SymbolTable<LoxValue>, private options: Options) {
         this.stack = new Array;
         this.locals_stack = new Array;
-
-        this.current_frame = new Frame(0, 0, chunk, 0, 0);
+        this.frame_stack = new Array;
+        this.frame_stack.push(new Frame(0, 0, chunk));
     }
     private stack: Array<LoxValue>;
     private locals_stack: Array<LoxValue>;
+    private frame_stack: Array<Frame>;
 
     public debug = true;
 
-    public current_frame: Frame
-
-    current() {
-        return this.current_frame;
+    current(): Frame {
+        return this.frame_stack.at(-1)!
     }
 
     reset_stack() {
@@ -102,13 +102,13 @@ export class VM {
     }
 
     get_word_arg() {
-        let val = this.chunk.get_constant(this.chunk.get_word(this.current().ip))
+        let val = this.current().chunk.get_constant(this.current().chunk.get_word(this.current().ip))
         this.current().ip += 2;
         return val;
     }
 
     get_word() {
-        let val = this.chunk.get_word(this.current().ip);
+        let val = this.current().chunk.get_word(this.current().ip);
         this.current().ip += 2;
         return val;
     }
@@ -118,16 +118,25 @@ export class VM {
             console.log("START:")
         }
         for (; ;) {
-            let instr = this.chunk.get_byte(this.current().ip);
+            let instr = this.current().chunk.get_byte(this.current().ip);
             if (this.debug) {
-                disassemble_instruction(this.current().ip, this.chunk);
+                disassemble_instruction(this.current().ip, this.current().chunk);
             }
             this.current().ip++;
-            if (this.current().ip >= this.chunk.end) {
+            if (this.current().ip >= this.current().chunk.end) {
                 return this.pop() ?? null;
             }
             switch (instr) {
                 case Opcode.RETURN: {
+                    if (this.frame_stack.length > 1) {
+                        let val = this.stack.pop()!; // save final value before removing the frame.
+                        let last_frame = this.frame_stack.pop()!
+                        this.stack.length = last_frame.previous_stack_ptr
+                        this.locals_stack.length = last_frame.previous_locals_ptr
+                        // push on the return val;
+                        this.stack.push(val);
+                        break;
+                    }
                     let val = this.pop()
                     return val;
                 }
@@ -322,7 +331,10 @@ export class VM {
                 case Opcode.CALL: {
                     let id = this.get_word_arg()
                     let val = this.symboltable.get(id as string);
-                    console.log(`call ${id} - ${typeof val} `)
+                    var fun = val as CompiledFunction;
+                    var new_frame = new Frame(this.stack.length, this.locals_stack.length, fun.bytecodes);
+                    this.frame_stack.push(new_frame);
+                    // execute function
                     break;
                 }
 

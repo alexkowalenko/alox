@@ -208,7 +208,12 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitReturn(e: LoxReturn): void {
-        throw new Error("Method not implemented.");
+        if (e.expr) {
+            e.expr.accept(this);
+        } else {
+            this.emit_instruction(Opcode.NIL);
+        }
+        this.emit_instruction(Opcode.RETURN);
     }
 
     visitPrint(p: LoxPrint): void {
