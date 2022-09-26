@@ -51,9 +51,10 @@ export const enum Opcode {
 class Frame {
     constructor(public previous_stack_ptr: number,
         public chunk: Chunk,
-        public ip: number = 0,
-        public last_line: number = 0) { };
-
+        public frame_ptr: number = 0,
+    ) { };
+    public ip: number = 0;
+    public last_line: number = 0;
     fn?: CompiledFunction;
 }
 
@@ -74,6 +75,18 @@ export class VM {
 
     stack_length() {
         return this.stack.length;
+    }
+
+    set_stack_length(l: number) {
+        this.stack.length = l;
+    }
+
+    stack_get_location(i: number) {
+        return this.stack[this.current().frame_ptr + i]
+    }
+
+    stack_set_location(i: number, val: LoxValue) {
+        this.stack[this.current().frame_ptr + i] = val;
     }
 
     pop() {
@@ -128,16 +141,28 @@ export class VM {
             switch (instr) {
                 case Opcode.RETURN: {
                     if (this.frame_stack.length > 1) {
-                        let val = this.stack.pop()!; // save final value before removing the frame.
+                        let val = this.pop()!; // save final value before removing the frame.
                         let last_frame = this.frame_stack.pop()!
-                        this.stack.length = last_frame.previous_stack_ptr
+                        this.set_stack_length(last_frame.previous_stack_ptr)
                         // push on the return val;
-                        this.stack.push(val);
+                        this.push(val);
                         break;
                     }
                     let val = this.pop()
                     return val;
                 }
+
+                case Opcode.CALL: {
+                    let id = this.get_word_arg()
+                    let val = this.symboltable.get(id as string);
+                    var fun = val as CompiledFunction;
+                    var new_frame = new Frame(this.stack_length(), fun.bytecodes, this.stack_length());
+                    new_frame.fn = fun;
+                    this.frame_stack.push(new_frame);
+                    // execute function
+                    break;
+                }
+
                 case Opcode.POP: {
                     this.pop();
                     break;
@@ -194,6 +219,7 @@ export class VM {
                     this.check_number(1);
                     this.push((this.pop() as number) < (this.pop() as number));
                     break;
+
                 case Opcode.GREATER:
                     this.check_number();
                     this.check_number(1);
@@ -220,11 +246,13 @@ export class VM {
                     this.check_number(1);
                     this.push((this.pop() as number) - (this.pop() as number));
                     break;
+
                 case Opcode.MULTIPLY:
                     this.check_number();
                     this.check_number(1);
                     this.push((this.pop() as number) * (this.pop() as number));
                     break;
+
                 case Opcode.DIVIDE:
                     this.check_number();
                     this.check_number(1);
@@ -234,9 +262,11 @@ export class VM {
                 case Opcode.NIL:
                     this.push(null);
                     break;
+
                 case Opcode.TRUE:
                     this.push(true);
                     break;
+
                 case Opcode.FALSE:
                     this.push(false);
                     break;
@@ -283,25 +313,25 @@ export class VM {
 
                 case Opcode.DEF_LOCAL: {
                     let expr = this.peek();
-                    this.stack.push(expr)
+                    this.push(expr)
                     break;
                 }
 
                 case Opcode.SET_LOCAL: {
                     let id = this.get_word()
                     let expr = this.peek();
-                    this.stack[id] = expr;
+                    this.stack_set_location(id, expr);
                     break;
                 }
 
                 case Opcode.GET_LOCAL: {
                     let id = this.get_word();
-                    this.push(this.stack[id])
+                    this.push(this.stack_get_location(id))
                     break;
                 }
 
                 case Opcode.POP_LOCAL:
-                    this.stack.pop();
+                    this.pop();
                     break;
 
                 case Opcode.JMP_IF_FALSE: {
@@ -328,16 +358,7 @@ export class VM {
                     break;
                 }
 
-                case Opcode.CALL: {
-                    let id = this.get_word_arg()
-                    let val = this.symboltable.get(id as string);
-                    var fun = val as CompiledFunction;
-                    var new_frame = new Frame(this.stack.length, fun.bytecodes);
-                    new_frame.fn = fun;
-                    this.frame_stack.push(new_frame);
-                    // execute function
-                    break;
-                }
+
 
                 default:
                     throw new RuntimeError("implementation: unknown instruction " + instr, this.get_location())

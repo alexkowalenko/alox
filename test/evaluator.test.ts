@@ -323,7 +323,10 @@ describe('Evaluator', () => {
     {
         const tests: TestCases[] = [
             ["fun f() {return 1;} f();", '1'],
-            ["fun g() { var x = 1; var y = 2; return x + y;} g();", '3']
+            ["fun g() { var x = 1; var y = 2; return x + y;} g();", '3'],
+            ["var x = 1; fun g() { var x = 1; var y = 2; return x + y;} g();", '3'],
+            ["fun h() { var x = 1; var y = 2; return x + y + g();} h();", '6'],
+            ["fun i() { var x = 1; var y = 2; return x + y + h();} i();", '9']
         ]
         it('return-b', () => { do_tests(tests, true) })
         tests.concat([
