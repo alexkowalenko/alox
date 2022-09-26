@@ -75,8 +75,8 @@ export class VM {
         return this.frame_stack.at(-1)!
     }
 
-    reset_stack() {
-        this.stack.length = 0;
+    stack_length() {
+        return this.stack.length;
     }
 
     pop() {

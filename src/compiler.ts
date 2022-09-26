@@ -32,7 +32,6 @@ export class CompiledFunction extends LoxFunction {
 
     last_continue: number | undefined = undefined;
     last_break: number | undefined = undefined;
-
 }
 
 export class Compiler implements AstVisitor<void>, Evaluator {
@@ -64,6 +63,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         vm.debug = this.options.trace;
         let val = vm.interpret();
         if (this.options.debug) {
+            // check stack hygiene 
+            if (vm.stack_length() > 0) {
+                console.error("** Stack hygiene")
+            }
             vm.dump_stack();
             vm.dump_symboltable();
         }
@@ -77,7 +80,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
                 this.emit_location(stat.location);
             }
             stat.accept(this)
-            if (i < prog.statements.length - 2) {
+            if (i < prog.statements.length - 1) {
                 // get rid value, except last
                 this.emit_instruction(Opcode.POP)
             }
@@ -103,8 +106,15 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         let prev = this.current_function
         this.current_function = funct;
 
+        this.begin_scope();
+        f.args.forEach(a => {
+            this.declare_var(a);
+        })
         f.body?.accept(this);
         this.emit_instruction(Opcode.RETURN)
+
+        this.end_scope();
+
         this.current_function = prev;
 
         if (this.options.debug) {
@@ -144,9 +154,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.emit_instruction(Opcode.POP)
 
         expr.stats.accept(this);
+        this.emit_instruction(Opcode.POP)
         this.emit_jump_back(Opcode.JUMP, start)
         this.patch_jump(exit)
-        this.emit_instruction(Opcode.POP)
+
 
         if (this.current().last_break) {
             this.patch_jump(this.current().last_break!)
@@ -176,6 +187,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
         // statements
         expr.stat?.accept(this);
+        this.emit_instruction(Opcode.POP)
 
         // do iterator
 
@@ -316,7 +328,17 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     visitCall(e: LoxCall): void {
         if (e.expr instanceof LoxIdentifier) {
             let name = (e.expr as LoxIdentifier).id
-            this.emit_constant(Opcode.CALL, name);
+            // find function
+            if (this.symboltable.has(name)) {
+                this.begin_scope();
+                let fundef = this.symboltable.get(name) as LoxFunction;
+                for (let i = 0; i < fundef.arity(); i++) {
+                    e.arguments[i].accept(this);
+                    this.define_var(fundef.fun.args[i]);
+                }
+                this.emit_constant(Opcode.CALL, name);
+                this.end_scope();
+            }
         }
     }
 
@@ -418,6 +440,14 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
         this.current().locals.push(new Local(v, this.current().scope_depth))
         this.emit_instruction(Opcode.DEF_LOCAL)
+    }
+
+    declare_var(v: LoxIdentifier) {
+        if (this.current().scope_depth == 0) {
+            return;
+        }
+        // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
+        this.current().locals.push(new Local(v, this.current().scope_depth))
     }
 
     find_var(v: LoxIdentifier): number {
