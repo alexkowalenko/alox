@@ -6,3 +6,5 @@ print nan != 1; // expect: true
 // NaN is not equal to self.
 print nan == nan; // expect: false
 print nan != nan; // expect: true
+
+// option: bytecode

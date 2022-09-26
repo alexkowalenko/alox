@@ -7,3 +7,5 @@
   var a = "second";
   print a; // expect: second
 }
+
+// option: bytecode

@@ -8,3 +8,5 @@
   var d = b + " d";
   print d; // expect: a b d
 }
+
+// option: bytecode

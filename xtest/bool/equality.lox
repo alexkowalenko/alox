@@ -21,3 +21,5 @@ print false != 0;       // expect: true
 print true != "true";   // expect: true
 print false != "false"; // expect: true
 print false != "";      // expect: true
+
+// option: bytecode

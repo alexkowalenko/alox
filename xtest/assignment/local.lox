@@ -8,3 +8,5 @@
   print a = "arg"; // expect: arg
   print a; // expect: arg
 }
+
+// option: bytecode

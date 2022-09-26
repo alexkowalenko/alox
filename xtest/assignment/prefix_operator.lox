@@ -1,2 +1,4 @@
 var a = "a";
 !a = "value"; // error: can't assign to !a
+
+// option: bytecode

@@ -246,7 +246,7 @@ export class VM {
                     if (val === null) {
                         this.options.output.write("nil" + os.EOL)
                     } else {
-                        this.options.output.write(val!.toString() + os.EOL)
+                        this.options.output.write(val.toString() + os.EOL)
                     }
                     break;
                 }
@@ -255,6 +255,9 @@ export class VM {
                     let id = this.get_word_arg()
                     let expr = this.peek();
                     this.symboltable.set(id as string, expr!)
+                    if (this.options.trace) {
+                        this.symboltable.dump();
+                    }
                     break;
                 }
 
@@ -271,7 +274,7 @@ export class VM {
                 case Opcode.GET_GLOBAL: {
                     let id = this.get_word_arg()
                     let val = this.symboltable.get(id as string);
-                    if (val == undefined) {
+                    if (val === undefined) {
                         throw new RuntimeError(`identifier ${id!.toString()} not found`, this.get_location());
                     }
                     this.push(val)

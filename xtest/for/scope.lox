@@ -24,3 +24,5 @@
     print i; // expect: 0
   }
 }
+
+// option: bytecode

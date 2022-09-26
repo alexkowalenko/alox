@@ -17,3 +17,5 @@ var b = "before";
     (a = "bad");
 print a; // expect: true
 print b; // expect: false
+
+// option: bytecode

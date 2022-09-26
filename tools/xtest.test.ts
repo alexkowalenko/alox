@@ -95,19 +95,27 @@ function get_expected(name: string): FileInfo {
         matcher = line.match(optionPattern)
         if (matcher) {
             let ex = matcher?.groups?.expect
-            // console.log(`option : ${ex}`)
+            // console.log(`${file} option : ${ex}`)
             fi.options.push(ex!)
         }
     }
     return fi;
 }
 
-async function execute_test(name: string): Promise<FileInfo> {
+type TestOptions = {
+    bytecode?: boolean;
+}
+
+async function execute_test(name: string, options: TestOptions): Promise<FileInfo> {
     // Execute ALOX program and capture output
 
     const file = `${base_dir}/${name}`;
     console.log(`do ${file}`)
-    const cmd = `${exec_file} -s -f ${file}`
+    let cmd = `${exec_file} -s `
+    if (options.bytecode) {
+        cmd += '-b '
+    }
+    cmd += `-f ${file}`;
     const args = cmd.split(' ');
     let { stdout, stderr, status } = await spawnP(args[0], args.slice(1)) as SpawnResult;
     // console.log("error: " + stderr)
@@ -116,10 +124,15 @@ async function execute_test(name: string): Promise<FileInfo> {
     return test_result;
 }
 
-async function run_test(name: string) {
-    let file_expected = get_expected(name);
-    test(name, async () => {
-        let test_result = await execute_test(name);
+async function test_with_options(name: string, file_expected: FileInfo, options: TestOptions) {
+
+    let test_name = name;
+    if (options.bytecode) {
+        test_name += " [Bytecode]"
+    }
+
+    test(test_name, async () => {
+        let test_result = await execute_test(name, options);
 
         for (let i = 0; i < file_expected.output.length && i < test_result.output.length; i++) {
             expect(test_result.output[i]).toBe(file_expected.output[i]);
@@ -132,6 +145,19 @@ async function run_test(name: string) {
     });
 }
 
+async function run_test(name: string) {
+    let file_expected = get_expected(name);
+    let options = {} as TestOptions;
+
+    test_with_options(name, file_expected, options);
+
+    // Run again with bytecode
+    if (file_expected.options.findIndex(x => x === "bytecode") >= 0) {
+        options.bytecode = true;
+        test_with_options(name, file_expected, options);
+    }
+}
+
 function run_tests() {
     let files = find_files(base_dir, ".lox");
     let promises = [];
@@ -139,7 +165,7 @@ function run_tests() {
         promises.push(run_test(file))
     }
     Promise.allSettled(promises).then(() => {
-        console.log("finished tests")
+        // console.log("finished tests")
     })
 }
 

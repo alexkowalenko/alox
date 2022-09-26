@@ -5,3 +5,5 @@ print a;
 // expect: 1
 // expect: 2
 // expect: 3
+
+// option: bytecode

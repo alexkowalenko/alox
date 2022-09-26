@@ -30,3 +30,5 @@ print 1-1;   // expect: 0
 
 // Using () for grouping.
 print (2 * (6 - (2 + 2))); // expect: 4
+
+// option: bytecode

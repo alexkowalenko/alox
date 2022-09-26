@@ -3,3 +3,5 @@ if (false) {
 }
 
 print "ok"; // expect: ok
+
+// option: bytecode

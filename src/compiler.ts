@@ -76,9 +76,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     visitProgram(prog: LoxProgram): void {
         //console.log("program")
         prog.statements.forEach((stat, i) => {
-            if (this.options.debug) {
-                this.emit_location(stat.location);
-            }
+            this.emit_location(stat.location);
             stat.accept(this)
             if (i < prog.statements.length - 1) {
                 // get rid value, except last
@@ -211,7 +209,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitBreak(expr: LoxBreak): void {
-        if (expr.what == TokenType.CONTINUE) {
+        if (expr.what === TokenType.CONTINUE) {
             if (this.current().last_continue) {
                 this.emit_jump_back(Opcode.JUMP, this.current().last_continue!)
                 this.current().last_continue = undefined;
@@ -237,9 +235,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     visitBlock(block: LoxBlock): void {
         this.begin_scope();
         block.statements.forEach((stat, i) => {
-            if (this.options.debug) {
-                this.emit_location(stat.location);
-            }
+            this.emit_location(stat.location);
             stat.accept(this)
             this.emit_instruction(Opcode.POP)
         })
@@ -265,7 +261,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     logical(e: LoxBinary) {
-        let op = e.operator == TokenType.AND ? Opcode.JMP_IF_FALSE : Opcode.JMP_IF_TRUE;
+        let op = e.operator === TokenType.AND ? Opcode.JMP_IF_FALSE : Opcode.JMP_IF_TRUE;
         e.left.accept(this);
         let jump = this.emit_jump(op)
         this.emit_instruction(Opcode.POP)
@@ -274,7 +270,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitBinary(e: LoxBinary): void {
-        if (e.operator == TokenType.AND || e.operator == TokenType.OR) {
+        if (e.operator === TokenType.AND || e.operator === TokenType.OR) {
             this.logical(e);
             return;
         }
@@ -431,7 +427,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     define_var(v: LoxIdentifier) {
-        if (this.current().scope_depth == 0) {
+        if (this.current().scope_depth === 0) {
             return;
         }
         // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
@@ -440,7 +436,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     declare_var(v: LoxIdentifier) {
-        if (this.current().scope_depth == 0) {
+        if (this.current().scope_depth === 0) {
             return;
         }
         // console.log(`define_var ${v.id} depth ${this.scope_depth}`)

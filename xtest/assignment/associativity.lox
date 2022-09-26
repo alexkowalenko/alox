@@ -7,3 +7,5 @@ a = b = c;
 print a; // expect: c
 print b; // expect: c
 print c; // expect: c
+
+// option: bytecode

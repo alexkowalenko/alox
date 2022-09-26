@@ -6,3 +6,5 @@ print nil or "ok"; // expect: ok
 print true or "ok"; // expect: true
 print 0 or "ok"; // expect: 0
 print "s" or "ok"; // expect: s
+
+// option: bytecode
