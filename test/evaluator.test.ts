@@ -244,8 +244,21 @@ describe('Evaluator', () => {
             ["{var x = 1; var y = 2; x + y;}", '3'],
             ["{var x = 1; var y = 2; var z = 3; x + y + z;}", '6']
         ]
-        it('block-b', () => { do_tests(tests, true) })
+
+        // To maintain stack hygiene - blocks don't return values in bytecode.
         it('block', () => { do_tests(tests) })
+        const tests_b: TestCases[] = [
+            ["{}", 'nil'],
+            ["{ print 1; print 2;}", 'nil'],
+            ["var y = 1; {var x = 1 + 4; y=x;} y;", '5'],
+            ["var z = 1; {y = z + 4;} y;", '5'],
+            ["var y = 1; {var y = 2; y = y + 4;} y;", '1'], // shadow
+            ["var b = 1; {var b = 2;  {var b = 4; b + 4;}} b;", '1'], // shadow
+            ["var a = 1; {var x = 1; var y = 2; a = x + y;} a;", '3'],
+            ["{var x = 1; var y = 2; var z = 3; a = x + y + z;} a;", '6']
+        ]
+        it('block-b', () => { do_tests(tests_b, true) })
+
     }
 
     {

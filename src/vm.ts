@@ -50,7 +50,6 @@ export const enum Opcode {
 
 class Frame {
     constructor(public previous_stack_ptr: number,
-        public previous_locals_ptr: number,
         public chunk: Chunk,
         public ip: number = 0,
         public last_line: number = 0) { };
@@ -61,12 +60,10 @@ class Frame {
 export class VM {
     constructor(chunk: Chunk, private symboltable: SymbolTable<LoxValue>, private options: Options) {
         this.stack = new Array;
-        this.locals_stack = new Array;
         this.frame_stack = new Array;
-        this.frame_stack.push(new Frame(0, 0, chunk));
+        this.frame_stack.push(new Frame(0, chunk));
     }
     private stack: Array<LoxValue>;
-    private locals_stack: Array<LoxValue>;
     private frame_stack: Array<Frame>;
 
     public debug = true;
@@ -134,7 +131,6 @@ export class VM {
                         let val = this.stack.pop()!; // save final value before removing the frame.
                         let last_frame = this.frame_stack.pop()!
                         this.stack.length = last_frame.previous_stack_ptr
-                        this.locals_stack.length = last_frame.previous_locals_ptr
                         // push on the return val;
                         this.stack.push(val);
                         break;
@@ -284,25 +280,25 @@ export class VM {
 
                 case Opcode.DEF_LOCAL: {
                     let expr = this.peek();
-                    this.locals_stack.push(expr)
+                    this.stack.push(expr)
                     break;
                 }
 
                 case Opcode.SET_LOCAL: {
                     let id = this.get_word()
                     let expr = this.peek();
-                    this.locals_stack[id] = expr;
+                    this.stack[id] = expr;
                     break;
                 }
 
                 case Opcode.GET_LOCAL: {
                     let id = this.get_word();
-                    this.push(this.locals_stack[id])
+                    this.push(this.stack[id])
                     break;
                 }
 
                 case Opcode.POP_LOCAL:
-                    this.locals_stack.pop();
+                    this.stack.pop();
                     break;
 
                 case Opcode.JMP_IF_FALSE: {
@@ -333,7 +329,7 @@ export class VM {
                     let id = this.get_word_arg()
                     let val = this.symboltable.get(id as string);
                     var fun = val as CompiledFunction;
-                    var new_frame = new Frame(this.stack.length, this.locals_stack.length, fun.bytecodes);
+                    var new_frame = new Frame(this.stack.length, fun.bytecodes);
                     new_frame.fn = fun;
                     this.frame_stack.push(new_frame);
                     // execute function
@@ -359,11 +355,6 @@ export class VM {
             buf += ` ${pretty_print(v)} | `
         })
         console.log("stack:" + buf);
-        buf = "";
-        this.locals_stack.forEach((v) => {
-            buf += ` ${pretty_print(v)} | `
-        })
-        console.log("local:" + buf);
     }
 
     dump_frame() {

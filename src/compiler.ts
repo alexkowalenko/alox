@@ -241,10 +241,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
                 this.emit_location(stat.location);
             }
             stat.accept(this)
-            if (i < block.statements.length - 1) {
-                // get rid value, except last
-                this.emit_instruction(Opcode.POP)
-            }
+            this.emit_instruction(Opcode.POP)
         })
         this.end_scope();
     }
