@@ -237,7 +237,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         block.statements.forEach((stat, i) => {
             this.emit_location(stat.location);
             stat.accept(this)
-            this.emit_instruction(Opcode.POP)
+            if (i != block.statements.length - 1) {
+                this.emit_instruction(Opcode.POP)
+            }
         })
         this.end_scope();
     }
