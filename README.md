@@ -81,6 +81,8 @@ Run the REPL by invoking `alox.ts`.
   - [x] Lambda expressions.
   - [x] Native Functions.
 - [ ] Closures - Chapter 25.
+  - [x] Wrap functions in closure structure.
+  - [ ] Upvalues
 - [x] Garbage Collection - Chapter 26. Implemented in TypeScript/JavaScript.
 - [ ] Classes and Instances - Chapter 27.
 - [ ] Methods and Initializers - Chapter 28.

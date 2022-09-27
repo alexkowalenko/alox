@@ -100,6 +100,7 @@ export class Interpreter {
         if (this.options.parse) {
             const printer: Printer = new Printer("\n", 4);
             this.options.output.write(printer.print(expr) + os.EOL)
+            //this.options.output.write(JSON.stringify(expr, null, 2))
         }
         this.analyser.analyse(expr);
         const val = this.evaluator.eval(expr)

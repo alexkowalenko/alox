@@ -8,7 +8,7 @@ import { Chunk } from "./chunk";
 import { disassemble_instruction } from "./debug";
 import { RuntimeError } from "../error";
 import { Options } from "../interpreter";
-import { check_number, check_string, Function_Evaluator, LoxCallable, LoxFunction, LoxValue, pretty_print, truthy } from "../runtime";
+import { check_number, check_string, Function_Evaluator, LoxCallable, LoxClosure, LoxFunction, LoxValue, pretty_print, truthy } from "../runtime";
 import { Location } from "../token";
 import { SymbolTable } from "../symboltable";
 import { CompiledFunction } from "./compiler";
@@ -47,6 +47,7 @@ export const enum Opcode {
     JMP_IF_TRUE,
     JUMP,
     CALL,
+    CLOSURE,
 }
 
 class Frame {
@@ -57,7 +58,7 @@ class Frame {
     public ip: number = 0;
     public arity: number = 0;
     public last_line: number = 0;
-    fn?: CompiledFunction;
+    public cl: LoxClosure | undefined = undefined
 }
 
 class Null_Eval implements Function_Evaluator {
@@ -170,8 +171,9 @@ export class VM {
 
                 case Opcode.CALL: {
                     let arity = this.get_byte();
-                    var fn = this.peek(arity);
-                    if (fn instanceof CompiledFunction) {
+                    var cl = this.peek(arity);
+                    if (cl instanceof LoxClosure) {
+                        let fn = cl.fn as CompiledFunction;
                         if (fn.arity() !== arity) {
                             throw new RuntimeError(`function ${fn.fun.name?.id} called with ${arity} arguments, expecting ${fn.arity()}`,
                                 this.get_location())
@@ -179,23 +181,32 @@ export class VM {
                         var new_frame = new Frame(this.stack_length(), fn.bytecodes, this.stack_length());
                         new_frame.arity = arity;
                         new_frame.frame_ptr = this.stack.length - arity;
-                        new_frame.fn = fn;
+                        new_frame.cl = cl;
                         this.frame_stack.push(new_frame);
                         // execute function
                         break;
-                    } else if (fn instanceof LoxCallable) {
+                    } else if (cl instanceof LoxCallable) {
+                        console.log("LoxCallable")
+                        // Native function
                         let args: Array<LoxValue> = new Array;
-                        for (let i = 0; i < fn.arity(); i++) {
+                        for (let i = 0; i < cl.arity(); i++) {
                             args.push(this.peek(i))
                         }
                         this.pop(); // pop the function off the stack.
-                        this.push(fn.call(null_eval, args))
+                        this.push(cl.call(null_eval, args))
                         break;
                     }
                     else {
-                        throw new RuntimeError(`can't call ${fn}`, this.get_location())
+                        throw new RuntimeError(`can't call ${cl}`, this.get_location())
                     }
                 }
+
+                // case Opcode.CLOSURE: {
+                //     let fn = this.get_word_arg();
+                //     let closure = new LoxClosure(fn as CompiledFunction);
+                //     this.push(closure as unknown as LoxValue);
+                //     break;
+                // }
 
                 case Opcode.POP: {
                     this.pop();
@@ -416,7 +427,7 @@ export class VM {
     dump_frame() {
         console.log("Frames:")
         for (let frame of this.frame_stack) {
-            console.log(`    line ${frame.last_line} in ${frame.fn ?? '_main'}`)
+            console.log(`    line ${frame.last_line} in ${frame.cl?.fn ?? '_main'}`)
         }
     }
 }

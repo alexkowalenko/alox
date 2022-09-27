@@ -5,7 +5,7 @@
 //
 
 import { AstVisitor, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFunDef, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "../ast";
-import { LoxValue, LoxFunction, Evaluator } from "../runtime";
+import { LoxValue, LoxFunction, Evaluator, LoxClosure } from "../runtime";
 import { SymbolTable } from "../symboltable";
 import { Options } from "../interpreter";
 import { Chunk } from "./chunk";
@@ -123,8 +123,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             funct.bytecodes.disassemble(f.name?.id ?? "λ")
         }
 
-        this.symboltable.set(f.name?.id!, funct);
-        this.add_constant(funct);
+        let cl = new LoxClosure(funct);
+        this.symboltable.set(f.name?.id!, cl);
+        this.add_constant(cl as unknown as LoxFunction);
     }
 
     visitClass(c: LoxClassDef): void {

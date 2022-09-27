@@ -27,7 +27,15 @@ export abstract class LoxCallable {
     }
 }
 
-export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance
+export class LoxClosure {
+    constructor(public fn: LoxCallable) { }
+
+    toString(): string {
+        return this.fn.toString() + "-c";
+    }
+}
+
+export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance | LoxClosure;
 
 export function pretty_print(v: LoxValue): string {
     if (v === null) {
