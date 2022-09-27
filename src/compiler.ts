@@ -109,7 +109,12 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         f.args.forEach(a => {
             this.declare_var(a);
         })
-        f.body?.accept(this);
+        if (f.body) {
+            f.body.accept(this);
+            if (f.body.statements.length === 0) {
+                this.emit_instruction(Opcode.RETURN)
+            }
+        }
 
         this.end_scope();
 
@@ -234,13 +239,17 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     visitBlock(block: LoxBlock): void {
         this.begin_scope();
-        block.statements.forEach((stat, i) => {
-            this.emit_location(stat.location);
-            stat.accept(this)
-            if (i != block.statements.length - 1) {
-                this.emit_instruction(Opcode.POP)
-            }
-        })
+        if (block.statements.length > 0) {
+            block.statements.forEach((stat, i) => {
+                this.emit_location(stat.location);
+                stat.accept(this)
+                if (i != block.statements.length - 1) {
+                    this.emit_instruction(Opcode.POP)
+                }
+            })
+        } else {
+            this.emit_instruction(Opcode.NIL)
+        }
         this.end_scope();
     }
 
@@ -325,8 +334,8 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             let name = (e.expr as LoxIdentifier).id
             // find function
             if (this.symboltable.has(name)) {
-                this.begin_scope();
                 let fun = this.symboltable.get(name) as LoxFunction;
+                this.begin_scope();
                 try {
                     if (fun.arity() != e.arguments.length) {
                         throw new RuntimeError(`function ${new Printer().print(e.expr)} called with ${e.arguments.length} arguments, expecting ${fun.arity()}`,
@@ -343,7 +352,6 @@ export class Compiler implements AstVisitor<void>, Evaluator {
                     this.end_scope();
                 }
             } else {
-                this.symboltable.dump();
                 throw new RuntimeError(`can't call ${new Printer().print(e.expr)}`, e.expr.location)
             }
         }
