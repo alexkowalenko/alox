@@ -62,7 +62,7 @@ Run the REPL by invoking `alox.ts`.
   - [x] `print` & POP
   - [x] Define global variables
   - [x] Access global variables
-- [ ] Test structure for running files with bytecode engine.
+- [x] Test structure for running files with bytecode engine.
 - [x] Local Variables - Chapter 22.
   - [x] Block scopes
   - [x] Define local variables
@@ -74,10 +74,14 @@ Run the REPL by invoking `alox.ts`.
   - [x] `while` statement.
   - [x] `for` statement.
   - [x] `continue` and `break`.
-- [ ] Functions - Chapter 24.
+- [x] Functions - Chapter 24.
   - [x] Function context for compiler, frames for the vm.
   - [x] Call functions with no arguments.
   - [x] Argument passing.
-  - [ ] Lambda expressions.
+  - [x] Lambda expressions.
   - [x] Native Functions.
 - [ ] Closures - Chapter 25.
+- [x] Garbage Collection - Chapter 26. Implemented in TypeScript/JavaScript.
+- [ ] Classes and Instances - Chapter 27.
+- [ ] Methods and Initializers - Chapter 28.
+- [ ] Superclasses - Chapters 29.

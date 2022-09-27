@@ -6,7 +6,7 @@
 
 import { AstVisitor, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxDeclaration, LoxExpr, LoxFor, LoxFunDef, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxProgram, LoxReturn, LoxString, LoxVar, LoxWhile, LoxBinary, LoxUnary, LoxLiteral, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper, LoxGroup, LoxPrint } from "./ast";
 import { ParseError } from "./error";
-import { Evaluator } from "./evaluator";
+import { Evaluator } from "./runtime";
 import { TokenType } from "./token";
 
 const enum FunctionType {

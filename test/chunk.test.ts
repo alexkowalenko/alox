@@ -4,8 +4,8 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Chunk } from '../src/chunk';
-import { Opcode } from '../src/vm';
+import { Chunk } from '../src/bytecode/chunk';
+import { Opcode } from '../src/bytecode/vm';
 
 describe('chunk', () => {
     it('base', () => {

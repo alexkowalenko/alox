@@ -6,7 +6,7 @@
 
 
 import { disassemble_instruction } from "./debug";
-import { LoxValue } from "./runtime";
+import { LoxValue } from "../runtime";
 import { Opcode } from "./vm";
 
 const DEFAULT_SIZE = 32;

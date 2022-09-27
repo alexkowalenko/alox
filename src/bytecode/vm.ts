@@ -6,14 +6,15 @@
 
 import { Chunk } from "./chunk";
 import { disassemble_instruction } from "./debug";
-import { RuntimeError } from "./error";
-import { Options } from "./interpreter";
-import { check_number, check_string, Function_Evaluator, LoxCallable, LoxFunction, LoxValue, pretty_print, truthy } from "./runtime";
-import { Location } from "./token";
+import { RuntimeError } from "../error";
+import { Options } from "../interpreter";
+import { check_number, check_string, Function_Evaluator, LoxCallable, LoxFunction, LoxValue, pretty_print, truthy } from "../runtime";
+import { Location } from "../token";
+import { SymbolTable } from "../symboltable";
+import { CompiledFunction } from "./compiler";
 
 import os from "os";
-import { SymbolTable } from "./symboltable";
-import { CompiledFunction } from "./compiler";
+
 
 export const enum Opcode {
     CONSTANT,

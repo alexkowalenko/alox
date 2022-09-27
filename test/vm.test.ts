@@ -4,11 +4,11 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { Chunk } from "../src/chunk";
+import { Chunk } from "../src/bytecode/chunk";
 import { Options } from "../src/interpreter";
 import { LoxValue } from "../src/runtime";
 import { SymbolTable } from "../src/symboltable";
-import { Opcode, VM } from "../src/vm";
+import { Opcode, VM } from "../src/bytecode/vm";
 
 describe('vm', () => {
     let st = new SymbolTable<LoxValue>();

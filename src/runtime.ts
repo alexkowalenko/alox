@@ -4,10 +4,15 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxClassDef, LoxFunDef } from "./ast";
+import { LoxClassDef, LoxExpr, LoxFunDef } from "./ast";
 import { RuntimeError } from "./error";
 import { SymbolTable } from "./symboltable";
 import { Location } from "./token";
+
+export interface Evaluator {
+    eval(expr: LoxExpr): LoxValue;
+    resolve(expr: LoxExpr, depth: number): void
+}
 
 export interface Function_Evaluator {
     call_function(f: LoxFunction, args: readonly LoxValue[]): LoxValue;

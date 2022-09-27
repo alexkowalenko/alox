@@ -4,20 +4,16 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFunDef, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper, LoxGroup, LoxLiteral } from "./ast";
-import { RuntimeError } from "./error";
-import { Options } from "./interpreter";
-import { Printer } from "./printer";
-import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print, check_number, check_string, truthy, Function_Evaluator } from "./runtime";
-import { SymbolTable } from "./symboltable";
-import { TokenType } from "./token";
+import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, LoxString, LoxProgram, LoxPrint, LoxIdentifier, LoxVar, LoxBlock, LoxIf, LoxWhile, LoxFor, LoxBreak, LoxCall, LoxFunDef, LoxReturn, LoxClassDef, LoxGet, LoxSet, LoxAssign, LoxThis, LoxSuper, LoxGroup, LoxLiteral } from "../ast";
+import { RuntimeError } from "../error";
+import { Options } from "../interpreter";
+import { Printer } from "../printer";
+import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print, check_number, check_string, truthy, Function_Evaluator, Evaluator } from "../runtime";
+import { SymbolTable } from "../symboltable";
+import { TokenType } from "../token";
 
 import os from "os";
 
-export interface Evaluator {
-    eval(expr: LoxExpr): LoxValue;
-    resolve(expr: LoxExpr, depth: number): void
-}
 
 export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator, Function_Evaluator {
 

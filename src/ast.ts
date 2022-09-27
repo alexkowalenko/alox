@@ -41,7 +41,7 @@ export class LoxVar extends LoxBase {
 }
 
 export class LoxFunDef extends LoxBase {
-    constructor(readonly location: Location, readonly name?: LoxIdentifier) {
+    constructor(readonly location: Location, readonly name: LoxIdentifier) {
         super(location);
         this.args = new Array<LoxIdentifier>;
     }
@@ -257,6 +257,13 @@ export class LoxIdentifier extends LoxBase {
 
     toString(): string {
         return this.id
+    }
+}
+
+export class LoxAnonIdent extends LoxIdentifier {
+    static #number = 0;
+    constructor(readonly location: Location) {
+        super(location, "λ" + LoxAnonIdent.#number++);
     }
 }
 

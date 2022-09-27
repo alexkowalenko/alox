@@ -4,16 +4,14 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { AstVisitor, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFunDef, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
-import { Evaluator } from "./evaluator";
-import { LoxValue, LoxFunction } from "./runtime";
-import { SymbolTable } from "./symboltable";
-import { Options } from "./interpreter";
+import { AstVisitor, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFunDef, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "../ast";
+import { LoxValue, LoxFunction, Evaluator } from "../runtime";
+import { SymbolTable } from "../symboltable";
+import { Options } from "../interpreter";
 import { Chunk } from "./chunk";
 import { Opcode, VM } from "./vm";
-import { TokenType, Location } from "./token";
-import { RuntimeError } from "./error";
-import { Printer } from "./printer";
+import { TokenType, Location } from "../token";
+import { RuntimeError } from "../error";
 
 
 class Local {
@@ -122,10 +120,11 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.current_function = prev;
 
         if (this.options.debug) {
-            funct.bytecodes.disassemble(f.name!.id)
+            funct.bytecodes.disassemble(f.name?.id ?? "λ")
         }
 
         this.symboltable.set(f.name?.id!, funct);
+        this.add_constant(funct);
     }
 
     visitClass(c: LoxClassDef): void {

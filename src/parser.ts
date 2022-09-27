@@ -4,7 +4,7 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { ForInit, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFunDef, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxStatement, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
+import { ForInit, LoxAnonIdent, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxDeclaration, LoxExpr, LoxFor, LoxFunDef, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxStatement, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "./ast";
 import { Lexer } from "./lexer";
 import { Token, TokenType, Location } from "./token";
 import { ParseError } from "./error";
@@ -403,7 +403,7 @@ export class Parser {
         if (id !== undefined) {
             ast = new LoxFunDef(loc, id);
         } else {
-            ast = new LoxFunDef(loc);
+            ast = new LoxFunDef(loc, new LoxAnonIdent(loc));
         }
         this.consume(TokenType.L_PAREN)
         let tok = this.lexer.peek_token();

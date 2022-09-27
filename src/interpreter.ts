@@ -5,18 +5,19 @@
 //
 
 import { Analyser } from "./analyser";
-import { Evaluator, TreeEvaluator } from "./evaluator";
+import { TreeEvaluator } from "./tree/evaluator";
+import { Compiler } from "./bytecode/compiler";
 import { Lexer } from "./lexer";
 import { Parser } from "./parser";
 import { Printer } from "./printer";
-import { LoxCallable, LoxValue, Function_Evaluator } from "./runtime";
+import { LoxCallable, LoxValue, Function_Evaluator, Evaluator } from "./runtime";
 import { SymbolTable } from "./symboltable";
 import { LoxError } from "./error";
 
 import * as stream from "node:stream";
 import os from "os";
 import { finished } from 'node:stream/promises';
-import { Compiler } from "./compiler";
+
 
 
 export class Options {

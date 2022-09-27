@@ -344,14 +344,15 @@ describe('Evaluator', () => {
         it('return-b', () => { do_tests(tests, true) })
     }
 
-    it('lambda', () => {
+    {
         const tests: TestCases[] = [
             ['fun(){return "a";}();', '"a"'],
             ['var f = fun(){return "a";}; f();', '"a"'],
             ['fun(){return fun(a){return a;};}()(2);', '2'],
         ]
-        do_tests(tests)
-    })
+        it('lambda', () => { do_tests(tests) })
+        it('lambda-b', () => { do_tests(tests, true) })
+    }
 
     it('class', () => {
         const tests: TestCases[] = [
