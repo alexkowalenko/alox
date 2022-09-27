@@ -10,3 +10,5 @@ fun isOdd(n) {
 
 print isEven(4); // expect: true
 print isOdd(3); // expect: true
+
+// option: bytecode

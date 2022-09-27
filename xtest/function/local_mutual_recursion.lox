@@ -11,3 +11,5 @@
 
   print isEven(4); // expect: true
 }
+
+// option: bytecode

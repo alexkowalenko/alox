@@ -105,6 +105,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         let prev = this.current_function
         this.current_function = funct;
 
+        this.declare_var(f.name!);
         this.begin_scope();
         f.args.forEach(a => {
             this.declare_var(a);
