@@ -13,10 +13,11 @@ import { Chunk } from "./chunk";
 import { Opcode, VM } from "./vm";
 import { TokenType, Location } from "./token";
 import { RuntimeError } from "./error";
+import { Printer } from "./printer";
 
 
 class Local {
-    constructor(public name: LoxIdentifier, public depth: number) { }
+    constructor(public name: LoxIdentifier, public depth: number, public pop = true) { }
 }
 
 export class CompiledFunction extends LoxFunction {
@@ -109,7 +110,6 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             this.declare_var(a);
         })
         f.body?.accept(this);
-        this.emit_instruction(Opcode.RETURN)
 
         this.end_scope();
 
@@ -326,13 +326,25 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             // find function
             if (this.symboltable.has(name)) {
                 this.begin_scope();
-                let fundef = this.symboltable.get(name) as LoxFunction;
-                for (let i = 0; i < fundef.arity(); i++) {
-                    e.arguments[i].accept(this);
-                    this.define_var(fundef.fun.args[i]);
+                let fun = this.symboltable.get(name) as LoxFunction;
+                try {
+                    if (fun.arity() != e.arguments.length) {
+                        throw new RuntimeError(`function ${new Printer().print(e.expr)} called with ${e.arguments.length} arguments, expecting ${fun.arity()}`,
+                            e.location)
+                    }
+                    for (let i = 0; i < fun.arity(); i++) {
+                        e.arguments[i].accept(this);
+                        this.declare_var(fun.fun.args[i]);
+                    }
+                    this.emit_constant(Opcode.CALL, fun);
+                    this.emit_byte(e.arguments.length);
+                    // console.log(`call ${fun} = ${e.arguments.length}`)
+                } finally {
+                    this.end_scope();
                 }
-                this.emit_constant(Opcode.CALL, name);
-                this.end_scope();
+            } else {
+                this.symboltable.dump();
+                throw new RuntimeError(`can't call ${new Printer().print(e.expr)}`, e.expr.location)
             }
         }
     }
@@ -416,7 +428,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
         // pop local from the stack
         this.current().locals.forEach((local) => {
-            if (local.depth > this.current().scope_depth) {
+            if (local.depth > this.current().scope_depth && local.pop) {
                 //console.log(`remove local ${local.name.id} depth ${local.depth}`)
                 this.emit_instruction(Opcode.POP_LOCAL)
             }
@@ -442,7 +454,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             return;
         }
         // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
-        this.current().locals.push(new Local(v, this.current().scope_depth))
+        this.current().locals.push(new Local(v, this.current().scope_depth, false))
     }
 
     find_var(v: LoxIdentifier): number {
@@ -459,6 +471,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     emit_instruction(instr: Opcode) {
         this.current().bytecodes.write_byte(instr);
+    }
+
+    emit_byte(val: number) {
+        this.current().bytecodes.write_byte(val)
     }
 
     emit_instruction_word(instr: Opcode, val: number) {

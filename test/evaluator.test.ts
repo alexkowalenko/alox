@@ -306,18 +306,19 @@ describe('Evaluator', () => {
     {
         const tests: TestCases[] = [
             ["fun f() {} f();", 'nil'],
-        ]
-        it('function-b', () => { do_tests(tests, true) })
-        tests.concat([
             ["fun f(a) {a;} f(1);", '1'],
             ["fun f(a) {a;} f(1+3);", '4'],
-            ["fun g(a,b) {a+ b;} g(1,3);", '4'],
+            ["fun f(a) { return a;} f(1+3);", '4'],
+            ["fun g(a,b) {return a+ b;} g(1,3);", '4'],
             ["g(f(3),3);", '6'],
+            ["fun f(a) {fun g(a) {return a+3;} return g(a)+4;} f(4);", '11'],
+
             // errors
             ["f(1,2);", 'null', "function f called with 2 arguments, expecting 1"],
             ["f();", 'null', "function f called with 0 arguments, expecting 1"],
-        ])
+        ]
         it('function', () => { do_tests(tests) })
+        it('function-b', () => { do_tests(tests, true) })
     }
 
     {
@@ -326,15 +327,20 @@ describe('Evaluator', () => {
             ["fun g() { var x = 1; var y = 2; return x + y;} g();", '3'],
             ["var x = 1; fun g() { var x = 1; var y = 2; return x + y;} g();", '3'],
             ["fun h() { var x = 1; var y = 2; return x + y + g();} h();", '6'],
-            ["fun i() { var x = 1; var y = 2; return x + y + h();} i();", '9']
-        ]
-        it('return-b', () => { do_tests(tests, true) })
-        tests.concat([
+            ["fun i() { var x = 1; var y = 2; return x + y + h();} i();", '9'],
             ["fun f(a) {return a;} f(1);", '1'],
             ["fun g(a,b) {return a+ b;} g(1,3);", '4'],
             ["g(f(3),3);", '6'],
-        ])
+            ["fun f() {return 2;} f() + f();", '4'],
+            ["fun f() {return 2;} f() + f() + f();", '6'],
+            ["fun f(a) {return a * 2;} f(1) + f(2);", '6'],
+            ["fun f(a) {return a * 2;} f(1) + f(2) + f(3);", '12'],
+            ["fun f(a,b) {return a + b;} f(1,2) + f(3,4);", '10'],
+            ["fun f(a,b) {return a + b;} f(1,2) + f(3,4) + f(5,6);", '21'],
+
+        ]
         it('return', () => { do_tests(tests) })
+        it('return-b', () => { do_tests(tests, true) })
     }
 
     it('lambda', () => {

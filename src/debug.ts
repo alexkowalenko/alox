@@ -135,7 +135,10 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             break;
         }
         case Opcode.CALL: {
-            console.log(str + const_name(offset, chunk, "CALL"));
+            let word = chunk.get_word(offset + 1)
+            let val = chunk.get_constant(word);
+            let arity = chunk.get_byte(offset + 3);
+            console.log(str + ` CALL - ${word}, ${arity}\t'${val?.toString()}'`);
             break;
         }
 

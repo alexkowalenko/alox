@@ -54,6 +54,7 @@ class Frame {
         public frame_ptr: number = 0,
     ) { };
     public ip: number = 0;
+    public arity: number = 0;
     public last_line: number = 0;
     fn?: CompiledFunction;
 }
@@ -77,8 +78,8 @@ export class VM {
         return this.stack.length;
     }
 
-    set_stack_length(l: number) {
-        this.stack.length = l;
+    set_stack_length(n: number) {
+        this.stack.length = n;
     }
 
     stack_get_location(i: number) {
@@ -119,6 +120,12 @@ export class VM {
         return val;
     }
 
+    get_byte() {
+        let val = this.current().chunk.get_byte(this.current().ip);
+        this.current().ip++;
+        return val;
+    }
+
     get_word() {
         let val = this.current().chunk.get_word(this.current().ip);
         this.current().ip += 2;
@@ -130,34 +137,36 @@ export class VM {
             console.log("START:")
         }
         for (; ;) {
+            if (this.current().ip >= this.current().chunk.end) {
+                return this.pop() ?? null;
+            }
             let instr = this.current().chunk.get_byte(this.current().ip);
             if (this.debug) {
                 disassemble_instruction(this.current().ip, this.current().chunk);
             }
             this.current().ip++;
-            if (this.current().ip >= this.current().chunk.end) {
-                return this.pop() ?? null;
-            }
             switch (instr) {
                 case Opcode.RETURN: {
                     if (this.frame_stack.length > 1) {
+                        // console.log("RETURN")
                         let val = this.pop()!; // save final value before removing the frame.
                         let last_frame = this.frame_stack.pop()!
-                        this.set_stack_length(last_frame.previous_stack_ptr)
-                        // push on the return val;
+                        this.set_stack_length(last_frame.previous_stack_ptr - last_frame.arity)
                         this.push(val);
                         break;
                     }
-                    let val = this.pop()
+                    let val = this.pop() ?? null;
                     return val;
                 }
 
                 case Opcode.CALL: {
                     let id = this.get_word_arg()
-                    let val = this.symboltable.get(id as string);
-                    var fun = val as CompiledFunction;
-                    var new_frame = new Frame(this.stack_length(), fun.bytecodes, this.stack_length());
-                    new_frame.fn = fun;
+                    let arity = this.get_byte();
+                    var fn = id as CompiledFunction;
+                    var new_frame = new Frame(this.stack_length(), fn.bytecodes, this.stack_length());
+                    new_frame.arity = arity;
+                    new_frame.frame_ptr = this.stack.length - arity;
+                    new_frame.fn = fn;
                     this.frame_stack.push(new_frame);
                     // execute function
                     break;

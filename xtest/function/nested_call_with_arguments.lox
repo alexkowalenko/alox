@@ -11,3 +11,5 @@ fun printArg(arg) {
 }
 
 returnFunCallWithArg(printArg, "hello world"); // expect: hello world
+
+// option: bytecode

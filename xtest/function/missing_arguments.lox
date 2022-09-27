@@ -1,3 +1,5 @@
 fun f(a, b) {}
 
 f(1); // error: function f called with 1 arguments, expecting 2
+
+// option: bytecode
