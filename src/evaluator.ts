@@ -8,7 +8,7 @@ import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, L
 import { RuntimeError } from "./error";
 import { Options } from "./interpreter";
 import { Printer } from "./printer";
-import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print, check_number, check_string, truthy } from "./runtime";
+import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print, check_number, check_string, truthy, Function_Evaluator } from "./runtime";
 import { SymbolTable } from "./symboltable";
 import { TokenType } from "./token";
 
@@ -17,10 +17,9 @@ import os from "os";
 export interface Evaluator {
     eval(expr: LoxExpr): LoxValue;
     resolve(expr: LoxExpr, depth: number): void
-    // call(f: Callable, args: const LoxValue[]): LoxValue
 }
 
-export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {
+export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator, Function_Evaluator {
 
     constructor(public symboltable: SymbolTable<LoxValue>, private readonly options: Options) {
     }
@@ -247,6 +246,32 @@ export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator {
         } else {
             throw new RuntimeError(`can't call ${new Printer().print(e.expr)}`, e.expr.location)
         }
+    }
+
+    public call_function(f: LoxFunction, args: readonly LoxValue[]): LoxValue {
+        let prev = this.symboltable
+        this.symboltable = new SymbolTable(f.closure);
+        for (let i = 0; i < args.length; i++) {
+            this.symboltable.set(f.fun.args[i].id, args[i])
+        }
+        let val: LoxValue = null;
+        try {
+            val = this.visitBlock(f.fun.body!)
+        }
+        catch (e) {
+            if (e instanceof LoxReturn) {
+                val = e.value;
+            } else {
+                throw e;
+            }
+        }
+        finally {
+            this.symboltable = prev
+        }
+        if (f.initializer) {
+            return f.closure.get_at(0, "this")!;
+        }
+        return val;
     }
 
     visitGet(e: LoxGet): LoxValue {

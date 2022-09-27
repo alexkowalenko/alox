@@ -4,14 +4,17 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxClassDef, LoxFunDef, LoxReturn } from "./ast";
+import { LoxClassDef, LoxFunDef } from "./ast";
 import { RuntimeError } from "./error";
-import { TreeEvaluator } from "./evaluator";
 import { SymbolTable } from "./symboltable";
 import { Location } from "./token";
 
+export interface Function_Evaluator {
+    call_function(f: LoxFunction, args: readonly LoxValue[]): LoxValue;
+}
+
 export abstract class LoxCallable {
-    abstract call(interp: TreeEvaluator, args: Array<LoxValue>): LoxValue;
+    abstract call(interp: Function_Evaluator, args: Array<LoxValue>): LoxValue;
     abstract arity(): number;
 
     toString(): string {
@@ -61,31 +64,8 @@ export class LoxFunction extends LoxCallable {
         super();
     }
 
-    // Todo: This needs to move back into the Evaluator class, and have a generic Evaluator interface.
-    call(interp: TreeEvaluator, args: readonly LoxValue[]): LoxValue {
-        let prev = interp.symboltable
-        interp.symboltable = new SymbolTable(this.closure);
-        for (let i = 0; i < args.length; i++) {
-            interp.symboltable.set(this.fun.args[i].id, args[i])
-        }
-        let val: LoxValue = null;
-        try {
-            val = interp.visitBlock(this.fun.body!)
-        }
-        catch (e) {
-            if (e instanceof LoxReturn) {
-                val = e.value;
-            } else {
-                throw e;
-            }
-        }
-        finally {
-            interp.symboltable = prev
-        }
-        if (this.initializer) {
-            return this.closure.get_at(0, "this")!;
-        }
-        return val;
+    call(interp: Function_Evaluator, args: readonly LoxValue[]): LoxValue {
+        return interp.call_function(this, args)
     }
 
     bind(instance: LoxInstance): LoxFunction {
@@ -128,11 +108,11 @@ export class LoxClass extends LoxCallable {
     public super_class?: LoxClass;
     public methods: Map<string, LoxFunction> = new Map;
 
-    call(interp: TreeEvaluator, args: LoxValue[]): LoxValue {
+    call(interp: Function_Evaluator, args: LoxValue[]): LoxValue {
         let instance = new LoxInstance(this);
         let init = this.findMethod("init");
         if (init != null) {
-            init.bind(instance).call(interp, args);
+            interp.call_function(init.bind(instance), args);
         }
         return instance;
     }

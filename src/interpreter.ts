@@ -9,7 +9,7 @@ import { Evaluator, TreeEvaluator } from "./evaluator";
 import { Lexer } from "./lexer";
 import { Parser } from "./parser";
 import { Printer } from "./printer";
-import { LoxCallable, LoxValue } from "./runtime";
+import { LoxCallable, LoxValue, Function_Evaluator } from "./runtime";
 import { SymbolTable } from "./symboltable";
 import { LoxError } from "./error";
 
@@ -60,7 +60,7 @@ export class Interpreter {
 
     private setup_stdlib() {
         this.symboltable.set("clock", new class extends LoxCallable {
-            call(i: TreeEvaluator, args: LoxValue[]): LoxValue {
+            call(_: Function_Evaluator, args: LoxValue[]): LoxValue {
                 return Date.now();
             }
             arity(): number {
@@ -70,7 +70,7 @@ export class Interpreter {
         this.analyser.define("clock")
 
         this.symboltable.set("exit", new class extends LoxCallable {
-            call(i: TreeEvaluator, args: LoxValue[]): LoxValue {
+            call(_: Function_Evaluator, args: LoxValue[]): LoxValue {
                 process.exit(args[0] as number)
             }
             arity(): number {
@@ -80,7 +80,7 @@ export class Interpreter {
         this.analyser.define("exit")
 
         this.symboltable.set("print_error", new class extends StdlibClass {
-            call(i: TreeEvaluator, args: LoxValue[]): LoxValue {
+            call(_: Function_Evaluator, args: LoxValue[]): LoxValue {
                 this.options.error.write(args[0] + os.EOL)
                 return args[0];
             }

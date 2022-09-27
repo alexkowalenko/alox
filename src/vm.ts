@@ -8,7 +8,7 @@ import { Chunk } from "./chunk";
 import { disassemble_instruction } from "./debug";
 import { RuntimeError } from "./error";
 import { Options } from "./interpreter";
-import { check_number, check_string, LoxValue, pretty_print, truthy } from "./runtime";
+import { check_number, check_string, Function_Evaluator, LoxCallable, LoxFunction, LoxValue, pretty_print, truthy } from "./runtime";
 import { Location } from "./token";
 
 import os from "os";
@@ -58,6 +58,14 @@ class Frame {
     public last_line: number = 0;
     fn?: CompiledFunction;
 }
+
+class Null_Eval implements Function_Evaluator {
+    call_function(f: LoxFunction, args: readonly LoxValue[]): LoxValue {
+        return null;
+    }
+}
+
+const null_eval = new Null_Eval;
 
 export class VM {
     constructor(chunk: Chunk, private symboltable: SymbolTable<LoxValue>, private options: Options) {
@@ -174,7 +182,16 @@ export class VM {
                         this.frame_stack.push(new_frame);
                         // execute function
                         break;
-                    } else {
+                    } else if (fn instanceof LoxCallable) {
+                        let args: Array<LoxValue> = new Array;
+                        for (let i = 0; i < fn.arity(); i++) {
+                            args.push(this.peek(i))
+                        }
+                        this.pop(); // pop the function off the stack.
+                        this.push(fn.call(null_eval, args))
+                        break;
+                    }
+                    else {
                         throw new RuntimeError(`can't call ${fn}`, this.get_location())
                     }
                 }
@@ -373,8 +390,6 @@ export class VM {
                     this.current().ip += offset;
                     break;
                 }
-
-
 
                 default:
                     throw new RuntimeError("implementation: unknown instruction " + instr, this.get_location())

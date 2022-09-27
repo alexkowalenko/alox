@@ -294,14 +294,15 @@ describe('Evaluator', () => {
         it('break', () => { do_tests(tests) })
     }
 
-    it('stdlib', () => {
+    {
         const tests: TestCases[] = [
             ["clock() * 0;", '0'],
             // errors
             ["tick() - clock();", '0', "identifier tick not found"],
         ]
-        do_tests(tests)
-    })
+        it('stdlib', () => { do_tests(tests) })
+        it('stdlib-b', () => { do_tests(tests, true) })
+    }
 
     {
         const tests: TestCases[] = [

@@ -19,17 +19,17 @@ function do_tests(tests: TestCases[]) {
             const token = lexer.get_token();
             const tok = token.tok;
             //console.log(`token tok: ${tok}  ${test[1]}`)
-            expect(tok).toBe(test[1])
+            expect(test[1]).toBe(tok)
             switch (test[1]) {
                 case TokenType.STRING:
                     //console.log(`test: ${test[2]}  gen: ${token.value}`)
-                    expect(test[2]).toBe(token.value)
+                    expect(token.value).toBe(test[2])
                     break
                 case TokenType.NUMBER:
-                    expect(test[2]).toBe(token.value)
+                    expect(token.value).toBe(test[2])
                     break
                 case TokenType.IDENT:
-                    expect(test[2]).toBe(token.value)
+                    expect(token.value).toBe(test[2])
                     break
             }
         }
@@ -108,6 +108,7 @@ describe('Lexer', () => {
             ['a_', TokenType.IDENT, 'a_'],
             ['_', TokenType.IDENT, '_'],
             ['a_', TokenType.IDENT, 'a_'],
+            ['a*', TokenType.IDENT, 'a'],
         ]
         do_tests(tests)
     })

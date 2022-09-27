@@ -67,7 +67,8 @@ export class Lexer {
     private get_identifier(c: string): Token {
         let buffer = c;
         const start = this.line.get_location();
-        while (this.line.peek_char().match(alphanumeric)) {
+        while (this.line.peek_char().match(alphanumeric)
+            && this.line.peek_char() !== "*") { // * character is recognised as emoji
             buffer += this.line.get_char()
         }
         if (reserved_words.has(buffer)) {
