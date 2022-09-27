@@ -132,6 +132,7 @@ async function test_with_options(name: string, file_expected: FileInfo, options:
     }
 
     test(test_name, async () => {
+        jest.setTimeout(10000);
         let test_result = await execute_test(name, options);
 
         for (let i = 0; i < file_expected.output.length && i < test_result.output.length; i++) {

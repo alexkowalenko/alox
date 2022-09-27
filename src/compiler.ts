@@ -330,31 +330,11 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitCall(e: LoxCall): void {
-        if (e.expr instanceof LoxIdentifier) {
-            let name = (e.expr as LoxIdentifier).id
-            // find function
-            if (this.symboltable.has(name)) {
-                let fun = this.symboltable.get(name) as LoxFunction;
-                this.begin_scope();
-                try {
-                    if (fun.arity() != e.arguments.length) {
-                        throw new RuntimeError(`function ${new Printer().print(e.expr)} called with ${e.arguments.length} arguments, expecting ${fun.arity()}`,
-                            e.location)
-                    }
-                    for (let i = 0; i < fun.arity(); i++) {
-                        e.arguments[i].accept(this);
-                        this.declare_var(fun.fun.args[i]);
-                    }
-                    this.emit_constant(Opcode.CALL, fun);
-                    this.emit_byte(e.arguments.length);
-                    // console.log(`call ${fun} = ${e.arguments.length}`)
-                } finally {
-                    this.end_scope();
-                }
-            } else {
-                throw new RuntimeError(`can't call ${new Printer().print(e.expr)}`, e.expr.location)
-            }
-        }
+        e.expr.accept(this);
+        e.arguments.forEach(arg => {
+            arg.accept(this);
+        })
+        this.emit_instruction_byte(Opcode.CALL, e.arguments.length);
     }
 
     visitGet(e: LoxGet): void {
@@ -488,6 +468,11 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     emit_instruction_word(instr: Opcode, val: number) {
         this.current().bytecodes.write_byte(instr);
         this.current().bytecodes.write_word(val);
+    }
+
+    emit_instruction_byte(instr: Opcode, val: number) {
+        this.current().bytecodes.write_byte(instr);
+        this.current().bytecodes.write_byte(val);
     }
 
     add_constant(val: LoxValue) {

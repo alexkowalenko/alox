@@ -79,5 +79,5 @@ Run the REPL by invoking `alox.ts`.
   - [x] Call functions with no arguments.
   - [x] Argument passing.
   - [ ] Lambda expressions.
-  - [ ] Native Functions
+  - [ ] Native Functions.
 - [ ] Closures - Chapter 25.

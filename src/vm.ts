@@ -151,7 +151,7 @@ export class VM {
                         // console.log("RETURN")
                         let val = this.pop()!; // save final value before removing the frame.
                         let last_frame = this.frame_stack.pop()!
-                        this.set_stack_length(last_frame.previous_stack_ptr - last_frame.arity)
+                        this.set_stack_length(last_frame.previous_stack_ptr - last_frame.arity - 1)
                         this.push(val);
                         break;
                     }
@@ -160,16 +160,23 @@ export class VM {
                 }
 
                 case Opcode.CALL: {
-                    let id = this.get_word_arg()
                     let arity = this.get_byte();
-                    var fn = id as CompiledFunction;
-                    var new_frame = new Frame(this.stack_length(), fn.bytecodes, this.stack_length());
-                    new_frame.arity = arity;
-                    new_frame.frame_ptr = this.stack.length - arity;
-                    new_frame.fn = fn;
-                    this.frame_stack.push(new_frame);
-                    // execute function
-                    break;
+                    var fn = this.peek(arity);
+                    if (fn instanceof CompiledFunction) {
+                        if (fn.arity() !== arity) {
+                            throw new RuntimeError(`function ${fn.fun.name?.id} called with ${arity} arguments, expecting ${fn.arity()}`,
+                                this.get_location())
+                        }
+                        var new_frame = new Frame(this.stack_length(), fn.bytecodes, this.stack_length());
+                        new_frame.arity = arity;
+                        new_frame.frame_ptr = this.stack.length - arity;
+                        new_frame.fn = fn;
+                        this.frame_stack.push(new_frame);
+                        // execute function
+                        break;
+                    } else {
+                        throw new RuntimeError(`can't call ${fn}`, this.get_location())
+                    }
                 }
 
                 case Opcode.POP: {
