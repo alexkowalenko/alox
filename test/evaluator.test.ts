@@ -314,6 +314,7 @@ describe('Evaluator', () => {
             ["g(f(3),3);", '6'],
             ["fun f(a) {fun g(a) {return a+3;} return g(a)+4;} f(4);", '11'],
             ["fun gg() {5;} gg(); 8;", '8'],
+            ["fun df() { return 4; } { fun df() {return 5; } } df();", '4'], // shadow functions
 
             // errors
             ["f(1,2);", 'null', "function f called with 2 arguments, expecting 1"],
@@ -339,6 +340,7 @@ describe('Evaluator', () => {
             ["fun f(a) {return a * 2;} f(1) + f(2) + f(3);", '12'],
             ["fun f(a,b) {return a + b;} f(1,2) + f(3,4);", '10'],
             ["fun f(a,b) {return a + b;} f(1,2) + f(3,4) + f(5,6);", '21'],
+
 
         ]
         it('return', () => { do_tests(tests) })

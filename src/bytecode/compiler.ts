@@ -173,10 +173,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
         let cl = new LoxClosure(funct);
         this.add_constant(cl as unknown as LoxFunction);
-        //this.define_var(f.name);
-
-        this.symboltable.set(f.name?.id!, cl);
-        // this.add_constant(cl as unknown as LoxFunction);
+        this.define_var(f.name);
     }
 
     visitClass(c: LoxClassDef): void {
