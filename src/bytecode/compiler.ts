@@ -15,12 +15,28 @@ import { RuntimeError } from "../error";
 
 
 class Local {
-    constructor(public name: LoxIdentifier, public depth: number, public pop = true) { }
+    constructor(
+        public name: LoxIdentifier,
+        public depth: number,
+        public pop = true
+    ) { }
+}
+
+class Upvalue {
+    constructor(
+        public name: LoxIdentifier,
+        public index: number,
+        public is_local: boolean
+    ) { }
+
+    toString() {
+        return `[${this.name.id} : ${this.index}, ${this.is_local ? "local" : ""}]`
+    }
 }
 
 export class CompiledFunction extends LoxFunction {
 
-    constructor(public fn: LoxFunDef) {
+    constructor(public fn: LoxFunDef, public parent?: CompiledFunction) {
         super(fn, new SymbolTable, false)
         this.bytecodes = new Chunk;
     }
@@ -28,16 +44,53 @@ export class CompiledFunction extends LoxFunction {
     bytecodes: Chunk;
     scope_depth = 0;
     locals = new Array<Local>;
+    upvalues = new Array<Upvalue>;
 
     last_continue: number | undefined = undefined;
     last_break: number | undefined = undefined;
+
+    has_local(name: LoxIdentifier): boolean {
+        return this.locals.findIndex(x => { x.name.id === name.id }) >= 0
+    }
+
+    add_local(name: LoxIdentifier, depth: number, pop: boolean) {
+        this.locals.push(new Local(name, depth, pop))
+    }
+
+    find_var(v: LoxIdentifier): number {
+        // search the list backwards and return its index.
+        let index = -1;
+        for (let i = this.locals.length - 1; i >= 0; i--) {
+            if (this.locals[i].name.id === v.id) {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
+
+    remove_locals() {
+        this.locals = this.locals.filter((local) => {
+            return local.depth <= this.scope_depth
+        })
+    }
+
+    search_upvalue(count: number, name: LoxIdentifier): number {
+        if (this.parent) {
+            if (this.parent.has_local(name)) {
+                return count;
+            }
+            return this.parent.search_upvalue(count + 1, name)
+        }
+        return -1;
+    }
 }
 
 export class Compiler implements AstVisitor<void>, Evaluator {
 
-    constructor(public symboltable: SymbolTable<LoxValue>,
-        private readonly options: Options) {
-    }
+    constructor(
+        public symboltable: SymbolTable<LoxValue>, // only has native functions from stdlib.
+        private readonly options: Options) { }
     private current_function!: CompiledFunction;
 
     init() {
@@ -99,7 +152,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitFun(f: LoxFunDef): void {
-        let funct = new CompiledFunction(f);
+        let funct = new CompiledFunction(f, this.current());
         let prev = this.current_function
         this.current_function = funct;
 
@@ -352,7 +405,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
         if (e.left instanceof LoxIdentifier) {
             let id = e.left as LoxIdentifier;
-            let index = this.find_var(id);
+            let index = this.current().find_var(id);
             if (index >= 0) {
                 this.emit_instruction_word(Opcode.SET_LOCAL, index)
                 return;
@@ -376,9 +429,8 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitIdentifier(e: LoxIdentifier): void {
-        // console.log(`find var: ${e.id}`)
         if (this.current().scope_depth > 0) {
-            let index = this.find_var(e);
+            let index = this.current().find_var(e);
             if (index >= 0) {
                 this.emit_instruction_word(Opcode.GET_LOCAL, index)
                 return;
@@ -423,9 +475,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             }
         })
         // remove locals from the list
-        this.current().locals = this.current().locals.filter((local) => {
-            return local.depth <= this.current().scope_depth
-        })
+        this.current().remove_locals();
         //console.log(`end_scope: locals count: ${this.locals.length}`)
     }
 
@@ -434,7 +484,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             return;
         }
         // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
-        this.current().locals.push(new Local(v, this.current().scope_depth))
+        this.current().add_local(v, this.current().scope_depth, true)
         this.emit_instruction(Opcode.DEF_LOCAL)
     }
 
@@ -443,19 +493,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             return;
         }
         // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
-        this.current().locals.push(new Local(v, this.current().scope_depth, false))
-    }
-
-    find_var(v: LoxIdentifier): number {
-        // search the list backwards and return its index.
-        let index = -1;
-        for (let i = this.current().locals.length - 1; i >= 0; i--) {
-            if (this.current().locals[i].name.id === v.id) {
-                index = i;
-                break;
-            }
-        }
-        return index;
+        this.current().add_local(v, this.current().scope_depth, false)
     }
 
     emit_instruction(instr: Opcode) {
@@ -510,5 +548,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.current().bytecodes.write_loc_word(offset, jump);
     }
 
-
+    dump_upvalues() {
+        let buf = "upvalues: ";
+        this.current().locals.forEach(x => {
+            buf += x.toString() + " "
+        })
+    }
 }
