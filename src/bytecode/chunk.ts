@@ -9,10 +9,10 @@ import { disassemble_instruction } from "./debug";
 import { LoxValue } from "../runtime";
 import { Opcode } from "./vm";
 
-const DEFAULT_SIZE = 32;
+const DEFAULT_SIZE = 128;
 
 export class Constant {
-    constructor(private capacity: number = DEFAULT_SIZE) {
+    constructor() {
         this.pool = new Array<LoxValue>;
     }
     private pool: Array<LoxValue>;
@@ -34,7 +34,7 @@ export class Constant {
 export class Chunk {
     constructor(private capacity: number = DEFAULT_SIZE) {
         this.code = Buffer.alloc(this.capacity);
-        this.constants = new Constant(this.capacity);
+        this.constants = new Constant();
     }
     private count = 0;
     private code: Buffer;

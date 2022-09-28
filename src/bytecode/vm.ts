@@ -100,6 +100,14 @@ export class VM {
         this.stack[this.current().frame_ptr + i] = val;
     }
 
+    pop_frame() {
+        let val = this.pop()!; // save final value before removing the frame.
+        let last_frame = this.frame_stack.pop()!
+        this.set_stack_length(last_frame.previous_stack_ptr - last_frame.arity - 1)
+        this.push(val);
+        return
+    }
+
     pop() {
         return this.stack.pop()
     }
@@ -148,6 +156,10 @@ export class VM {
         }
         for (; ;) {
             if (this.current().ip >= this.current().chunk.end) {
+                if (this.frame_stack.length > 1) {
+                    this.pop_frame();
+                    continue;
+                }
                 return this.pop() ?? null;
             }
             let instr = this.current().chunk.get_byte(this.current().ip);
@@ -159,10 +171,7 @@ export class VM {
                 case Opcode.RETURN: {
                     if (this.frame_stack.length > 1) {
                         // console.log("RETURN")
-                        let val = this.pop()!; // save final value before removing the frame.
-                        let last_frame = this.frame_stack.pop()!
-                        this.set_stack_length(last_frame.previous_stack_ptr - last_frame.arity - 1)
-                        this.push(val);
+                        this.pop_frame();
                         break;
                     }
                     let val = this.pop() ?? null;

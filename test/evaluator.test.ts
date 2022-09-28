@@ -313,6 +313,7 @@ describe('Evaluator', () => {
             ["fun g(a,b) {return a+ b;} g(1,3);", '4'],
             ["g(f(3),3);", '6'],
             ["fun f(a) {fun g(a) {return a+3;} return g(a)+4;} f(4);", '11'],
+            ["fun gg() {5;} gg(); 8;", '8'],
 
             // errors
             ["f(1,2);", 'null', "function f called with 2 arguments, expecting 1"],

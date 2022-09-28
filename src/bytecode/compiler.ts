@@ -145,10 +145,6 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             this.emit_instruction(Opcode.NIL)
         }
         this.define_var(v.ident);
-        if (this.current().scope_depth > 0) {
-            return;
-        }
-        this.emit_constant(Opcode.DEF_GLOBAL, v.ident.id)
     }
 
     visitFun(f: LoxFunDef): void {
@@ -169,7 +165,6 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         }
 
         this.end_scope();
-
         this.current_function = prev;
 
         if (this.options.debug) {
@@ -177,8 +172,11 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         }
 
         let cl = new LoxClosure(funct);
-        this.symboltable.set(f.name?.id!, cl);
         this.add_constant(cl as unknown as LoxFunction);
+        //this.define_var(f.name);
+
+        this.symboltable.set(f.name?.id!, cl);
+        // this.add_constant(cl as unknown as LoxFunction);
     }
 
     visitClass(c: LoxClassDef): void {
@@ -479,8 +477,14 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         //console.log(`end_scope: locals count: ${this.locals.length}`)
     }
 
+    /**
+     * Adds v to local variable list and instructs to create it.
+     * @param v 
+     * @returns 
+     */
     define_var(v: LoxIdentifier) {
         if (this.current().scope_depth === 0) {
+            this.emit_constant(Opcode.DEF_GLOBAL, v.id)
             return;
         }
         // console.log(`define_var ${v.id} depth ${this.scope_depth}`)
@@ -488,6 +492,11 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.emit_instruction(Opcode.DEF_LOCAL)
     }
 
+    /**
+     * Adds v to local variable list only
+     * @param v 
+     * @returns 
+     */
     declare_var(v: LoxIdentifier) {
         if (this.current().scope_depth === 0) {
             return;
