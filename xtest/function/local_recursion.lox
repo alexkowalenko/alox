@@ -6,5 +6,3 @@
 
   print fib(8); // expect: 21
 }
-
-// option: bytecode

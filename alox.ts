@@ -104,6 +104,7 @@ async function do_file(file: string, opts: Options) {
     program.option('-b, --bytecode', 'use the bytecode compiler')
     program.option('-d, --debug', 'debug')
     program.option('-x, --trace', 'trace execution')
+    program.option('-v, --var', 'trace variable declaration')
 
     program.parse(process.argv);
 
@@ -115,6 +116,7 @@ async function do_file(file: string, opts: Options) {
     opts.bytecode = options.bytecode;
     opts.debug = options.debug;
     opts.trace = options.trace;
+    opts.var = options.var
     if (!options.silent) {
         console.log("ALOX 👾 interpreter")
         if (opts.bytecode) {

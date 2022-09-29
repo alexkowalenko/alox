@@ -11,9 +11,10 @@ import { Options } from "../interpreter";
 import { check_number, check_string, Function_Evaluator, LoxCallable, LoxClosure, LoxFunction, LoxValue, pretty_print, truthy } from "../runtime";
 import { Location } from "../token";
 import { SymbolTable } from "../symboltable";
-import { CompiledFunction } from "./compiler";
+import { CompiledFunction } from "./compiledfunction";
 
 import os from "os";
+import _ from 'lodash';
 
 
 export const enum Opcode {
@@ -195,12 +196,11 @@ export class VM {
                         // execute function
                         break;
                     } else if (cl instanceof LoxCallable) {
-                        console.log("LoxCallable")
+                        //console.log("LoxCallable")
                         // Native function
                         let args: Array<LoxValue> = new Array;
-                        for (let i = 0; i < cl.arity(); i++) {
-                            args.push(this.peek(i))
-                        }
+                        _.range(0, cl.arity()).forEach(
+                            i => args.push(this.peek(i)));
                         this.pop(); // pop the function off the stack.
                         this.push(cl.call(null_eval, args))
                         break;
