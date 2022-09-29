@@ -323,17 +323,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitAssign(e: LoxAssign): void {
-        // console.log("assign")
         e.right.accept(this);
 
         if (e.left instanceof LoxIdentifier) {
-            let id = e.left as LoxIdentifier;
-            let index = this.current().find_var(id);
-            if (index >= 0) {
-                this.emit_instruction_word(Opcode.SET_LOCAL, index)
-                return;
-            }
-            this.emit_constant(Opcode.SET_GLOBAL, (e.left as LoxIdentifier).id)
+            this.named_var(e.left as LoxIdentifier, true);
             return
         }
         throw new RuntimeError(`can't assign to ${e.left.toString()}`, e.left.location)
@@ -355,20 +348,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         if (this.options.var) {
             console.log(`var: find ${e.id} depth ${this.current().scope_depth} of ${this.current().fn.name}`)
         }
-        if (this.current().scope_depth > 0) {
-            let index = this.current().find_var(e);
-            if (index >= 0) {
-                this.emit_instruction_word(Opcode.GET_LOCAL, index)
-                if (this.options.var) {
-                    console.log(`var: found ${e.id} local`)
-                }
-                return;
-            }
-        }
-        if (this.options.var) {
-            console.log(`var: found ${e.id} global`)
-        }
-        this.emit_constant(Opcode.GET_GLOBAL, e.id)
+        this.named_var(e);
     }
 
     visitNumber(expr: LoxNumber): void {
@@ -453,6 +433,24 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             return;
         }
         this.current().add_local(v, this.current().scope_depth + adjust, false)
+    }
+
+    named_var(v: LoxIdentifier, can_assign = false) {
+        let index = this.current().find_var(v);
+        if (index >= 0) {
+            if (can_assign) {
+                this.emit_instruction_word(Opcode.SET_LOCAL, index)
+            } else {
+                this.emit_instruction_word(Opcode.GET_LOCAL, index)
+            }
+            return;
+        } else {
+            if (can_assign) {
+                this.emit_constant(Opcode.SET_GLOBAL, v.id)
+            } else {
+                this.emit_constant(Opcode.GET_GLOBAL, v.id)
+            }
+        }
     }
 
     emit_instruction(instr: Opcode) {
