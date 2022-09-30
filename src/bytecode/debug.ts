@@ -4,8 +4,11 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
+import { LoxClosure, LoxFunction } from "../runtime";
 import { Chunk } from "./chunk";
 import { Opcode } from "./vm";
+
+import _ from 'lodash';
 
 function simple_instruction(op: Opcode, offset: number): number {
     let str = String(offset).padStart(4, '0');
@@ -122,6 +125,14 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             console.log(str + val_name(offset, chunk, "SET_LOCAL"));
             break;
         }
+        case Opcode.GET_UPVALUE: {
+            console.log(str + val_name(offset, chunk, "GET_UPVALUE"));
+            break;
+        }
+        case Opcode.SET_UPVALUE: {
+            console.log(str + val_name(offset, chunk, "SET_UPVALUE"));
+            break;
+        }
         case Opcode.JMP_IF_FALSE: {
             console.log(str + val_name(offset, chunk, "JMP_IF_FALSE"));
             break;
@@ -140,7 +151,17 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             break;
         }
         case Opcode.CLOSURE: {
-            console.log(str + val_name(offset, chunk, "CLOSURE"));
+
+            let word = chunk.get_word(offset + 1)
+            let fn = chunk.get_constant(word) as LoxFunction;
+            console.log(str + ` CLOSURE\t${fn.toString()} [${fn.arity()}]`);
+            let start = offset + 2;
+            _.range(0, fn.arity()).forEach((i) => {
+                let is_local = chunk.get_byte(start++)
+                let index = chunk.get_byte(start++)
+                console.log(`      |\t${is_local ? "local" : "upvalue"} ${index}`)
+
+            })
             break;
         }
 
@@ -159,7 +180,7 @@ export function disassemble_instruction(offset: number, chunk: Chunk) {
             return constant_instruction(instr as Opcode, offset, chunk);
         case Opcode.DEF_GLOBAL: case Opcode.GET_GLOBAL: case Opcode.SET_GLOBAL:
             return constant_instruction(instr as Opcode, offset, chunk);
-        case Opcode.GET_LOCAL: case Opcode.SET_LOCAL:
+        case Opcode.GET_LOCAL: case Opcode.SET_LOCAL: case Opcode.GET_UPVALUE: case Opcode.SET_UPVALUE:
         case Opcode.JMP_IF_FALSE: case Opcode.JMP_IF_TRUE: case Opcode.JUMP:
         case Opcode.CALL: case Opcode.CLOSURE:
             return constant_instruction(instr as Opcode, offset, chunk);

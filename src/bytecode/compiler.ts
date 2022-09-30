@@ -75,7 +75,6 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitFun(f: LoxFunDef): void {
-
         let funct = new CompiledFunction(f, this.current());
         let prev = this.current_function
         this.current_function = funct;
@@ -93,14 +92,19 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         }
 
         this.end_scope();
+        let new_funct_env = this.current_function;
         this.current_function = prev;
 
         if (this.options.debug) {
             funct.bytecodes.disassemble(f.name?.id ?? "λ")
         }
 
-        let cl = new LoxClosure(funct);
-        this.add_constant(cl as unknown as LoxFunction);
+        this.emit_constant(Opcode.CLOSURE, funct);
+        //console.log(`upvalues ${new_funct_env.upvalues.length}`)
+        new_funct_env.upvalues.forEach(up => {
+            this.emit_byte(up.is_local ? 1 : 0)
+            this.emit_byte(up.index)
+        })
         this.define_var(f.name);
     }
 
@@ -442,6 +446,13 @@ export class Compiler implements AstVisitor<void>, Evaluator {
                 this.emit_instruction_word(Opcode.SET_LOCAL, index)
             } else {
                 this.emit_instruction_word(Opcode.GET_LOCAL, index)
+            }
+            return;
+        } else if ((index = this.current().resolveUpvalue(v)) !== -1) {
+            if (can_assign) {
+                this.emit_instruction_word(Opcode.SET_UPVALUE, index)
+            } else {
+                this.emit_instruction_word(Opcode.GET_UPVALUE, index)
             }
             return;
         } else {

@@ -8,7 +8,7 @@ import { Chunk } from "./chunk";
 import { disassemble_instruction } from "./debug";
 import { RuntimeError } from "../error";
 import { Options } from "../interpreter";
-import { check_number, check_string, Function_Evaluator, LoxCallable, LoxClosure, LoxFunction, LoxValue, pretty_print, truthy } from "../runtime";
+import { check_number, check_string, Function_Evaluator, LoxCallable, LoxClosure, LoxFunction, LoxUpvalue, LoxValue, pretty_print, truthy } from "../runtime";
 import { Location } from "../token";
 import { SymbolTable } from "../symboltable";
 import { CompiledFunction } from "./compiledfunction";
@@ -43,6 +43,8 @@ export const enum Opcode {
     DEF_LOCAL,
     GET_LOCAL,
     SET_LOCAL,
+    GET_UPVALUE,
+    SET_UPVALUE,
     POP_LOCAL,
     JMP_IF_FALSE,
     JMP_IF_TRUE,
@@ -210,12 +212,21 @@ export class VM {
                     }
                 }
 
-                // case Opcode.CLOSURE: {
-                //     let fn = this.get_word_arg();
-                //     let closure = new LoxClosure(fn as CompiledFunction);
-                //     this.push(closure as unknown as LoxValue);
-                //     break;
-                // }
+                case Opcode.CLOSURE: {
+                    let fn = this.get_word_arg();
+                    let closure = new LoxClosure(fn as CompiledFunction);
+                    this.push(closure as unknown as LoxValue);
+                    for (let i = 0; i < closure.upvalues.length; i++) {
+                        let is_local = this.get_byte();
+                        let index = this.get_byte();
+                        if (is_local) {
+                            closure.upvalues[i] = this.captureUpvalue(this.stack[this.current().previous_stack_ptr + index]);
+                        } else {
+                            closure.upvalues[i] = this.current().cl?.upvalues[index]!
+                        }
+                    }
+                    break;
+                }
 
                 case Opcode.POP: {
                     this.pop();
@@ -371,6 +382,18 @@ export class VM {
                     break;
                 }
 
+                case Opcode.GET_UPVALUE: {
+                    let slot = this.get_byte();
+                    this.push(this.current().cl?.upvalues[slot].location as LoxValue);
+                    break;
+                }
+
+                case Opcode.SET_UPVALUE: {
+                    let slot = this.get_byte();
+                    this.current().cl!.upvalues[slot].location = this.peek();
+                    break;
+                }
+
                 case Opcode.SET_LOCAL: {
                     let id = this.get_word()
                     let expr = this.peek();
@@ -419,6 +442,10 @@ export class VM {
                 this.dump_stack();
             }
         }
+    }
+
+    captureUpvalue(local: LoxValue) {
+        return new LoxUpvalue(local);
     }
 
     dump_symboltable() {

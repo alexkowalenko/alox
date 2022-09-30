@@ -29,13 +29,22 @@ export abstract class LoxCallable {
 
 export class LoxClosure {
     constructor(public fn: LoxCallable) { }
+    public upvalues = new Array<LoxUpvalue>;
 
     toString(): string {
         return this.fn.toString() + "-c";
     }
 }
 
-export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance | LoxClosure;
+export class LoxUpvalue {
+    constructor(public location: LoxValue = null) { }
+
+    toString() {
+        return "Upvalue"
+    }
+}
+
+export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance | LoxClosure | LoxUpvalue;
 
 export function pretty_print(v: LoxValue): string {
     if (v === null) {

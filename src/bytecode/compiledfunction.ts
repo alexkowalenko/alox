@@ -15,7 +15,8 @@ class Local {
     constructor(
         public name: LoxIdentifier,
         public depth: number,
-        public pop = true
+        public pop = true,
+        public is_captured = false,
     ) { }
 }
 
@@ -64,13 +65,26 @@ export class CompiledFunction extends LoxFunction {
         })
     }
 
-    search_upvalue(count: number, name: LoxIdentifier): number {
-        if (this.parent) {
-            if (this.parent.has_local(name)) {
-                return count;
-            }
-            return this.parent.search_upvalue(count + 1, name)
+    resolveUpvalue(name: LoxIdentifier): number {
+        if (this.parent === undefined) {
+            return -1;
+        }
+        let local = this.parent.find_var(name);
+        if (local !== -1) {
+            this.parent.locals[-local].is_captured = true;
+            return this.add_upvalue(name, local, false)
         }
         return -1;
+    }
+
+    add_upvalue(name: LoxIdentifier, index: number, local: boolean): number {
+        let ret = this.upvalues.findIndex(a => {
+            a.index == index && a.is_local == true
+        })
+        if (ret >= 0) {
+            return ret;
+        }
+        this.upvalues.push(new Upvalue(name, index, local));
+        return this.upvalues.length - 1;
     }
 }
