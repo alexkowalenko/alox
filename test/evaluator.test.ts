@@ -360,12 +360,10 @@ describe('Evaluator', () => {
     {
         const tests: TestCases[] = [
             ['class A{}', '<A>'],
-        ]
-        it('class-b', () => { do_tests(tests, true) })
-        tests.concat(
             ['class A{} var x = A(); x;', '<instance A>'],
-        )
-        it('class-b', () => { do_tests(tests) })
+        ]
+        it('class', () => { do_tests(tests) })
+        it('class-b', () => { do_tests(tests, true) })
     }
 
     it('get set', () => {

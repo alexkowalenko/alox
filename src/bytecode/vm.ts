@@ -11,10 +11,10 @@ import { Options } from "../interpreter";
 import { check_number, check_string, Function_Evaluator, LoxCallable, LoxClosure, LoxUpvalue, LoxValue, pretty_print, truthy } from "../runtime";
 import { Location } from "../token";
 import { SymbolTable } from "../symboltable";
-import { CompiledFunction } from "./bytecode_runtime";
+import { CompiledFunction, LOXBInstance } from "./bytecode_runtime";
 
 import os from "os";
-import _ from 'lodash';
+import _, { isArguments } from 'lodash';
 import { LoxFunction } from "../tree/tree_runtime";
 import { LoxBClass } from "./bytecode_runtime"
 
@@ -208,6 +208,14 @@ export class VM {
                             i => args.push(this.peek(i)));
                         this.pop(); // pop the function off the stack.
                         this.push(cl.call(null_eval, args))
+                        break;
+                    } else if (cl instanceof LoxBClass) {
+                        if (cl.arity() != arity) {
+                            throw new RuntimeError(`function ${cl.name} called with ${arity} arguments, expecting ${cl.arity()}`,
+                                this.get_location())
+                        }
+                        let instance = new LOXBInstance(cl);
+                        this.stack.push(instance)
                         break;
                     }
                     else {

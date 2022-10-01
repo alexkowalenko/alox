@@ -5,7 +5,7 @@
 //
 
 import { LoxExpr } from "./ast";
-import { LoxBClass } from "./bytecode/bytecode_runtime";
+import { LoxBClass, LOXBInstance } from "./bytecode/bytecode_runtime";
 import { RuntimeError } from "./error";
 import { Location } from "./token";
 import { LoxClass, LoxFunction, LoxInstance } from "./tree/tree_runtime";
@@ -45,7 +45,7 @@ export class LoxUpvalue {
     }
 }
 
-export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance | LoxClosure | LoxUpvalue | LoxBClass;
+export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance | LoxClosure | LoxUpvalue | LoxBClass | LOXBInstance;
 
 export function pretty_print(v: LoxValue): string {
     if (v === null) {

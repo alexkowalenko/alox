@@ -107,7 +107,21 @@ export class LoxBClass {
     }
     public fields: Map<string, LoxValue>;
 
+    arity(): number {
+        return 0;
+    }
+
     public toString() {
         return `<${this.name}>`;
+    }
+}
+
+export class LOXBInstance {
+
+    constructor(public cls: LoxBClass) { }
+    public fields: Array<LoxValue> = new Array;
+
+    toString(): string {
+        return `<instance ${this.cls.name}>`
     }
 }
