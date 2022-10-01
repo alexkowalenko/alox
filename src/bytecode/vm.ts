@@ -8,13 +8,15 @@ import { Chunk } from "./chunk";
 import { disassemble_instruction } from "./debug";
 import { RuntimeError } from "../error";
 import { Options } from "../interpreter";
-import { check_number, check_string, Function_Evaluator, LoxCallable, LoxClosure, LoxFunction, LoxUpvalue, LoxValue, pretty_print, truthy } from "../runtime";
+import { check_number, check_string, Function_Evaluator, LoxCallable, LoxClosure, LoxUpvalue, LoxValue, pretty_print, truthy } from "../runtime";
 import { Location } from "../token";
 import { SymbolTable } from "../symboltable";
-import { CompiledFunction } from "./compiledfunction";
+import { CompiledFunction } from "./bytecode_runtime";
 
 import os from "os";
 import _ from 'lodash';
+import { LoxFunction } from "../tree/tree_runtime";
+import { LoxBClass } from "./bytecode_runtime"
 
 
 export const enum Opcode {
@@ -51,6 +53,7 @@ export const enum Opcode {
     JUMP,
     CALL,
     CLOSURE,
+    CLASS,
 }
 
 class Frame {
@@ -187,7 +190,7 @@ export class VM {
                     if (cl instanceof LoxClosure) {
                         let fn = cl.fn as CompiledFunction;
                         if (fn.arity() !== arity) {
-                            throw new RuntimeError(`function ${fn.fun.name?.id} called with ${arity} arguments, expecting ${fn.arity()}`,
+                            throw new RuntimeError(`function ${fn.fn.name?.id} called with ${arity} arguments, expecting ${fn.arity()}`,
                                 this.get_location())
                         }
                         var new_frame = new Frame(this.stack_length(), fn.bytecodes, this.stack_length());
@@ -432,6 +435,11 @@ export class VM {
                 case Opcode.JUMP: {
                     let offset = this.get_word();
                     this.current().ip += offset;
+                    break;
+                }
+
+                case Opcode.CLASS: {
+                    this.push(new LoxBClass(this.get_word_arg() as string))
                     break;
                 }
 

@@ -5,13 +5,13 @@
 //
 
 import { AstVisitor, LoxAssign, LoxBinary, LoxBlock, LoxBool, LoxBreak, LoxCall, LoxClassDef, LoxExpr, LoxFor, LoxFunDef, LoxGet, LoxGroup, LoxIdentifier, LoxIf, LoxLiteral, LoxNil, LoxNumber, LoxPrint, LoxProgram, LoxReturn, LoxSet, LoxString, LoxSuper, LoxThis, LoxUnary, LoxVar, LoxWhile } from "../ast";
-import { LoxValue, LoxFunction, Evaluator, LoxClosure } from "../runtime";
+import { LoxValue, Evaluator } from "../runtime";
 import { SymbolTable } from "../symboltable";
 import { Options } from "../interpreter";
 import { Opcode, VM } from "./vm";
 import { TokenType, Location } from "../token";
 import { RuntimeError } from "../error";
-import { CompiledFunction } from "./compiledfunction";
+import { CompiledFunction } from "./bytecode_runtime";
 
 export class Compiler implements AstVisitor<void>, Evaluator {
 
@@ -109,7 +109,8 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitClass(c: LoxClassDef): void {
-        throw new Error("Method not implemented.");
+        this.emit_constant(Opcode.CLASS, c.name.id);
+        this.define_var(c.name);
     }
 
     visitIf(expr: LoxIf): void {

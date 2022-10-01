@@ -4,9 +4,8 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxFunDef, LoxIdentifier } from "../ast";
-import { LoxFunction } from "../runtime";
-import { SymbolTable } from "../symboltable";
+import { LoxClassDef, LoxFunDef, LoxIdentifier } from "../ast";
+import { Function_Evaluator, LoxCallable, LoxValue } from "../runtime";
 import { Chunk } from "./chunk";
 
 import _ from 'lodash';
@@ -32,10 +31,9 @@ class Upvalue {
     }
 }
 
-export class CompiledFunction extends LoxFunction {
+export class CompiledFunction implements LoxCallable {
 
     constructor(public fn: LoxFunDef, public parent?: CompiledFunction) {
-        super(fn, new SymbolTable, false)
         this.bytecodes = new Chunk;
     }
 
@@ -86,5 +84,30 @@ export class CompiledFunction extends LoxFunction {
         }
         this.upvalues.push(new Upvalue(name, index, local));
         return this.upvalues.length - 1;
+    }
+
+    call(interp: Function_Evaluator, args: LoxValue[]): LoxValue {
+        throw new Error("Method not implemented.");
+    }
+
+    arity(): number {
+        return this.fn.args.length
+    }
+
+    toString(): string {
+        throw this.fn.toString();
+    }
+
+}
+
+export class LoxBClass {
+
+    constructor(public name: string) {
+        this.fields = new Map;
+    }
+    public fields: Map<string, LoxValue>;
+
+    public toString() {
+        return `<${this.name}>`;
     }
 }

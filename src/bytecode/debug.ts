@@ -4,11 +4,11 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxClosure, LoxFunction } from "../runtime";
 import { Chunk } from "./chunk";
 import { Opcode } from "./vm";
 
 import _ from 'lodash';
+import { CompiledFunction } from "./bytecode_runtime";
 
 function simple_instruction(op: Opcode, offset: number): number {
     let str = String(offset).padStart(4, '0');
@@ -151,9 +151,8 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             break;
         }
         case Opcode.CLOSURE: {
-
             let word = chunk.get_word(offset + 1)
-            let fn = chunk.get_constant(word) as LoxFunction;
+            let fn = chunk.get_constant(word) as CompiledFunction;
             console.log(str + ` CLOSURE\t${fn.toString()} [${fn.arity()}]`);
             let start = offset + 2;
             _.range(0, fn.arity()).forEach((i) => {
@@ -162,6 +161,10 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
                 console.log(`      |\t${is_local ? "local" : "upvalue"} ${index}`)
 
             })
+            break;
+        }
+        case Opcode.CLASS: {
+            console.log(str + const_name(offset, chunk, "CLASS"));
             break;
         }
 
@@ -182,7 +185,7 @@ export function disassemble_instruction(offset: number, chunk: Chunk) {
             return constant_instruction(instr as Opcode, offset, chunk);
         case Opcode.GET_LOCAL: case Opcode.SET_LOCAL: case Opcode.GET_UPVALUE: case Opcode.SET_UPVALUE:
         case Opcode.JMP_IF_FALSE: case Opcode.JMP_IF_TRUE: case Opcode.JUMP:
-        case Opcode.CALL: case Opcode.CLOSURE:
+        case Opcode.CALL: case Opcode.CLOSURE: case Opcode.CLASS:
             return constant_instruction(instr as Opcode, offset, chunk);
     }
     return simple_instruction(instr as Opcode, offset);

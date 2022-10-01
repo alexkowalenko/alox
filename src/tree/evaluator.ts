@@ -8,11 +8,12 @@ import { AstVisitor, LoxExpr, LoxNumber, LoxBool, LoxNil, LoxUnary, LoxBinary, L
 import { RuntimeError } from "../error";
 import { Options } from "../interpreter";
 import { Printer } from "../printer";
-import { LoxCallable, LoxValue, LoxFunction, LoxClass, LoxInstance, pretty_print, check_number, check_string, truthy, Function_Evaluator, Evaluator } from "../runtime";
+import { LoxCallable, LoxValue, pretty_print, check_number, check_string, truthy, Function_Evaluator, Evaluator } from "../runtime";
 import { SymbolTable } from "../symboltable";
 import { TokenType } from "../token";
 
 import os from "os";
+import { LoxClass, LoxFunction, LoxInstance } from "./tree_runtime";
 
 
 export class TreeEvaluator implements AstVisitor<LoxValue>, Evaluator, Function_Evaluator {
