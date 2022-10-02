@@ -4,8 +4,8 @@
 // Copyright © Alex Kowalenko 2022.
 //
 
-import { LoxClassDef, LoxFunDef, LoxIdentifier } from "../ast";
-import { Function_Evaluator, LoxCallable, LoxValue } from "../runtime";
+import { LoxFunDef, LoxIdentifier } from "../ast";
+import { Function_Evaluator, LoxCallable, LoxClosure, LoxValue } from "../runtime";
 import { Chunk } from "./chunk";
 
 import _ from 'lodash';
@@ -95,7 +95,7 @@ export class CompiledFunction implements LoxCallable {
     }
 
     toString(): string {
-        throw this.fn.toString();
+        return `${this.fn.name}()`
     }
 
 }
@@ -103,9 +103,9 @@ export class CompiledFunction implements LoxCallable {
 export class LoxBClass {
 
     constructor(public name: string) {
-        this.fields = new Map;
+        this.methods = new Map;
     }
-    public fields: Map<string, LoxValue>;
+    public methods: Map<string, LoxClosure>;
 
     arity(): number {
         return 0;

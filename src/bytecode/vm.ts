@@ -56,6 +56,7 @@ export const enum Opcode {
     CLASS,
     GET_PROPERTY,
     SET_PROPERTY,
+    METHOD,
 }
 
 class Frame {
@@ -450,6 +451,14 @@ export class VM {
 
                 case Opcode.CLASS: {
                     this.push(new LoxBClass(this.get_word_arg() as string))
+                    break;
+                }
+
+                case Opcode.METHOD: {
+                    let method_name = this.get_word_arg() as string;
+                    let cls = this.peek(1) as LoxBClass;
+                    cls.methods.set(method_name, this.peek() as LoxClosure);
+                    this.pop();
                     break;
                 }
 

@@ -74,7 +74,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.define_var(v.ident);
     }
 
-    visitFun(f: LoxFunDef): void {
+    private function(f: LoxFunDef) {
         let funct = new CompiledFunction(f, this.current());
         let prev = this.current_function
         this.current_function = funct;
@@ -105,11 +105,19 @@ export class Compiler implements AstVisitor<void>, Evaluator {
             this.emit_byte(up.is_local ? 1 : 0)
             this.emit_byte(up.index)
         })
+    }
+
+    visitFun(f: LoxFunDef): void {
+        this.function(f);
         this.define_var(f.name);
     }
 
     visitClass(c: LoxClassDef): void {
         this.emit_constant(Opcode.CLASS, c.name.id);
+        c.methods.forEach(method => {
+            this.function(method);
+            this.emit_constant(Opcode.METHOD, method.name.id)
+        })
         this.define_var(c.name);
     }
 
