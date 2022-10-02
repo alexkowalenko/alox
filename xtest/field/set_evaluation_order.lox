@@ -1,2 +1,4 @@
 undefined1.bar // error: identifier undefined1 not found
   = undefined2;
+
+// option: bytecode 

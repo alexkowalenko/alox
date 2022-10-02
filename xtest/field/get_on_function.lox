@@ -1,3 +1,5 @@
 fun foo() {}
 
 foo.bar; // error: only objects have properties
+
+// option: bytecode

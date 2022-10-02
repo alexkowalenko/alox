@@ -1,1 +1,3 @@
 "str".foo = "value"; // error: only objects have properties
+
+// option: bytecode 

@@ -1,1 +1,3 @@
 123.foo = "value"; // error: unexpected ident<foo>, expecting ;
+
+// option: bytecode 

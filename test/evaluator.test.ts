@@ -366,8 +366,8 @@ describe('Evaluator', () => {
         it('class-b', () => { do_tests(tests, true) })
     }
 
-    it('get set', () => {
-        const tests: TestCases[] = [
+    {
+        let tests: TestCases[] = [
             ['class A{} var x = A(); x.s = 1;', '1'],
             ['x.s;', '1'],
             ['x.c = 2;', '2'],
@@ -382,8 +382,9 @@ describe('Evaluator', () => {
             ['x = 1; x.s;', '', 'only objects have properties'],
             ['class X{} x = X(); x.s;', '', 'undefined property s'],
         ]
-        do_tests(tests)
-    })
+        it('get set', () => { do_tests(tests) })
+        it('get set-b', () => { do_tests(tests, true) })
+    }
 
     it('methods', () => {
         const tests: TestCases[] = [

@@ -96,7 +96,7 @@ function get_expected(name: string): FileInfo {
         if (matcher) {
             let ex = matcher?.groups?.expect
             // console.log(`${file} option : ${ex}`)
-            fi.options.push(ex!)
+            fi.options.push(ex!.trim())
         }
     }
     return fi;
@@ -129,6 +129,7 @@ async function test_with_options(name: string, file_expected: FileInfo, options:
     let test_name = name;
     if (options.bytecode) {
         test_name += " [Bytecode]"
+        //console.log(test_name)
     }
 
     test(test_name, async () => {

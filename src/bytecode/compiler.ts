@@ -320,11 +320,14 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitGet(e: LoxGet): void {
-        throw new Error("Method not implemented.");
+        e.expr.accept(this);
+        this.emit_constant(Opcode.GET_PROPERTY, e.ident.id);
     }
 
     visitSet(e: LoxSet): void {
-        throw new Error("Method not implemented.");
+        e.value.accept(this);
+        e.expr.accept(this);
+        this.emit_constant(Opcode.SET_PROPERTY, e.ident.id);
     }
 
     visitAssign(e: LoxAssign): void {

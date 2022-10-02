@@ -85,8 +85,11 @@ Run the REPL by invoking `alox.ts`.
   - [x] Upvalues
   - [ ] Closed upvalues
 - [x] Garbage Collection - Chapter 26. Implemented in TypeScript/JavaScript.
-- [ ] Classes and Instances - Chapter 27.
+- [x] Classes and Instances - Chapter 27.
   - [x] Class objects
-  - [ ] Instances
+  - [x] Instances
 - [ ] Methods and Initializers - Chapter 28.
+  - [ ] Methods.
+  - [ ] `this`
+  - [ ] Constructors.
 - [ ] Superclasses - Chapters 29.

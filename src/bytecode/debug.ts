@@ -167,6 +167,14 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             console.log(str + const_name(offset, chunk, "CLASS"));
             break;
         }
+        case Opcode.SET_PROPERTY: {
+            console.log(str + const_name(offset, chunk, "SET_PROPERTY"));
+            break;
+        }
+        case Opcode.GET_GLOBAL: {
+            console.log(str + const_name(offset, chunk, "GET_PROPERTY"));
+            break;
+        }
 
         default:
             console.log(str + ` <unknown ${op}>`);
@@ -185,7 +193,7 @@ export function disassemble_instruction(offset: number, chunk: Chunk) {
             return constant_instruction(instr as Opcode, offset, chunk);
         case Opcode.GET_LOCAL: case Opcode.SET_LOCAL: case Opcode.GET_UPVALUE: case Opcode.SET_UPVALUE:
         case Opcode.JMP_IF_FALSE: case Opcode.JMP_IF_TRUE: case Opcode.JUMP:
-        case Opcode.CALL: case Opcode.CLOSURE: case Opcode.CLASS:
+        case Opcode.CALL: case Opcode.CLOSURE: case Opcode.CLASS: case Opcode.SET_PROPERTY: case Opcode.GET_GLOBAL:
             return constant_instruction(instr as Opcode, offset, chunk);
     }
     return simple_instruction(instr as Opcode, offset);

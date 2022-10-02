@@ -13,3 +13,5 @@ foo.bar(1, 2);
 // expect: bar
 // expect: 1
 // expect: 2
+
+// option: bytecode

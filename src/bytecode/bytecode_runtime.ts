@@ -116,10 +116,10 @@ export class LoxBClass {
     }
 }
 
-export class LOXBInstance {
+export class LoxBInstance {
 
     constructor(public cls: LoxBClass) { }
-    public fields: Array<LoxValue> = new Array;
+    public fields: Map<string, LoxValue> = new Map;
 
     toString(): string {
         return `<instance ${this.cls.name}>`

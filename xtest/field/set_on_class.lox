@@ -1,2 +1,4 @@
 class Foo {}
 Foo.bar = "value"; // error: only objects have properties
+
+// option: bytecode 

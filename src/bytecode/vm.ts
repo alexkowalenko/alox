@@ -11,7 +11,7 @@ import { Options } from "../interpreter";
 import { check_number, check_string, Function_Evaluator, LoxCallable, LoxClosure, LoxUpvalue, LoxValue, pretty_print, truthy } from "../runtime";
 import { Location } from "../token";
 import { SymbolTable } from "../symboltable";
-import { CompiledFunction, LOXBInstance } from "./bytecode_runtime";
+import { CompiledFunction, LoxBInstance } from "./bytecode_runtime";
 
 import os from "os";
 import _, { isArguments } from 'lodash';
@@ -54,6 +54,8 @@ export const enum Opcode {
     CALL,
     CLOSURE,
     CLASS,
+    GET_PROPERTY,
+    SET_PROPERTY,
 }
 
 class Frame {
@@ -214,7 +216,7 @@ export class VM {
                             throw new RuntimeError(`function ${cl.name} called with ${arity} arguments, expecting ${cl.arity()}`,
                                 this.get_location())
                         }
-                        let instance = new LOXBInstance(cl);
+                        let instance = new LoxBInstance(cl);
                         this.stack.push(instance)
                         break;
                     }
@@ -448,6 +450,32 @@ export class VM {
 
                 case Opcode.CLASS: {
                     this.push(new LoxBClass(this.get_word_arg() as string))
+                    break;
+                }
+
+                case Opcode.GET_PROPERTY: {
+                    if (!(this.peek() instanceof LoxBInstance)) {
+                        throw new RuntimeError("only objects have properties", this.get_location())
+                    }
+                    let instance = this.pop() as LoxBInstance;
+                    let field = this.get_word_arg();
+                    if ((instance as LoxBInstance).fields.has(field as string)) {
+                        this.push(instance.fields.get(field as string)!)
+                        break;
+                    }
+                    throw new RuntimeError(`undefined property ${field}`, this.get_location())
+                }
+
+                case Opcode.SET_PROPERTY: {
+                    if (!(this.peek() instanceof LoxBInstance)) {
+                        throw new RuntimeError("only objects have properties", this.get_location())
+                    }
+                    let instance = this.pop() as LoxBInstance;
+                    let field = this.get_word_arg();
+                    let value = this.pop();
+                    this.pop();
+                    instance.fields.set(field as string, value!)
+                    this.push(value!);
                     break;
                 }
 

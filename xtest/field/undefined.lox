@@ -2,3 +2,5 @@ class Foo {}
 var foo = Foo();
 
 foo.bar; // error: undefined property bar
+
+// option: bytecode 
