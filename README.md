@@ -91,5 +91,8 @@ Run the REPL by invoking `alox.ts`.
 - [ ] Methods and Initializers - Chapter 28.
   - [x] Methods.
   - [x] `this`
-  - [ ] Constructors.
+  - [x] Constructors.
+  - [ ] Opcode.INVOKE
 - [ ] Superclasses - Chapters 29.
+  - [ ] Inheritance.
+  - [ ] `super`.

@@ -6,3 +6,5 @@ class Foo {
 }
 
 var foo = Foo(1, 2, 3, 4); // error: function Foo called with 4 arguments, expecting 2
+
+// option: bytecode

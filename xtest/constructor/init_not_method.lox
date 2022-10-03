@@ -10,3 +10,5 @@ fun init() {
 }
 
 init(); // expect: not initializer
+
+// option: bytecode

@@ -407,14 +407,15 @@ describe('Evaluator', () => {
         it('this-b', () => { do_tests(tests, true) })
     }
 
-    it('init', () => {
+    {
         const tests: TestCases[] = [
             ['class A{ init() {this.a = "jones";} } var x = A(); x.a;', '"jones"'],
             ['class B{ init(b) {this.a = b;} } x = B("jim"); x.a;', '"jim"'],
             ['class C{ init(a, b) {this.a = a; this.b = b;} } x = C(1, 2); x.b;', '2'],
         ]
-        do_tests(tests)
-    })
+        it('init', () => { do_tests(tests) })
+        it('init-b', () => { do_tests(tests, true) })
+    }
 
     it('inheritance', () => {
         const tests: TestCases[] = [

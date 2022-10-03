@@ -45,13 +45,18 @@ export class LoxBoundMethod {
 export const enum FunctionType {
     FUNCTION,
     METHOD,
+    INITIALISER
+}
+
+function is_method_type(x: FunctionType) {
+    return x === FunctionType.METHOD || x === FunctionType.INITIALISER;
 }
 
 export class CompiledFunction implements LoxCallable {
 
     constructor(public fn: LoxFunDef, public type: FunctionType, public parent?: CompiledFunction) {
         this.bytecodes = new Chunk;
-        if (type === FunctionType.METHOD) {
+        if (is_method_type(type)) {
             this.add_local(new LoxIdentifier(fn.location, "this"), 0, true);
         }
     }
@@ -115,6 +120,10 @@ export class CompiledFunction implements LoxCallable {
 
     toString(): string {
         return `${this.fn.name}()`
+    }
+
+    is_method() {
+        return this.type === FunctionType.METHOD || this.type === FunctionType.INITIALISER;
     }
 
 }

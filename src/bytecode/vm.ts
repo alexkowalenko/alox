@@ -11,7 +11,7 @@ import { Options } from "../interpreter";
 import { check_number, check_string, Function_Evaluator, LoxCallable, LoxValue, pretty_print, truthy } from "../runtime";
 import { Location } from "../token";
 import { SymbolTable } from "../symboltable";
-import { CompiledFunction, FunctionType, LoxBInstance, LoxBoundMethod, LoxClosure, LoxUpvalue } from "./bytecode_runtime";
+import { CompiledFunction, LoxBInstance, LoxBoundMethod, LoxClosure, LoxUpvalue } from "./bytecode_runtime";
 
 import os from "os";
 import _, { isArguments } from 'lodash';
@@ -208,11 +208,21 @@ export class VM {
                         this.push(cl.call(null_eval, args))
                         break;
                     } else if (cl instanceof LoxBClass) {
-                        if (cl.arity() != arity) {
-                            throw new RuntimeError(`function ${cl.name} called with ${arity} arguments, expecting ${cl.arity()}`,
-                                this.get_location())
+                        if (!cl.methods.has("init")) {
+                            if (arity != 0) {
+                                throw new RuntimeError(`function ${cl.name} called with ${arity} arguments, expecting ${cl.arity()}`,
+                                    this.get_location())
+                            }
                         }
                         let instance = new LoxBInstance(cl);
+                        if (cl.methods.has("init")) {
+                            let method = cl.methods.get("init")!;
+                            if (arity !== method.fn.arity()) {
+                                throw new RuntimeError(`function ${cl.name} called with ${arity} arguments, expecting ${method.fn.arity()}`,
+                                    this.get_location())
+                            }
+                            this.invoke_method(instance, method, arity);
+                        }
                         this.stack.push(instance)
                         break;
                     } else if (cl instanceof LoxBoundMethod) {
@@ -220,10 +230,7 @@ export class VM {
                             throw new RuntimeError(`function ${cl.method.fn.fn.name.id} called with ${arity} arguments, expecting ${cl.method.fn.arity()}`,
                                 this.get_location())
                         }
-                        let pos = this.stack.length - arity - 1;
-                        //console.log(`this is ${cl.receiver} pos = ${pos}`)
-                        this.stack[pos] = cl.receiver;
-                        this.call(cl.method, arity)
+                        this.invoke_method(cl.receiver, cl.method, arity);
                         break;
                     }
                     else {
@@ -512,10 +519,17 @@ export class VM {
         }
     }
 
+    invoke_method(receiver: LoxBInstance, method: LoxClosure, arity: number) {
+        let pos = this.stack.length - arity - 1;
+        //console.log(`this is ${cl.receiver} pos = ${pos}`)
+        this.stack[pos] = receiver;
+        this.call(method, arity)
+    }
+
     call(cl: LoxClosure, arity: number): void {
         var new_frame = new Frame(this.stack_length(), cl.fn.bytecodes, this.stack_length());
         new_frame.arity = arity;
-        new_frame.frame_ptr = this.stack.length - arity - (cl.fn.type === FunctionType.METHOD ? 1 : 0)
+        new_frame.frame_ptr = this.stack.length - arity - (cl.fn.is_method() ? 1 : 0)
         new_frame.cl = cl;
         this.frame_stack.push(new_frame);
         // execute function

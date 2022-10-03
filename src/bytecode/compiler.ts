@@ -115,7 +115,8 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     visitClass(c: LoxClassDef): void {
         this.emit_constant(Opcode.CLASS, c.name.id);
         c.methods.forEach(method => {
-            this.function(method, FunctionType.METHOD);
+            let type = method.name.id === "init" ? FunctionType.INITIALISER : FunctionType.METHOD
+            this.function(method, type);
             this.emit_constant(Opcode.METHOD, method.name.id)
         })
         this.define_var(c.name);
@@ -214,7 +215,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitReturn(e: LoxReturn): void {
-        if (e.expr) {
+        if (this.current().type === FunctionType.INITIALISER) {
+            this.emit_instruction_word(Opcode.GET_LOCAL, 0);
+        } else if (e.expr) {
             e.expr.accept(this);
         } else {
             this.emit_instruction(Opcode.NIL);
@@ -237,6 +240,9 @@ export class Compiler implements AstVisitor<void>, Evaluator {
                     this.emit_instruction(Opcode.POP)
                 }
             })
+            if (this.current().type == FunctionType.INITIALISER) {
+                this.emit_instruction_word(Opcode.GET_LOCAL, 0);
+            }
         } else {
             this.emit_instruction(Opcode.NIL)
         }

@@ -3,3 +3,5 @@ class Foo {
 }
 
 var foo = Foo(1); // error: function Foo called with 1 arguments, expecting 2
+
+// option: bytecode

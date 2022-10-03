@@ -13,3 +13,5 @@ print foo2; // expect: <instance Foo>
 
 // Make sure init() doesn't create a fresh instance.
 print foo.field; // expect: init
+
+// option: bytecode
