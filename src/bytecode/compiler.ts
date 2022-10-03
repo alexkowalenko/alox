@@ -11,7 +11,7 @@ import { Options } from "../interpreter";
 import { Opcode, VM } from "./vm";
 import { TokenType, Location } from "../token";
 import { RuntimeError } from "../error";
-import { CompiledFunction } from "./bytecode_runtime";
+import { CompiledFunction, FunctionType } from "./bytecode_runtime";
 
 export class Compiler implements AstVisitor<void>, Evaluator {
 
@@ -22,7 +22,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     init() {
         let fn = new LoxFunDef(new Location(), new LoxIdentifier(new Location(), "_main"));
-        this.current_function = new CompiledFunction(fn);
+        this.current_function = new CompiledFunction(fn, FunctionType.FUNCTION);
     }
 
     current() {
@@ -74,8 +74,8 @@ export class Compiler implements AstVisitor<void>, Evaluator {
         this.define_var(v.ident);
     }
 
-    private function(f: LoxFunDef) {
-        let funct = new CompiledFunction(f, this.current());
+    private function(f: LoxFunDef, type: FunctionType) {
+        let funct = new CompiledFunction(f, type, this.current());
         let prev = this.current_function
         this.current_function = funct;
 
@@ -108,14 +108,14 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitFun(f: LoxFunDef): void {
-        this.function(f);
+        this.function(f, FunctionType.FUNCTION);
         this.define_var(f.name);
     }
 
     visitClass(c: LoxClassDef): void {
         this.emit_constant(Opcode.CLASS, c.name.id);
         c.methods.forEach(method => {
-            this.function(method);
+            this.function(method, FunctionType.METHOD);
             this.emit_constant(Opcode.METHOD, method.name.id)
         })
         this.define_var(c.name);
@@ -353,7 +353,7 @@ export class Compiler implements AstVisitor<void>, Evaluator {
     }
 
     visitThis(e: LoxThis): void {
-        throw new Error("Method not implemented.");
+        this.visitIdentifier(new LoxIdentifier(e.location, "this"));
     }
 
     visitSuper(e: LoxSuper): void {

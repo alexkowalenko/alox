@@ -4,3 +4,5 @@ class Foo {
 }
 
 print Foo().bar().baz(); // expect: baz
+
+// option: bytecode

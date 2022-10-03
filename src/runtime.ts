@@ -34,6 +34,9 @@ export function pretty_print(v: LoxValue): string {
     if (v === null) {
         return 'nil'
     }
+    if (v === undefined) {
+        return '<undefined>'
+    }
     if (typeof v == 'string') {
         return '"' + v + '"'
     }

@@ -11,7 +11,7 @@ import { Options } from "../interpreter";
 import { check_number, check_string, Function_Evaluator, LoxCallable, LoxValue, pretty_print, truthy } from "../runtime";
 import { Location } from "../token";
 import { SymbolTable } from "../symboltable";
-import { CompiledFunction, LoxBInstance, LoxBoundMethod, LoxClosure, LoxUpvalue } from "./bytecode_runtime";
+import { CompiledFunction, FunctionType, LoxBInstance, LoxBoundMethod, LoxClosure, LoxUpvalue } from "./bytecode_runtime";
 
 import os from "os";
 import _, { isArguments } from 'lodash';
@@ -195,7 +195,7 @@ export class VM {
                             throw new RuntimeError(`function ${cl.fn.fn.name?.id} called with ${arity} arguments, expecting ${cl.fn.arity()}`,
                                 this.get_location())
                         }
-                        this.call(cl, arity);;
+                        this.call(cl, arity)
                         // execute function
                         break;
                     } else if (cl instanceof LoxCallable) {
@@ -220,6 +220,9 @@ export class VM {
                             throw new RuntimeError(`function ${cl.method.fn.fn.name.id} called with ${arity} arguments, expecting ${cl.method.fn.arity()}`,
                                 this.get_location())
                         }
+                        let pos = this.stack.length - arity - 1;
+                        //console.log(`this is ${cl.receiver} pos = ${pos}`)
+                        this.stack[pos] = cl.receiver;
                         this.call(cl.method, arity)
                         break;
                     }
@@ -400,7 +403,7 @@ export class VM {
 
                 case Opcode.GET_UPVALUE: {
                     let slot = this.get_byte();
-                    this.push(this.current().cl?.upvalues[slot].location as LoxValue);
+                    this.push(this.current().cl?.upvalues[slot]?.location as LoxValue);
                     break;
                 }
 
@@ -512,7 +515,7 @@ export class VM {
     call(cl: LoxClosure, arity: number): void {
         var new_frame = new Frame(this.stack_length(), cl.fn.bytecodes, this.stack_length());
         new_frame.arity = arity;
-        new_frame.frame_ptr = this.stack.length - arity;
+        new_frame.frame_ptr = this.stack.length - arity - (cl.fn.type === FunctionType.METHOD ? 1 : 0)
         new_frame.cl = cl;
         this.frame_stack.push(new_frame);
         // execute function

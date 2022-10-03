@@ -397,15 +397,15 @@ describe('Evaluator', () => {
         it('methods', () => { do_tests(tests) })
         it('methods-b', () => { do_tests(tests, true) })
     }
-
-    it('this', () => {
+    {
         const tests: TestCases[] = [
             ['class A{ f() {return this;} } var x = A(); x.f();', '<instance A>'],
             ['class C{ f() {return this.x;} g(a) { this.x = a;}} x = C(); x.x = 17; x.f();', '17'],
             ['x.g(5); x.x;', '5'],
         ]
-        do_tests(tests)
-    })
+        it('this', () => { do_tests(tests) })
+        it('this-b', () => { do_tests(tests, true) })
+    }
 
     it('init', () => {
         const tests: TestCases[] = [

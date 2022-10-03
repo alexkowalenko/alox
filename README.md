@@ -89,7 +89,7 @@ Run the REPL by invoking `alox.ts`.
   - [x] Class objects
   - [x] Instances
 - [ ] Methods and Initializers - Chapter 28.
-  - [ ] Methods.
-  - [ ] `this`
+  - [x] Methods.
+  - [x] `this`
   - [ ] Constructors.
 - [ ] Superclasses - Chapters 29.

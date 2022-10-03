@@ -171,7 +171,7 @@ function constant_instruction(op: Opcode, offset: number, chunk: Chunk): number 
             console.log(str + const_name(offset, chunk, "SET_PROPERTY"));
             break;
         }
-        case Opcode.GET_GLOBAL: {
+        case Opcode.GET_PROPERTY: {
             console.log(str + const_name(offset, chunk, "GET_PROPERTY"));
             break;
         }

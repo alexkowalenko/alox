@@ -33,20 +33,27 @@ class Upvalue {
 
 export class LoxBoundMethod {
     constructor(
-        public receiver: LoxValue,
+        public receiver: LoxBInstance,
         public method: LoxClosure
     ) { }
-    public obj: LoxValue = null;
 
     toString() {
         return `<fn ${this.method.fn.fn.name}>`
     }
 }
 
+export const enum FunctionType {
+    FUNCTION,
+    METHOD,
+}
+
 export class CompiledFunction implements LoxCallable {
 
-    constructor(public fn: LoxFunDef, public parent?: CompiledFunction) {
+    constructor(public fn: LoxFunDef, public type: FunctionType, public parent?: CompiledFunction) {
         this.bytecodes = new Chunk;
+        if (type === FunctionType.METHOD) {
+            this.add_local(new LoxIdentifier(fn.location, "this"), 0, true);
+        }
     }
 
     bytecodes: Chunk;
