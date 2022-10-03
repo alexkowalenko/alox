@@ -54,6 +54,7 @@ export const enum Opcode {
     CALL,
     CLOSURE,
     CLASS,
+    INHERIT,
     GET_PROPERTY,
     SET_PROPERTY,
     METHOD,
@@ -463,6 +464,22 @@ export class VM {
 
                 case Opcode.CLASS: {
                     this.push(new LoxBClass(this.get_word_arg() as string))
+                    break;
+                }
+
+                case Opcode.INHERIT: {
+                    let sub_class = this.peek(1) as LoxBClass;
+                    let super_class_name = this.peek() as string;
+                    let super_class = this.symboltable.get(super_class_name)
+                    if (super_class instanceof LoxBClass) {
+                        // console.log(`superclass : ${super_class.name} method count ${super_class.methods.size}`)
+                        super_class.methods.forEach(method => {
+                            sub_class.methods.set(method.fn.fn.name.id, method)
+                        })
+                    } else {
+                        throw new RuntimeError(`superclass of ${sub_class.name} must be a class`, this.get_location())
+                    }
+                    this.pop();
                     break;
                 }
 

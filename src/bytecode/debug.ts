@@ -70,6 +70,9 @@ function simple_instruction(op: Opcode, offset: number): number {
         case Opcode.DEF_LOCAL:
             console.log(str + " DEF_LOCAL");
             break;
+        case Opcode.INHERIT:
+            console.log(str + " INHERIT");
+            break;
         default:
             console.log(str + ` <unknown ${op}>`);
     }

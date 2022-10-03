@@ -88,11 +88,19 @@ Run the REPL by invoking `alox.ts`.
 - [x] Classes and Instances - Chapter 27.
   - [x] Class objects
   - [x] Instances
-- [ ] Methods and Initializers - Chapter 28.
+- [x] Methods and Initializers - Chapter 28.
   - [x] Methods.
   - [x] `this`
   - [x] Constructors.
-  - [ ] Opcode.INVOKE
 - [ ] Superclasses - Chapters 29.
-  - [ ] Inheritance.
+  - [x] Inheritance.
   - [ ] `super`.
+
+## Problems
+
+- Differing from the book, every statement returns a value. This led to some messy code to keep stack hygiene in block statements, and also returning from constructors. This was done so that the compiler could be tested via what it returned. If I re-write this interpreter/compiler, I will eliminate this feature and keep it closer to book.
+
+- TypeScript/JavaScript does not really allow to point to values into the stack, like the C version did. I could have worked it out via a index into the array of the stack, but it is too messy. Thus closures don't work.
+
+- Line numbers are transferred to the VM via special Opcode LINE - I think this does slow down significantly the VM, as you can't really turn of line numbers due to error code reporting. Line number information should be kept separately in the bytecode chunk, but not fed through the VM.
+  

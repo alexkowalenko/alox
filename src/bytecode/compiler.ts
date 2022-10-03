@@ -114,6 +114,10 @@ export class Compiler implements AstVisitor<void>, Evaluator {
 
     visitClass(c: LoxClassDef): void {
         this.emit_constant(Opcode.CLASS, c.name.id);
+        if (c.super_class) {
+            this.add_constant(c.super_class.id)
+            this.emit_instruction(Opcode.INHERIT)
+        }
         c.methods.forEach(method => {
             let type = method.name.id === "init" ? FunctionType.INITIALISER : FunctionType.METHOD
             this.function(method, type);

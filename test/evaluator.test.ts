@@ -417,7 +417,7 @@ describe('Evaluator', () => {
         it('init-b', () => { do_tests(tests, true) })
     }
 
-    it('inheritance', () => {
+    {
         const tests: TestCases[] = [
             ['class A{ f(a) {this.x = a;} }', '<A>'],
             ['class B < A { g(a) {this.x = a;}} var y= B(); y.f(88); y.x;', '88'],
@@ -426,8 +426,9 @@ describe('Evaluator', () => {
             // Error
             ['var x = 1; class A < x{ init() {this.a = "jones";} }', '', "superclass of A must be a class"],
         ]
-        do_tests(tests)
-    })
+        it('inheritance', () => { do_tests(tests) })
+        it('inheritance-b', () => { do_tests(tests, true) })
+    }
 
     it('super', () => {
         const tests: TestCases[] = [

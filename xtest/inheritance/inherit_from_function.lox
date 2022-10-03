@@ -1,3 +1,5 @@
 fun foo() {}
 
 class Subclass < foo {} // error: superclass of Subclass must be a class
+
+// option: bytecode

@@ -12,3 +12,5 @@ class B < A {}
 
 var b = B("value");
 b.test(); // expect: value
+
+// option: bytecode
