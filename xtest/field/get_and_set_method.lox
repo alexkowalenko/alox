@@ -23,3 +23,5 @@ foo.method(1);
 method(2);
 // expect: method
 // expect: 2
+
+// option: bytecode

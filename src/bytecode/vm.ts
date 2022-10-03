@@ -8,10 +8,10 @@ import { Chunk } from "./chunk";
 import { disassemble_instruction } from "./debug";
 import { RuntimeError } from "../error";
 import { Options } from "../interpreter";
-import { check_number, check_string, Function_Evaluator, LoxCallable, LoxClosure, LoxUpvalue, LoxValue, pretty_print, truthy } from "../runtime";
+import { check_number, check_string, Function_Evaluator, LoxCallable, LoxValue, pretty_print, truthy } from "../runtime";
 import { Location } from "../token";
 import { SymbolTable } from "../symboltable";
-import { CompiledFunction, LoxBInstance } from "./bytecode_runtime";
+import { CompiledFunction, LoxBInstance, LoxBoundMethod, LoxClosure, LoxUpvalue } from "./bytecode_runtime";
 
 import os from "os";
 import _, { isArguments } from 'lodash';
@@ -191,16 +191,11 @@ export class VM {
                     let arity = this.get_byte();
                     var cl = this.peek(arity);
                     if (cl instanceof LoxClosure) {
-                        let fn = cl.fn as CompiledFunction;
-                        if (fn.arity() !== arity) {
-                            throw new RuntimeError(`function ${fn.fn.name?.id} called with ${arity} arguments, expecting ${fn.arity()}`,
+                        if (cl.fn.arity() !== arity) {
+                            throw new RuntimeError(`function ${cl.fn.fn.name?.id} called with ${arity} arguments, expecting ${cl.fn.arity()}`,
                                 this.get_location())
                         }
-                        var new_frame = new Frame(this.stack_length(), fn.bytecodes, this.stack_length());
-                        new_frame.arity = arity;
-                        new_frame.frame_ptr = this.stack.length - arity;
-                        new_frame.cl = cl;
-                        this.frame_stack.push(new_frame);
+                        this.call(cl, arity);;
                         // execute function
                         break;
                     } else if (cl instanceof LoxCallable) {
@@ -219,6 +214,13 @@ export class VM {
                         }
                         let instance = new LoxBInstance(cl);
                         this.stack.push(instance)
+                        break;
+                    } else if (cl instanceof LoxBoundMethod) {
+                        if (cl.method.fn.arity() != arity) {
+                            throw new RuntimeError(`function ${cl.method.fn.fn.name.id} called with ${arity} arguments, expecting ${cl.method.fn.arity()}`,
+                                this.get_location())
+                        }
+                        this.call(cl.method, arity)
                         break;
                     }
                     else {
@@ -467,11 +469,21 @@ export class VM {
                         throw new RuntimeError("only objects have properties", this.get_location())
                     }
                     let instance = this.pop() as LoxBInstance;
-                    let field = this.get_word_arg();
-                    if ((instance as LoxBInstance).fields.has(field as string)) {
-                        this.push(instance.fields.get(field as string)!)
+                    let field = this.get_word_arg() as string;
+
+                    // Look for field
+                    if ((instance as LoxBInstance).fields.has(field)) {
+                        this.push(instance.fields.get(field)!)
                         break;
                     }
+
+                    // Look for method
+                    if (instance.cls.methods.has(field)) {
+                        let bound = new LoxBoundMethod(instance, instance.cls.methods.get(field)!)
+                        this.push(bound);
+                        break;
+                    }
+
                     throw new RuntimeError(`undefined property ${field}`, this.get_location())
                 }
 
@@ -495,6 +507,16 @@ export class VM {
                 this.dump_stack();
             }
         }
+    }
+
+    call(cl: LoxClosure, arity: number): void {
+        var new_frame = new Frame(this.stack_length(), cl.fn.bytecodes, this.stack_length());
+        new_frame.arity = arity;
+        new_frame.frame_ptr = this.stack.length - arity;
+        new_frame.cl = cl;
+        this.frame_stack.push(new_frame);
+        // execute function
+        return;
     }
 
     captureUpvalue(local: LoxValue) {

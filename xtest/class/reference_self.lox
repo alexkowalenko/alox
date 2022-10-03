@@ -5,3 +5,5 @@ class Foo {
 }
 
 print Foo().returnSelf(); // expect: <Foo>
+
+// option: bytecode

@@ -5,7 +5,7 @@
 //
 
 import { LoxFunDef, LoxIdentifier } from "../ast";
-import { Function_Evaluator, LoxCallable, LoxClosure, LoxValue } from "../runtime";
+import { Function_Evaluator, LoxCallable, LoxValue } from "../runtime";
 import { Chunk } from "./chunk";
 
 import _ from 'lodash';
@@ -28,6 +28,18 @@ class Upvalue {
 
     toString() {
         return `[${this.name.id} : ${this.index}, ${this.is_local ? "local" : ""}]`
+    }
+}
+
+export class LoxBoundMethod {
+    constructor(
+        public receiver: LoxValue,
+        public method: LoxClosure
+    ) { }
+    public obj: LoxValue = null;
+
+    toString() {
+        return `<fn ${this.method.fn.fn.name}>`
     }
 }
 
@@ -98,6 +110,23 @@ export class CompiledFunction implements LoxCallable {
         return `${this.fn.name}()`
     }
 
+}
+
+export class LoxClosure {
+    constructor(public fn: CompiledFunction) { }
+    public upvalues = new Array<LoxUpvalue>;
+
+    toString(): string {
+        return this.fn.toString() + "-c";
+    }
+}
+
+export class LoxUpvalue {
+    constructor(public location: LoxValue = null) { }
+
+    toString() {
+        return "Upvalue"
+    }
 }
 
 export class LoxBClass {

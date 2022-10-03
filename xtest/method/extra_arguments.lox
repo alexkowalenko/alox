@@ -6,3 +6,5 @@ class Foo {
 }
 
 Foo().method(1, 2, 3, 4); // error: function Foo().method called with 4 arguments, expecting 2
+
+// option: bytecode

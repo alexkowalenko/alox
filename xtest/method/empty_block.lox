@@ -3,3 +3,5 @@ class Foo {
 }
 
 print Foo().bar(); // expect: nil
+
+// option: bytecode

@@ -5,7 +5,7 @@
 //
 
 import { LoxExpr } from "./ast";
-import { LoxBClass, LoxBInstance } from "./bytecode/bytecode_runtime";
+import { LoxBClass, LoxBInstance, LoxBoundMethod, LoxClosure, LoxUpvalue } from "./bytecode/bytecode_runtime";
 import { RuntimeError } from "./error";
 import { Location } from "./token";
 import { LoxClass, LoxFunction, LoxInstance } from "./tree/tree_runtime";
@@ -28,24 +28,7 @@ export abstract class LoxCallable {
     }
 }
 
-export class LoxClosure {
-    constructor(public fn: LoxCallable) { }
-    public upvalues = new Array<LoxUpvalue>;
-
-    toString(): string {
-        return this.fn.toString() + "-c";
-    }
-}
-
-export class LoxUpvalue {
-    constructor(public location: LoxValue = null) { }
-
-    toString() {
-        return "Upvalue"
-    }
-}
-
-export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance | LoxClosure | LoxUpvalue | LoxBClass | LoxBInstance;
+export type LoxValue = number | string | boolean | null | LoxCallable | LoxClass | LoxInstance | LoxClosure | LoxUpvalue | LoxBClass | LoxBInstance | LoxBoundMethod;
 
 export function pretty_print(v: LoxValue): string {
     if (v === null) {

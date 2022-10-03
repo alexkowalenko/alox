@@ -20,3 +20,5 @@ print foo.method5(1, 2, 3, 4, 5); // expect: 15
 print foo.method6(1, 2, 3, 4, 5, 6); // expect: 21
 print foo.method7(1, 2, 3, 4, 5, 6, 7); // expect: 28
 print foo.method8(1, 2, 3, 4, 5, 6, 7, 8); // expect: 36
+
+// option: bytecode
